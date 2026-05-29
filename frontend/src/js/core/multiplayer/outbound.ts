@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-24 / v1.2.0 - Increased projectile sync cap to 200 and implemented visual relevance score sorting to prevent client-side hit registration lag.
+ * @last_update: 2026-05-29 / v1.2.1 - Implemented emitHostEndedWave.
  */
 import { state } from '../state';
 import { Config } from '../config';
@@ -245,4 +245,8 @@ export function emitSyncLives(lives: number): void {
 
 export function emitSyncGold(gold: number): void {
     socket?.emit('sync_gold', gold);
+}
+
+export function emitHostEndedWave(): void {
+    socket?.emit('host_ended_wave');
 }

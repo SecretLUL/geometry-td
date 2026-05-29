@@ -12,11 +12,11 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-28 / v1.9.0 - Replaced game speed magic numbers with central Config.GAME_SPEEDS constants.
+ * @last_update: 2026-05-29 / v1.9.1 - Reset originalWave and waveModified in game resets.
  */
 import { state } from '../core/state';
 import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../entities/towers/index';
-import { Config } from '../core/config';
+import { Config, TowerData } from '../core/config';
 import { Multiplayer, socket } from '../core/multiplayer/context';
 import { PoolManager } from '../core/pool';
 import { map, getCOLS, getROWS } from '../core/map';
@@ -28,12 +28,8 @@ import { resetHudDisplay } from './hud';
 export function buildTowerAt(type: string, col: number, row: number): boolean {
 
     const TS = Config.TILE_SIZE;
-    let cost = 0;
-    if (type === 'Base') { cost = Config.TOWER_BASE_COST; }
-    else if (type === 'Sniper') { cost = Config.TOWER_SNIPER_COST; }
-    else if (type === 'Bomb') { cost = Config.TOWER_BOMB_COST; }
-    else if (type === 'Tesla') { cost = Config.TOWER_TESLA_COST; }
-    else if (type === 'Prisma') { cost = Config.TOWER_PRISMA_COST; }
+    if (!type || !TowerData[type]) return false;
+    const cost = TowerData[type].baseCost;
 
     if (state.infiniteGold || state.gold >= cost) {
         // Optimistic client-side prediction if not host
@@ -134,7 +130,7 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
             autoStartActive: false, selectedTowerType: null,
             camera: { x: 0, y: 0 },
             enemies: [], towers: [], enemiesToSpawn: 0, spawnCooldown: 0, gameSpeed: Config.GAME_SPEEDS.NORMAL,
-            hoveredTower: null
+            hoveredTower: null, godMode: false, infiniteGold: false, waveModified: false, originalWave: null
         });
         document.getElementById('bossHpContainer')?.classList.add('hidden');
         document.getElementById('gameOverScreen')?.classList.add('hidden');
@@ -340,7 +336,7 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
             autoStartActive: false, selectedTowerType: null,
             camera: { x: 0, y: 0 },
             enemies: [], towers: [], enemiesToSpawn: 0, spawnCooldown: 0, gameSpeed: Config.GAME_SPEEDS.NORMAL,
-            hoveredTower: null, godMode: false, infiniteGold: false, waveModified: false
+            hoveredTower: null, godMode: false, infiniteGold: false, waveModified: false, originalWave: null
         });
         document.getElementById('bossHpContainer')?.classList.add('hidden');
         document.getElementById('gameOverScreen')?.classList.add('hidden');

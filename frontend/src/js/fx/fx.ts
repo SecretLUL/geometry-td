@@ -460,6 +460,115 @@ export class SniperBeam {
     public draw(): void {}
 }
 
+// ─── TeslaArc ─────────────────────────────────────────────────────────────
+export class TeslaArc {
+    public startX!: number;
+    public startY!: number;
+    public targetX!: number;
+    public targetY!: number;
+    public life!: number;
+    public color!: string;
+    public active: boolean = false;
+    public graphics?: PIXI.Graphics;
+
+    constructor(startX = 0, startY = 0, targetX = 0, targetY = 0, color = '#00ffff') {
+        if (startX !== 0 || startY !== 0 || targetX !== 0 || targetY !== 0) {
+            this.init(startX, startY, targetX, targetY, color);
+        } else {
+            this.startX = 0;
+            this.startY = 0;
+            this.targetX = 0;
+            this.targetY = 0;
+            this.life = 0;
+            this.color = color;
+            this.active = false;
+        }
+    }
+
+    public init(startX: number, startY: number, targetX: number, targetY: number, color = '#00ffff'): this {
+        this.startX = startX;
+        this.startY = startY;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.life = 1.0;
+        this.color = color;
+        this.active = true;
+
+        if (typeof window !== 'undefined' && app.renderer) {
+            if (!this.graphics) {
+                this.graphics = new PIXI.Graphics();
+                entitiesContainer.addChild(this.graphics);
+            }
+            this.graphics.visible = true;
+            this.redrawGraphics();
+        }
+        return this;
+    }
+
+    private redrawGraphics() {
+        if (!this.graphics) return;
+        const g = this.graphics;
+        g.clear();
+        if (this.life <= 0) return;
+
+        // Draw a beautiful jagged electric arc with 5 segments
+        const segments = 5;
+        const pts: { x: number, y: number }[] = [];
+        pts.push({ x: this.startX, y: this.startY });
+        
+        const dx = this.targetX - this.startX;
+        const dy = this.targetY - this.startY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance > 0) {
+            // Normal vector for offset direction
+            const nx = -dy / distance;
+            const ny = dx / distance;
+            
+            for (let i = 1; i < segments; i++) {
+                const ratio = i / segments;
+                const tx = this.startX + dx * ratio;
+                const ty = this.startY + dy * ratio;
+                // Scale offset by distance so short arcs are less jagged, and long arcs are suitably jagged
+                const maxOffset = Math.min(20, distance * 0.12);
+                const offset = (Math.random() - 0.5) * maxOffset * 2;
+                pts.push({ x: tx + nx * offset, y: ty + ny * offset });
+            }
+        }
+        pts.push({ x: this.targetX, y: this.targetY });
+
+        const drawPath = (color: string, width: number, alpha: number) => {
+            g.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) {
+                g.lineTo(pts[i].x, pts[i].y);
+            }
+            g.stroke({ color, width, alpha });
+        };
+
+        // Draw multiple passes for a gorgeous neon glow
+        drawPath(this.color, 12 * this.life, this.life * 0.15); // Neon glow outer
+        drawPath(this.color, 5 * this.life, this.life * 0.45);  // Neon glow inner
+        drawPath('#ffffff', 1.5 * this.life, this.life * 0.95);  // Intense hot core
+    }
+
+    public update(): void {
+        if (!this.active) return;
+        this.life -= 0.12; // Electric arcs vanish quickly (approx 8 frames at 60 FPS)
+
+        if (this.graphics) {
+            this.redrawGraphics();
+        }
+
+        if (this.life <= 0) {
+            this.active = false;
+            if (this.graphics) this.graphics.visible = false;
+        }
+    }
+
+    public draw(): void {}
+}
+
+
 // ─── RadiationArea ───────────────────────────────────────────────────────────
 export class RadiationArea {
     public x!: number;

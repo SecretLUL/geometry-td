@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-28 / v1.7.0 - Added dynamic ICE/STUN backend configuration and browser console log filtering to prevent I/O blocking.
+ * @last_update: 2026-05-29 / v1.7.1 - Registered host_ended_wave relay for co-op notifications.
  */
 import express, { Request, Response } from 'express';
 import http from 'http';
@@ -823,6 +823,7 @@ io.on("connection", (socket: CustomSocket) => {
 
   // 4. Gegner-Events (Falls wichtig für Spezialeffekte)
   relay("enemy_leaked");
+  relay("host_ended_wave");
 
   // WebRTC-Signalisierungs-Relay
   socket.on("webrtc_signal", (rawPayload: unknown) => {

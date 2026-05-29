@@ -14,7 +14,7 @@
  * ----------------------------------
  * @last_update: 2026-05-29 / v2.4.2 - Added overlapping RadiationArea merging to prevent neon-green screen overlay stacking under heavy combat.
  */
-import { Particle, FloatingText, StunRay, MuzzleFlash, SniperBeam, RadiationArea, Shockwave } from '../fx/fx';
+import { Particle, FloatingText, StunRay, MuzzleFlash, SniperBeam, RadiationArea, Shockwave, TeslaArc } from '../fx/fx';
 import { Projectile } from '../entities/projectiles';
 import { Enemy, Tower, Vector2D } from '../types';
 import { Config } from './config';
@@ -60,6 +60,7 @@ export const PoolManager = {
     sniperBeams: null as any as ObjectPool<SniperBeam>,
     radiationAreas: null as any as ObjectPool<RadiationArea>,
     shockwaves: null as any as ObjectPool<Shockwave>,
+    teslaArcs: null as any as ObjectPool<TeslaArc>,
 
     // Combined lists for polymorphic state arrays
     stunEffectsList: [] as any[],
@@ -73,6 +74,7 @@ export const PoolManager = {
         this.stunRays = new ObjectPool<StunRay>(() => new StunRay(), 50);
         this.muzzleFlashes = new ObjectPool<MuzzleFlash>(() => new MuzzleFlash(), 50);
         this.sniperBeams = new ObjectPool<SniperBeam>(() => new SniperBeam(), 50);
+        this.teslaArcs = new ObjectPool<TeslaArc>(() => new TeslaArc(), 80);
         this.radiationAreas = new ObjectPool<RadiationArea>(() => new RadiationArea(), 50);
         this.shockwaves = new ObjectPool<Shockwave>(() => new Shockwave(), 50);
 
@@ -80,7 +82,8 @@ export const PoolManager = {
         this.stunEffectsList = [
             ...this.stunRays.getArray(),
             ...this.muzzleFlashes.getArray(),
-            ...this.sniperBeams.getArray()
+            ...this.sniperBeams.getArray(),
+            ...this.teslaArcs.getArray()
         ];
 
         // Pre-populate combined groundEffects array
@@ -160,6 +163,10 @@ export const PoolManager = {
         return this.sniperBeams.get().init(startX, startY, targetX, targetY, color);
     },
 
+    getTeslaArc(startX: number, startY: number, targetX: number, targetY: number, color = '#00ffff'): TeslaArc {
+        return this.teslaArcs.get().init(startX, startY, targetX, targetY, color);
+    },
+
     getRadiationArea(x: number, y: number, radius: number, damagePerTick: number, lifeTime = 240, tower: Tower | null = null): RadiationArea {
         const array = this.radiationAreas.getArray();
         const mergeThreshold = 30; // pixels
@@ -204,6 +211,7 @@ export const PoolManager = {
             for (let p of this.stunRays.getArray()) p.active = false;
             for (let p of this.muzzleFlashes.getArray()) p.active = false;
             for (let p of this.sniperBeams.getArray()) p.active = false;
+            for (let p of this.teslaArcs.getArray()) p.active = false;
             for (let p of this.radiationAreas.getArray()) p.active = false;
             for (let p of this.shockwaves.getArray()) p.active = false;
         }

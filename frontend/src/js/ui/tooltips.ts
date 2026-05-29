@@ -15,7 +15,7 @@
  * @last_update: 2026-05-27 / v1.2.0 - Unified and localized tower tooltips on the battlefield and in the shop UI, removed Kills completely, hid Spezial/Upgrade in shop tooltips, and simplified Prisma Tower stats to DPS.
  */
 import { state } from '../core/state';
-import { Config } from '../core/config';
+import { Config, TowerData } from '../core/config';
 import { getEl } from '../core/utils';
 
 export function updateTooltip(): void {
@@ -151,49 +151,46 @@ export function updateTooltip(): void {
         tooltip.style.left = `${Math.max(padding, x)}px`;
         tooltip.style.top = `${Math.max(padding, y)}px`;
     } else if (state.shopHoveredType) {
-        let name = state.shopHoveredType;
-        let stats = "";
-        let cost = 0;
+        const name = state.shopHoveredType;
+        if (!TowerData[name]) return;
+        const data = TowerData[name];
+        const cost = data.baseCost;
 
+        let stats = "";
         if (name === 'Base') {
             stats = `
-                <p>Schaden: <span>${Config.TOWER_BASE_DAMAGE}</span></p>
-                <p>Speed: <span>${(60 / Config.TOWER_BASE_FIRE_RATE).toFixed(1)}/s</span></p>
-                <p>Reichweite: <span>${Config.TOWER_BASE_RANGE}</span></p>
+                <p>Schaden: <span>${data.baseDamage}</span></p>
+                <p>Speed: <span>${(60 / data.baseFireRate).toFixed(1)}/s</span></p>
+                <p>Reichweite: <span>${data.baseRange}</span></p>
             `;
-            cost = Config.TOWER_BASE_COST;
         } else if (name === 'Sniper') {
             stats = `
-                <p>Schaden: <span>${Config.TOWER_SNIPER_DAMAGE}</span></p>
-                <p>Speed: <span>${(60 / Config.TOWER_SNIPER_FIRE_RATE).toFixed(1)}/s</span></p>
+                <p>Schaden: <span>${data.baseDamage}</span></p>
+                <p>Speed: <span>${(60 / data.baseFireRate).toFixed(1)}/s</span></p>
                 <p>Reichweite: <span>∞</span></p>
             `;
-            cost = Config.TOWER_SNIPER_COST;
         } else if (name === 'Bomb') {
             stats = `
-                <p>Schaden: <span>${Config.TOWER_BOMB_DAMAGE}</span></p>
-                <p>Speed: <span>${(60 / Config.TOWER_BOMB_FIRE_RATE).toFixed(1)}/s</span></p>
-                <p>Reichweite: <span>${Config.TOWER_BOMB_RANGE}</span></p>
-                <p>AoE: <span>${Config.TOWER_BOMB_AOE_RADIUS}</span></p>
+                <p>Schaden: <span>${data.baseDamage}</span></p>
+                <p>Speed: <span>${(60 / data.baseFireRate).toFixed(1)}/s</span></p>
+                <p>Reichweite: <span>${data.baseRange}</span></p>
+                <p>AoE: <span>${data.aoeRadius}</span></p>
             `;
-            cost = Config.TOWER_BOMB_COST;
         } else if (name === 'Tesla') {
             stats = `
-                <p>Schaden: <span>${Config.TOWER_TESLA_DAMAGE}</span></p>
-                <p>Speed: <span>${(60 / Config.TOWER_TESLA_FIRE_RATE).toFixed(1)}/s</span></p>
-                <p>Reichweite: <span>${Config.TOWER_TESLA_RANGE}</span></p>
+                <p>Schaden: <span>${data.baseDamage}</span></p>
+                <p>Speed: <span>${(60 / data.baseFireRate).toFixed(1)}/s</span></p>
+                <p>Reichweite: <span>${data.baseRange}</span></p>
                 <p>Aura: <span>Nahkampf</span></p>
             `;
-            cost = Config.TOWER_TESLA_COST;
         } else if (name === 'Prisma') {
-            const minDps = Math.round(Config.TOWER_PRISMA_DAMAGE * 60 * Config.TOWER_PRISMA_MIN_MULTIPLIER);
-            const maxDps = Math.round(Config.TOWER_PRISMA_DAMAGE * 60 * Config.TOWER_PRISMA_MAX_MULTIPLIER);
+            const minDps = Math.round(data.baseDamage * 60 * data.prismaMinMultiplier!);
+            const maxDps = Math.round(data.baseDamage * 60 * data.prismaMaxMultiplier!);
             stats = `
                 <p>DPS: <span>${minDps}-${maxDps}/s</span></p>
-                <p>Reichweite: <span>${Config.TOWER_PRISMA_RANGE}</span></p>
+                <p>Reichweite: <span>${data.baseRange}</span></p>
                 <p>Typ: <span>Kontinuierlicher Laser</span></p>
             `;
-            cost = Config.TOWER_PRISMA_COST;
         }
 
         tooltip.innerHTML = `

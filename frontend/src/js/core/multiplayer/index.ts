@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-27 / v1.4.0 - Implemented dynamic self-adjusting host sync loop based on active WebRTC clients.
+ * @last_update: 2026-05-29 / v1.4.1 - Bound emitHostEndedWave to Multiplayer API.
  */
 import { state } from '../state';
 import { Config } from '../config';
@@ -22,7 +22,8 @@ import { bindInboundEvents } from './inbound';
 import {
     emitSyncGameState, syncNow, emitChangeSpeed, emitToggleMod, emitTogglePause,
     emitToggleAuto, emitSyncTowers, emitRequestPlaceTower, emitRequestUpgradeTower,
-    emitRequestSellTower, emitRequestWaveStart, emitSyncLives, emitSyncGold
+    emitRequestSellTower, emitRequestWaveStart, emitSyncLives, emitSyncGold,
+    emitHostEndedWave
 } from './outbound';
 import { cleanupAllWebRTC, hasActiveWebRTCClients } from './webrtc';
 
@@ -269,5 +270,6 @@ Multiplayer.emitRequestSellTower = emitRequestSellTower;
 Multiplayer.emitRequestWaveStart = emitRequestWaveStart;
 Multiplayer.emitSyncLives = emitSyncLives;
 Multiplayer.emitSyncGold = emitSyncGold;
+Multiplayer.emitHostEndedWave = emitHostEndedWave;
 
 export { Multiplayer, socket, setSocket };

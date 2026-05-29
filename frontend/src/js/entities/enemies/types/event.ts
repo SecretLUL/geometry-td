@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-22 / v1.0.0 - Created event.ts as part of enemies.ts split.
+ * @last_update: 2026-05-29 / v1.0.1 - Buffed Collector HP and rewards.
  */
 import { BaseEnemy } from '../base';
 import { Config } from '../../../core/config';
@@ -28,10 +28,10 @@ export class CollectorEnemy extends BaseEnemy {
 
         const baseHp = Config.ENEMY_BASE_HP;
         const hpMultiplier = Config.getHpMultiplier(waveNumber);
-        // Very high HP (multiplier similar to 'Bruiser', which is 2.5)
-        this.maxHp = Math.floor(baseHp * hpMultiplier * 2.5);
-        // Massive reward (Config.ENEMY_REWARD_BASE * 35)
-        this.reward = Math.floor((Config.ENEMY_REWARD_BASE * 35) * Math.pow(Config.ENEMY_REWARD_MULTIPLIER, waveNumber - 1));
+        // Very high HP (increased from 2.5 to 3.2 for HP buff)
+        this.maxHp = Math.floor(baseHp * hpMultiplier * 3.2);
+        // Massive reward (increased from 35 to 180 base reward factor)
+        this.reward = Math.floor((Config.ENEMY_REWARD_BASE * 180) * Math.pow(Config.ENEMY_REWARD_MULTIPLIER, waveNumber - 1));
         this.initHp();
     }
 

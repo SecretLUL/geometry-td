@@ -12,9 +12,9 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.0.0 - Migrated rendering to PixiJS.
+ * @last_update: 2026-05-29 / v2.5.0 - Adjusted to use the newly reduced aoeRadiusPerLevel value.
  */
-import { Config, TowerData } from '../../core/config';
+import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
 import { FloatingText, createExplosion } from '../../fx/fx';
 import { Projectile } from '../projectiles';
@@ -60,20 +60,20 @@ export class BombTower extends Tower {
             this.level++;
 
             const data = TowerData['Bomb'];
-            this.damage += data.damagePerLevel;
+            if (this.level === 19) {
+                this.damage = 4500;
+            } else if (this.level === 20) {
+                this.damage = 13500;
+            } else {
+                this.damage += data.damagePerLevel;
+            }
             this.range += data.rangePerLevel;
             this.aoeRadius = (this.aoeRadius || 0) + (data.aoeRadiusPerLevel || 0);
-            this.fireRate = Math.max(Config.TOWER_MIN_FIRE_RATE, this.fireRate - data.fireRateDecrease);
+            this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
 
             this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
             
-            // Flattening costs: 2.0x before level 5, 1.4x after
-            if (this.level >= 5) {
-                this.upgradeCost = Math.floor(this.upgradeCost * 1.4);
-            } else {
-                this.upgradeCost *= 2;
-            }
-            this.upgradeCost = roundUpgradeCost(this.upgradeCost);
+            this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
             PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, '#4cc9f0');
             createExplosion(this.x, this.y, this.currentColor, 10);
@@ -131,21 +131,29 @@ export class BombTower extends Tower {
                 if (spec) baseColor = spec.color;
             }
 
-            g.circle(0, yOffset, baseR).fill({ color: baseColor });
+            if (this.specialization === 'cluster') {
+                // 1. Draw a dark hexagonal mechanical base-plate underneath
+                g.moveTo(Math.cos(0) * baseR, yOffset + Math.sin(0) * baseR);
+                for (let i = 1; i <= 6; i++) {
+                    const ang = (Math.PI / 3) * i;
+                    g.lineTo(Math.cos(ang) * baseR, yOffset + Math.sin(ang) * baseR);
+                }
+                g.closePath();
+                g.fill({ color: '#1e272e' }); // Dark heavy plate
+                g.stroke({ color: '#d63031', width: 2 }); // Red edge
+            } else {
+                g.circle(0, yOffset, baseR).fill({ color: baseColor });
+            }
 
             if (this.constructionTimer > 0) {
-                // Hazard spinning indicator
-                const rot = (1 - progress) * Math.PI * 3;
-                g.rotation = rot;
-                for (let i = 0; i < 3; i++) {
-                    const a1 = (Math.PI * 2 / 3) * i;
-                    const a2 = a1 + (Math.PI / 3);
-                    g.moveTo(0, yOffset);
-                    g.arc(0, yOffset, baseR - 3, a1, a2);
-                    g.closePath();
-                    g.fill({ color: 0xf1c40f, alpha: 0.45 });
+                // Expanding shockwave rings (bomb-themed blast waves)
+                const pulseRadius1 = baseR * (0.2 + 0.8 * progress);
+                g.circle(0, yOffset, pulseRadius1).stroke({ color: '#ff4757', alpha: 0.5 * (1 - progress), width: 1.5 });
+
+                const pulseRadius2 = baseR * ((0.2 + 0.8 * progress + 0.4) % 1.0);
+                if (pulseRadius2 > 0.2 * baseR) {
+                    g.circle(0, yOffset, pulseRadius2).stroke({ color: '#ff7675', alpha: 0.3 * (1 - (pulseRadius2 / baseR)), width: 1.0 });
                 }
-                g.rotation = 0; // reset
             }
 
             if (this.specialization === 'nuke') {
@@ -161,9 +169,44 @@ export class BombTower extends Tower {
             }
             
             if (this.specialization === 'cluster') {
-                for (let i = 0; i < 6; i++) {
-                    const ang = (Math.PI / 3) * i;
-                    g.moveTo(0, yOffset).lineTo(Math.cos(ang) * baseR, yOffset + Math.sin(ang) * baseR).stroke({ color: 0x000000, alpha: 0.2, width: 1 });
+                // 2. Draw mechanical guide rails
+                g.circle(0, yOffset, baseR * 0.55).stroke({ color: '#ff7675', alpha: 0.15, width: 1.5 });
+
+                // 3. Draw rotating sub-munition bay with active payloads (5 for normal, 9 for mastery)
+                const clusterCount = this.masteryUnlocked ? 9 : 5;
+                const angleStep = (Math.PI * 2) / clusterCount;
+                const rotSpeed = state.animTime * 0.0012; // slow continuous rotation
+                const radiusOffset = baseR * 0.55;
+
+                for (let i = 0; i < clusterCount; i++) {
+                    const ang = rotSpeed + angleStep * i;
+                    const px = Math.cos(ang) * radiusOffset;
+                    const py = yOffset + Math.sin(ang) * radiusOffset;
+
+                    // Draw connection rail to center
+                    g.moveTo(0, yOffset).lineTo(px, py).stroke({ color: '#ff7675', alpha: 0.1, width: 1 });
+
+                    // Draw payload
+                    g.circle(px, py, 3.2 * scale).fill({ color: '#d63031' });
+                    g.circle(px, py, 1.8 * scale).fill({ color: '#fffa65' }); // Glowing yellow tip!
+                    
+                    const pPulse = (Math.sin(state.animTime * 0.07 + i * 0.8) * 0.5 + 0.5) * 1.5 + 3.2;
+                    g.circle(px, py, pPulse * scale).stroke({ color: '#ff4040', alpha: 0.45, width: 1 });
+                }
+
+                // If mastery is unlocked, add 3 outer containment corner brackets
+                if (this.masteryUnlocked) {
+                    for (let i = 0; i < 3; i++) {
+                        const ang = -rotSpeed * 0.5 + (Math.PI * 2 / 3) * i;
+                        const bx1 = Math.cos(ang) * (baseR + 1.5);
+                        const by1 = yOffset + Math.sin(ang) * (baseR + 1.5);
+                        const bx2 = Math.cos(ang + 0.2) * (baseR + 3);
+                        const by2 = yOffset + Math.sin(ang + 0.2) * (baseR + 3);
+                        const bx3 = Math.cos(ang - 0.2) * (baseR + 3);
+                        const by3 = yOffset + Math.sin(ang - 0.2) * (baseR + 3);
+
+                        g.moveTo(bx2, by2).lineTo(bx1, by1).lineTo(bx3, by3).stroke({ color: '#fffa65', width: 2 });
+                    }
                 }
             }
 
@@ -223,15 +266,70 @@ export class BombTower extends Tower {
         }
 
         if (part === 'turret') {
-            const turretColor1 = this.specialization === 'nuke' ? '#badc58' : (this.specialization === 'cluster' ? '#ff7675' : '#600');
-            const turretColor2 = this.specialization === 'nuke' ? '#2d3436' : (this.specialization === 'cluster' ? '#d63031' : '#300');
+            const turretColor1 = this.specialization === 'nuke' ? '#badc58' : (this.specialization === 'cluster' ? '#57606f' : '#600');
+            const turretColor2 = this.specialization === 'nuke' ? '#2d3436' : (this.specialization === 'cluster' ? '#2f3542' : '#300');
             
-            g.circle(0, yOffset, 10 * scale).fill({ color: turretColor1 });
+            // Draw main turret revolving drum (chamber)
+            g.circle(0, yOffset, 10 * scale).fill({ color: turretColor2 });
+            g.circle(0, yOffset, 10 * scale).stroke({ color: this.specialization === 'cluster' ? '#d63031' : turretColor1, width: 1.5 });
+            
+            // Glowing core light in the middle of the drum
+            const coreColor = this.specialization === 'nuke' ? '#badc58' : '#ff4757';
+            const corePulse = (Math.sin(state.animTime * 0.1) * 0.5 + 0.5) * 2 + 3;
+            g.circle(-2 * scale, yOffset, corePulse * scale).fill({ color: coreColor });
+            g.circle(-2 * scale, yOffset, 2 * scale).fill({ color: '#ffffff' });
 
             if (this.specialization === 'cluster') {
-                g.rect(5 * scale, yOffset - 6 * scale, 8 * scale, 3 * scale).fill({ color: '#ff4040' });
-                g.rect(8 * scale, yOffset - 2 * scale, 8 * scale, 4 * scale).fill({ color: '#ff4040' });
-                g.rect(5 * scale, yOffset + 3 * scale, 8 * scale, 3 * scale).fill({ color: '#ff4040' });
+                if (this.masteryUnlocked) {
+                    // --- REDESIGN: Heavy Honeycomb 9-Cell Multi-Launcher Pod ---
+                    // 1. Pod chassis
+                    g.roundRect(4 * scale, yOffset - 9 * scale, 14 * scale, 18 * scale, 3 * scale).fill({ color: '#2f3542' });
+                    g.roundRect(4 * scale, yOffset - 9 * scale, 14 * scale, 18 * scale, 3 * scale).stroke({ color: '#ffd700', width: 1.5 }); // Golden trim for mastery
+
+                    // 2. Honeycomb cells (9 cells in a 3x3 grid)
+                    // Rows: -6, 0, 6; Columns: 7, 11, 15
+                    const cellInner = '#fffa65';
+                    for (let rIdx = 0; rIdx < 3; rIdx++) {
+                        const cy = yOffset + (rIdx - 1) * 5.2 * scale;
+                        for (let cIdx = 0; cIdx < 3; cIdx++) {
+                            const cx = (7 + cIdx * 4) * scale;
+                            // Draw cell outline
+                            g.circle(cx, cy, 1.8 * scale).fill({ color: '#1e272e' });
+                            // Draw glowing rocket/bomb tip ready in the launcher
+                            const isCellCharged = (state.animTime + rIdx * 3 + cIdx * 7) % 30 > 5;
+                            if (isCellCharged) {
+                                g.circle(cx, cy, 1.1 * scale).fill({ color: cellInner });
+                            }
+                        }
+                    }
+
+                    // 3. Side armor plates / cooling vents with red striping
+                    g.moveTo(0, yOffset - 8 * scale).lineTo(6 * scale, yOffset - 12 * scale).lineTo(10 * scale, yOffset - 12 * scale).lineTo(6 * scale, yOffset - 8 * scale).closePath().fill({ color: '#d63031' });
+                    g.moveTo(0, yOffset + 8 * scale).lineTo(6 * scale, yOffset + 12 * scale).lineTo(10 * scale, yOffset + 12 * scale).lineTo(6 * scale, yOffset + 8 * scale).closePath().fill({ color: '#d63031' });
+
+                    // 4. Rear counterweight/exhaust
+                    g.rect(-10 * scale, yOffset - 4 * scale, 4 * scale, 8 * scale).fill({ color: '#57606f' });
+                    g.rect(-10 * scale, yOffset - 4 * scale, 4 * scale, 8 * scale).stroke({ color: '#ff4757', width: 1 });
+
+                } else {
+                    // --- REDESIGN: Sleek Triple-Barrel Rocket-Pod Launcher ---
+                    // 1. Side stabilizers
+                    g.rect(2 * scale, yOffset - 8 * scale, 4 * scale, 16 * scale).fill({ color: '#ff4040' });
+                    
+                    // 2. Barrels (3 parallel barrels: top, middle, bottom)
+                    // Top barrel
+                    g.roundRect(4 * scale, yOffset - 6 * scale, 10 * scale, 3 * scale, 1 * scale).fill({ color: '#747d8c' });
+                    g.rect(12 * scale, yOffset - 6 * scale, 3 * scale, 3 * scale).fill({ color: '#d63031' }); // red muzzle tip
+                    // Middle barrel (slightly longer and thicker)
+                    g.roundRect(5 * scale, yOffset - 2 * scale, 11 * scale, 4 * scale, 1 * scale).fill({ color: '#2f3542' });
+                    g.rect(14 * scale, yOffset - 2 * scale, 3 * scale, 4 * scale).fill({ color: '#ff4757' }); // glowing tip
+                    // Bottom barrel
+                    g.roundRect(4 * scale, yOffset + 3 * scale, 10 * scale, 3 * scale, 1 * scale).fill({ color: '#747d8c' });
+                    g.rect(12 * scale, yOffset + 3 * scale, 3 * scale, 3 * scale).fill({ color: '#d63031' }); // red muzzle tip
+
+                    // 3. Central connector bar
+                    g.rect(0, yOffset - 2 * scale, 6 * scale, 4 * scale).fill({ color: '#2f3542' });
+                }
             } else {
                 g.rect(0, yOffset - 6 * scale, 12 * scale, 12 * scale).fill({ color: this.specialization === 'nuke' ? '#2d3436' : '#ff4040' });
                 g.rect(10 * scale, yOffset - 7 * scale, 4 * scale, 14 * scale).fill({ color: this.specialization === 'nuke' ? '#badc58' : '#ffffff' });
@@ -253,6 +351,16 @@ export class BombTower extends Tower {
             name: specs[key].name,
             desc: specs[key].desc
         }));
+    }
+
+    public override getDisplayDamage(): number | string {
+        let dmg = this.damage;
+        if (this.specialization === 'nuke') {
+            const spec = TowerData[this.type].specializations['nuke'];
+            const mult = this.masteryUnlocked ? spec.multipliers!.masteryDmg : spec.multipliers!.normalDmg;
+            dmg = Math.floor(dmg * mult);
+        }
+        return dmg;
     }
 
     public getDisplayAoe(): number {
@@ -376,7 +484,14 @@ export class BombTower extends Tower {
                 const aoe = this.getDisplayAoe();
                 const isCluster = this.specialization === 'cluster';
                 
-                PoolManager.getProjectile(this.x, this.y, this.target, this.damage, this, aoe, this.projectileSpeed, 0, isCluster);
+                let dmg = this.damage;
+                if (this.specialization === 'nuke') {
+                    const spec = TowerData[this.type].specializations['nuke'];
+                    const mult = this.masteryUnlocked ? spec.multipliers!.masteryDmg : spec.multipliers!.normalDmg;
+                    dmg = Math.floor(dmg * mult);
+                }
+                
+                PoolManager.getProjectile(this.x, this.y, this.target, dmg, this, aoe, this.projectileSpeed, 0, isCluster);
 
                 if (!(state as any).projectileEvents) (state as any).projectileEvents = [];
                 (state as any).projectileEvents.push({
@@ -385,7 +500,7 @@ export class BombTower extends Tower {
                     row: this.row,
                     targetId: null,
                     targetPoint: { x: this.target.x, y: this.target.y },
-                    damage: this.damage,
+                    damage: dmg,
                     aoeRadius: aoe,
                     projectileSpeed: this.projectileSpeed,
                     isHoming: false,

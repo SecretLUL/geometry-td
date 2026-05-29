@@ -15,7 +15,7 @@
  * @last_update: 2026-05-27 / v1.2.0 - Added max level validation check in processUpgradeTower to prevent gold loss when upgrading past max level.
  */
 import { state } from '../state';
-import { Config } from '../config';
+import { Config, TowerData } from '../config';
 import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../../entities/towers/index';
 import { createExplosion } from '../../fx/fx';
 import { TowerSpecialization } from '../../types';
@@ -28,12 +28,11 @@ export function processPlaceTower(type: any, col: number, row: number): boolean 
         return false;
     }
 
-    let cost = 0;
-    if (type === 'Base') cost = Config.TOWER_BASE_COST;
-    else if (type === 'Sniper') cost = Config.TOWER_SNIPER_COST;
-    else if (type === 'Bomb') cost = Config.TOWER_BOMB_COST;
-    else if (type === 'Tesla') cost = Config.TOWER_TESLA_COST;
-    else if (type === 'Prisma') cost = Config.TOWER_PRISMA_COST;
+    if (!type || !TowerData[type]) {
+        socket?.emit('reject_place_tower', { type, col, row });
+        return false;
+    }
+    const cost = TowerData[type].baseCost;
 
     if (state.infiniteGold || state.gold >= cost) {
         if (!state.infiniteGold) state.gold -= cost;

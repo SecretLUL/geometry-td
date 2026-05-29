@@ -12,10 +12,10 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-28 / v1.6.0 - Added network status antenna rendering in HUD to indicate WebRTC connection and Socket.io fallback.
+ * @last_update: 2026-05-29 / v1.6.1 - Enabled dynamic modUndoWaveBtn status updates for hosts.
  */
 import { state } from '../core/state';
-import { Config } from '../core/config';
+import { Config, TowerData } from '../core/config';
 import { getEl, formatNumber } from '../core/utils';
 
 import { ICONS } from './icons';
@@ -35,6 +35,7 @@ let lastRenderedInfiniteGold: boolean | null = null;
 let lastRenderedModInfiniteGold: boolean | null = null;
 let lastRenderedGodMode: boolean | null = null;
 let lastRenderedGold = -1;
+let lastRenderedOriginalWave: number | null | undefined = undefined;
 
 let lastBtnBenchmark: boolean | null = null;
 let lastBtnHost: boolean | null = null;
@@ -129,6 +130,23 @@ export function updateUI(): void {
                 modLifeBtn.style.borderColor = state.godMode ? '#ff3366' : '';
             }
         }
+        if (lastRenderedOriginalWave !== state.originalWave) {
+            lastRenderedOriginalWave = state.originalWave;
+            const modUndoWaveBtn = getEl('modUndoWaveBtn');
+            if (modUndoWaveBtn) {
+                if (state.originalWave !== null) {
+                    (modUndoWaveBtn as HTMLButtonElement).disabled = false;
+                    modUndoWaveBtn.classList.remove('btn-disabled');
+                    modUndoWaveBtn.style.opacity = '';
+                    modUndoWaveBtn.style.pointerEvents = '';
+                } else {
+                    (modUndoWaveBtn as HTMLButtonElement).disabled = true;
+                    modUndoWaveBtn.classList.add('btn-disabled');
+                    modUndoWaveBtn.style.opacity = '0.4';
+                    modUndoWaveBtn.style.pointerEvents = 'none';
+                }
+            }
+        }
     }
 
     if (lastRenderedGold !== state.gold || lastRenderedInfiniteGold !== state.infiniteGold) {
@@ -150,12 +168,8 @@ export function updateUI(): void {
         document.querySelectorAll('.tower-btn').forEach(btn => {
             const htmlBtn = btn as HTMLElement;
             const type = htmlBtn.dataset.type;
-            let cost = 0;
-            if (type === 'Base') cost = Config.TOWER_BASE_COST;
-            else if (type === 'Sniper') cost = Config.TOWER_SNIPER_COST;
-            else if (type === 'Bomb') cost = Config.TOWER_BOMB_COST;
-            else if (type === 'Tesla') cost = Config.TOWER_TESLA_COST;
-            else if (type === 'Prisma') cost = Config.TOWER_PRISMA_COST;
+            if (!type || !TowerData[type]) return;
+            const cost = TowerData[type].baseCost;
 
             const priceTag = htmlBtn.querySelector('.btn-label small');
             if (priceTag) {

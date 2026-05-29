@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-28 / v1.1.0 - Introduced high-performance CircularBuffer class for stateBuffer to eliminate shift() reindexing overhead.
+ * @last_update: 2026-05-29 / v1.1.1 - Added emitHostEndedWave to IMultiplayer.
  */
 import { TowerSpecialization, SyncFullGameStatePayload, SyncTowerState, TowerType } from '../../types';
 
@@ -108,6 +108,7 @@ export interface IMultiplayer {
     emitRequestWaveStart(wave: number | { wave: number; pool?: string[] }): void;
     emitSyncLives(lives: number): void;
     emitSyncGold(gold: number): void;
+    emitHostEndedWave(): void;
 }
 
 export let socket: any = null;

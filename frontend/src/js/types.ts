@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-28 / v1.9.0 - Added optional webRTCStatus property to GameState interface.
+ * @last_update: 2026-05-29 / v1.9.3 - Added host_ended_wave socket event to SocketEventMap.
  */
 /**
  * Geometry Tower Defense - Core TypeScript Definitions
@@ -38,6 +38,7 @@ export interface GameState {
     godMode: boolean;
     infiniteGold: boolean;
     waveModified: boolean;
+    originalWave: number | null;
     benchmarkActive: boolean;
     benchmarkBackup: any | null;
     selectedTowerType: string | null;   // null = no tower selected (placement mode off)
@@ -74,6 +75,7 @@ export interface GameState {
     contextShopPos?: Vector2D | null;
     webRTCStatus?: 'connected' | 'connecting' | 'failed' | 'idle';
     mapNeedsRedraw?: boolean;
+    lastCollectorWave?: number;
 }
 
 export interface Vector2D {
@@ -382,4 +384,5 @@ export interface SocketEventMap {
     'sync_lives': number;
     'sync_gold': number;
     'sync_towers': SyncTowerState[];
+    'host_ended_wave': void;
 }

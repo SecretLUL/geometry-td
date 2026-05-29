@@ -12,10 +12,15 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-27 / v1.3.0 - Added roundUpgradeCost helper function to round upgrade costs to clean, round intervals.
+ * @last_update: 2026-05-29 / v1.3.1 - Removed direct state import and introduced setGameStateRef to resolve circular dependency with Config.
  */
-import { state } from './state';
-import { Enemy } from '../types';
+import { Enemy, GameState } from '../types';
+
+let stateRef: GameState | null = null;
+
+export function setGameStateRef(ref: GameState) {
+    stateRef = ref;
+}
 
 /**
  * Calculates the squared distance between two points.
@@ -44,7 +49,7 @@ let bufferIndex = 0;
  * Avoids any array allocations by rotating through a pre-allocated circular buffer.
  */
 export function getNearbyEnemies(x: number, y: number, radius: number): Enemy[] {
-    if (!state.enemyGrid) return state.enemies;
+    if (!stateRef || !stateRef.enemyGrid) return stateRef ? stateRef.enemies : [];
     const CELL_SIZE = 100;
     const cx = Math.floor(x / CELL_SIZE);
     const cy = Math.floor(y / CELL_SIZE);
@@ -57,7 +62,7 @@ export function getNearbyEnemies(x: number, y: number, radius: number): Enemy[] 
     for (let ix = -radiusCells; ix <= radiusCells; ix++) {
         for (let iy = -radiusCells; iy <= radiusCells; iy++) {
             const key = (cx + ix) | ((cy + iy) << 16);
-            const cell = state.enemyGrid.get(key);
+            const cell = stateRef.enemyGrid.get(key);
             if (cell) {
                 for (let i = 0; i < cell.length; i++) {
                     nearby.push(cell[i]);

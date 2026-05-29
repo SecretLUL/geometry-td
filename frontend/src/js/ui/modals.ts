@@ -15,7 +15,7 @@
  * @last_update: 2026-05-27 / v1.10.0 - Use formatNumber utility for Game Over gold stats and efficiency table damage.
  */
 import { state } from '../core/state';
-import { Config } from '../core/config';
+import { Config, TowerData } from '../core/config';
 import { Multiplayer } from '../core/multiplayer/context';
 import { PoolManager } from '../core/pool';
 import { getEl, formatNumber } from '../core/utils';
@@ -257,11 +257,11 @@ export function showContextShop(x: number, y: number, col: number, row: number):
     contextMenu.innerHTML = '';
 
     const shopItems = [
-        { type: 'Base', cost: Config.TOWER_BASE_COST },
-        { type: 'Sniper', cost: Config.TOWER_SNIPER_COST },
-        { type: 'Bomb', cost: Config.TOWER_BOMB_COST },
-        { type: 'Tesla', cost: Config.TOWER_TESLA_COST },
-        { type: 'Prisma', cost: Config.TOWER_PRISMA_COST }
+        { type: 'Base', cost: TowerData['Base'].baseCost },
+        { type: 'Sniper', cost: TowerData['Sniper'].baseCost },
+        { type: 'Bomb', cost: TowerData['Bomb'].baseCost },
+        { type: 'Tesla', cost: TowerData['Tesla'].baseCost },
+        { type: 'Prisma', cost: TowerData['Prisma'].baseCost }
     ];
 
     shopItems.forEach(item => {

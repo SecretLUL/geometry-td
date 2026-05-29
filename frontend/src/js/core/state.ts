@@ -12,11 +12,12 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-28 / v1.4.0 - Added webRTCStatus state property and initialized gameSpeed using central Config.GAME_SPEEDS.
+ * @last_update: 2026-05-29 / v1.4.3 - Initialized originalWave to null in state.
  */
 import { GameState } from '../types';
 import { PoolManager } from './pool';
 import { Config } from './config';
+import { setGameStateRef } from './utils';
 
 // NOTE: PoolManager.init() is now called in game.ts AFTER initPixi(), to avoid
 // a Race Condition where pool constructors (Particle, Projectile, etc.) run before
@@ -40,6 +41,7 @@ export const state: GameState = {
     godMode: false,
     infiniteGold: false,
     waveModified: false,
+    originalWave: null,
     benchmarkActive: false,
     benchmarkBackup: null,
     selectedTowerType: null,   // null = no tower selected (placement mode off)
@@ -70,5 +72,9 @@ export const state: GameState = {
     contextShopCell: null,
     contextShopPos: null,
     targetCamera: null,
-    mapNeedsRedraw: true
+    mapNeedsRedraw: true,
+    lastCollectorWave: 0
 };
+
+// Register game state reference in utils to break circular import dependency
+setGameStateRef(state);

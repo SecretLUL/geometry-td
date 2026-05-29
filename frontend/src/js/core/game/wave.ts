@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-27 / v1.3.0 - Refactored wave completion interest calculation to use Config.INTEREST_RATE instead of hardcoded 15%.
+ * @last_update: 2026-05-29 / v1.3.1 - Implemented Collector spawn frequency constraints and multiplayer tracking.
  */
 import { state } from '../state';
 import { Config, EnemyData } from '../config';
@@ -38,7 +38,18 @@ export function generateEnemyPool(wave: number): string[] {
         const selectedBoss = primaryBosses[bossIndex % primaryBosses.length] || 'Boss';
         return [selectedBoss];
     } else {
-        let availableEnemies = Object.keys(EnemyData).filter(type => EnemyData[type].category !== 'Bosse' && EnemyData[type].unlockWave <= wave);
+        let availableEnemies = Object.keys(EnemyData).filter(type => {
+            if (EnemyData[type].category === 'Bosse' || EnemyData[type].unlockWave > wave) {
+                return false;
+            }
+            if (type === 'Collector') {
+                const lastWave = state.lastCollectorWave || 0;
+                if (wave - lastWave < 4) {
+                    return false; // Needs at least a 3-wave break between spawns
+                }
+            }
+            return true;
+        });
         let poolPercentages: Record<string, number> = {};
         let totalWeightOfOthers = 0;
 
@@ -67,6 +78,9 @@ export function generateEnemyPool(wave: number): string[] {
         let totalCount = 0;
         availableEnemies.forEach(type => {
             let num = Math.floor(enemiesToSpawn * poolPercentages[type]);
+            if (type === 'Collector') {
+                num = Math.min(1, num); // Enforce a maximum of 1 Collector per wave
+            }
             counts[type] = num;
             totalCount += num;
         });
@@ -93,6 +107,9 @@ export function generateEnemyPool(wave: number): string[] {
             }
             // An das Ende anhängen, da beim Spawnen mit pop() vom Ende genommen wird
             pool.push(newType);
+        }
+        if (pool.includes('Collector')) {
+            state.lastCollectorWave = wave;
         }
     }
     return pool;
@@ -158,6 +175,9 @@ export function executeStartWave(data: any): void {
     if (pool) {
         state.enemyPool = [...pool];
         state.enemiesToSpawn = state.enemyPool.length;
+        if (state.enemyPool.includes('Collector')) {
+            state.lastCollectorWave = state.wave;
+        }
     } else {
         state.enemyPool = generateEnemyPool(state.wave);
         state.enemiesToSpawn = state.enemyPool.length;

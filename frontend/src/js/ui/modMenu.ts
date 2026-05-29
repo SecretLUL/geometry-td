@@ -12,15 +12,16 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.4.1 - Fixed benchmark to spawn Level 20 towers and properly destroy Pixi sprites on undo and benchmark start.
+ * @last_update: 2026-05-29 / v2.5.2 - Fixed frozen enemy sprites when skipping a wave: enemies are now properly released via EnemyFactory.releaseEnemyToPool() before clearing the array.
  */
 import { state } from '../core/state';
 import { Config } from '../core/config';
 import { Multiplayer } from '../core/multiplayer/context';
 import { PoolManager } from '../core/pool';
+import { EnemyFactory } from '../entities/enemies';
 import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../entities/towers/index';
 import { map } from '../core/map';
-import { updateUI, cancelPlacement } from './ui';
+import { updateUI, cancelPlacement, showGameNotification } from './ui';
 
 export function makeDraggable(element: HTMLElement, handle: HTMLElement): void {
 
@@ -85,12 +86,22 @@ export function setupModMenu() {
     });
     document.getElementById('modWinBtn')?.addEventListener('click', () => {
         if (!state.isHost) return;
+        // Release all active enemy sprites back to the pool before clearing,
+        // so their PixiJS sprites are hidden immediately and don't freeze on screen.
+        for (let i = state.enemies.length - 1; i >= 0; i--) {
+            EnemyFactory.releaseEnemyToPool(state.enemies[i]);
+        }
         state.enemies = [];
         state.enemiesToSpawn = 0;
-        state.waveModified = true;
+        state.enemyPool = [];
         updateUI();
-        PoolManager.getFloatingText(state.ghostMouse.x, state.ghostMouse.y, "Welle geskippt!", "#00ff00");
-        Multiplayer.emitToggleMod('waveModified', true);
+        PoolManager.getFloatingText(state.ghostMouse.x, state.ghostMouse.y, "Welle beendet!", "#00ff00");
+        showGameNotification(
+            'info',
+            '🌊 WELLE BEENDET',
+            'Der Host hat die aktuelle Welle sofort beendet.'
+        );
+        Multiplayer.emitHostEndedWave();
         Multiplayer.syncNow();
     });
     document.getElementById('modLoseBtn')?.addEventListener('click', () => {
@@ -105,6 +116,9 @@ export function setupModMenu() {
         if (input) {
             const val = parseInt(input.value);
             if (val >= 1) {
+                if (state.originalWave === null) {
+                    state.originalWave = state.wave;
+                }
                 state.wave = val;
                 state.waveModified = true;
                 updateUI();
@@ -113,6 +127,20 @@ export function setupModMenu() {
                 Multiplayer.syncNow();
             }
         }
+    });
+    document.getElementById('modUndoWaveBtn')?.addEventListener('click', () => {
+        if (!state.isHost) return;
+        if (state.originalWave === null) return;
+
+        const original = state.originalWave;
+        state.wave = original;
+        state.originalWave = null;
+        state.waveModified = false;
+
+        updateUI();
+        PoolManager.getFloatingText(state.ghostMouse.x, state.ghostMouse.y, `Welle auf ursprüngliche ${original} zurückgesetzt!`, '#ff9f1c');
+        Multiplayer.emitToggleMod('waveModified', false);
+        Multiplayer.syncNow();
     });
     document.getElementById('modStartBenchmarkBtn')?.addEventListener('click', () => {
         if (!state.isHost) return;

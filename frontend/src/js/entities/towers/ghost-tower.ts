@@ -14,7 +14,7 @@
  * ----------------------------------
  * @last_update: 2026-05-29 / v2.0.0 - Migrated rendering to PixiJS.
  */
-import { Config } from '../../core/config';
+import { Config, TowerData } from '../../core/config';
 import { state } from '../../core/state';
 import { Tower, drawRangeCircle } from './base-tower';
 import { SniperTower } from './sniper-tower';
@@ -52,20 +52,19 @@ export function drawGhostTower(g: PIXI.Graphics): void {
 
     // Determine which tower prototype to use for range/color
     let range: number, towerColor: number;
-    if (state.selectedTowerType === 'Sniper') {
-        range = Config.TOWER_SNIPER_RANGE;
+    const type = state.selectedTowerType;
+    const data = TowerData[type] || TowerData['Base'];
+    
+    range = data.baseRange;
+    if (type === 'Sniper') {
         towerColor = 0x4cc9f0;
-    } else if (state.selectedTowerType === 'Bomb') {
-        range = Config.TOWER_BOMB_RANGE;
+    } else if (type === 'Bomb') {
         towerColor = 0xff6060;
-    } else if (state.selectedTowerType === 'Tesla') {
-        range = Config.TOWER_TESLA_RANGE;
+    } else if (type === 'Tesla') {
         towerColor = 0x00ffff;
-    } else if (state.selectedTowerType === 'Prisma') {
-        range = Config.TOWER_PRISMA_RANGE;
+    } else if (type === 'Prisma') {
         towerColor = 0xffd700;
     } else {
-        range = Config.TOWER_BASE_RANGE;
         towerColor = 0x4299e1;
     }
 
@@ -74,7 +73,6 @@ export function drawGhostTower(g: PIXI.Graphics): void {
         drawRangeCircle(g, cx, cy, range, towerColor);
     }
 
-    const type = state.selectedTowerType;
 
     for (const key in ghostCache) {
         if (ghostCache[key] && ghostCache[key].pixiSprite) {

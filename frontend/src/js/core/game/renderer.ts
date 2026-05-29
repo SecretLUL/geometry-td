@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.2.0 - Migrated entirely to pure PixiJS for GPU acceleration, completely eliminating CanvasRenderingContext2D.
+ * @last_update: 2026-05-29 / v1.2.1 - Increased path energy photon density to 20 for more frequent animated guide dots.
  */
 import { state } from '../state';
 import { Config } from '../config';
@@ -197,7 +197,7 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
         }
         pathAnimGraphics.stroke({ color: 0x00f2fe, alpha: 0.25, width: 5, cap: 'round', join: 'round' });
 
-        const numPhotons = 8;
+        const numPhotons = 20;
         for (let j = 0; j < numPhotons; j++) {
             const t = (time * 0.03 + (j / numPhotons)) % 1.0;
             const pos = getPointAlongPath(waypoints, t);

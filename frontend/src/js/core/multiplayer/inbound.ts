@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.10.1 - Fixed level-offset bug for specialized towers during client full-state and tower-list synchronization.
+ * @last_update: 2026-05-29 / v1.10.2 - Added host_ended_wave listener to show system notifications on clients.
  */
 import { state } from '../state';
 import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../../entities/towers/index';
@@ -230,9 +230,13 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
                     }
                 }
             } else if (event.type === 'tesla') {
+                let arcColor = '#00ffff';
                 if (tower) {
+                    if (tower.specialization === 'highvolt') arcColor = '#a29bfe';
+                    else if (tower.specialization === 'stun') arcColor = '#81ecec';
+                    
                     tower.auraTime = 35;
-                    createExplosion(tower.x, tower.y, '#00ffff', 5);
+                    createExplosion(tower.x, tower.y, arcColor, 5);
                 }
 
                 if (event.targetIds) {
@@ -240,12 +244,35 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
                         const enemy = enemiesMap.get(tid);
                         if (enemy) {
                             enemy.flashTime = 5;
-                            let explosionColor = '#00ffff';
+                            createExplosion(enemy.x, enemy.y, arcColor, 3);
+                            
+                            // Draw lightning arc from tower to target
                             if (tower) {
-                                if (tower.specialization === 'highvolt') explosionColor = '#a29bfe';
-                                else if (tower.specialization === 'stun') explosionColor = '#81ecec';
+                                PoolManager.getTeslaArc(tower.x, tower.y, enemy.x, enemy.y, arcColor);
+                                
+                                // Client-side Level 20 Mastery visuals: double arc + secondary branching leaps
+                                if (tower.masteryUnlocked) {
+                                    PoolManager.getTeslaArc(tower.x, tower.y, enemy.x, enemy.y, arcColor);
+                                    
+                                    // Chain visual branching
+                                    let closestChainTarget: Enemy | null = null;
+                                    let closestDistSq = 90 * 90;
+                                    for (let j = 0; j < state.enemies.length; j++) {
+                                        const potential = state.enemies[j];
+                                        if (potential.id === enemy.id || potential.hp <= 0 || potential.deadMarked) continue;
+                                        const dx = potential.x - enemy.x;
+                                        const dy = potential.y - enemy.y;
+                                        const distSq = dx * dx + dy * dy;
+                                        if (distSq < closestDistSq) {
+                                            closestDistSq = distSq;
+                                            closestChainTarget = potential;
+                                        }
+                                    }
+                                    if (closestChainTarget) {
+                                        PoolManager.getTeslaArc(enemy.x, enemy.y, closestChainTarget.x, closestChainTarget.y, arcColor);
+                                    }
+                                }
                             }
-                            createExplosion(enemy.x, enemy.y, explosionColor, 3);
                         }
                     }
                 }
@@ -812,6 +839,15 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
             socket.on('sync_gold', (gold: number) => {
                 state.gold = gold;
                 Multiplayer.updateUI();
+            });
+
+            // Host ended wave notification
+            socket.on('host_ended_wave', () => {
+                showGameNotification(
+                    'info',
+                    '🌊 WELLE BEENDET',
+                    'Der Host hat die aktuelle Welle sofort beendet.'
+                );
             });
         } catch (err) {
             console.error("Fehler beim Binden der Socket-Events. Multiplayer deaktiviert.", err);

@@ -12,9 +12,9 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.0.0 - Migrated rendering to PixiJS.
+ * @last_update: 2026-05-29 / v2.0.2 - Made Base Tower attack speed scale linearly and removed visual antennas.
  */
-import { Config, TowerData } from '../../core/config';
+import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
 import { FloatingText, createExplosion } from '../../fx/fx';
 import { Projectile } from '../projectiles';
@@ -201,16 +201,12 @@ export class Tower {
             const data = TowerData[this.type];
             this.damage += data.baseDamage + (this.level * data.damagePerLevel);
             this.range += data.rangePerLevel;
-            this.fireRate = Math.max(Config.TOWER_MIN_FIRE_RATE, this.fireRate - data.fireRateDecrease);
+            
+            this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
 
             this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
             
-            if (this.level >= 5) {
-                this.upgradeCost = Math.floor(this.upgradeCost * 1.4);
-            } else {
-                this.upgradeCost *= 2;
-            }
-            this.upgradeCost = roundUpgradeCost(this.upgradeCost);
+            this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
             if (!silent) {
                 PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, '#4cc9f0');
@@ -302,16 +298,7 @@ export class Tower {
                 }
             }
 
-            if (tier >= 1) {
-                const antColor = this.specialization === 'heavy' ? '#fab1a0' : '#4cc9f0';
-                g.moveTo(-halfBase / 2 * scale, -halfBase * scale);
-                g.lineTo(-halfBase / 2 * scale, (-halfBase - 8 - tier * 4) * scale);
-                if (tier >= 2) {
-                    g.moveTo(halfBase / 2 * scale, -halfBase * scale);
-                    g.lineTo(halfBase / 2 * scale, (-halfBase - 8 - tier * 4) * scale);
-                }
-                g.stroke({ color: antColor, width: 2 });
-            }
+            // Antenna elements removed
             
             // Level Badge
             if (this.level > 1 && this.pixiLevelText) {

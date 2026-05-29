@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-20 / v1.0.0
+ * @last_update: 2026-05-29 / v1.1.0 - Integrated new premium visual rendering for Cluster parent bombs and fragmentation sub-munitions.
  */
 import { Config, TowerData } from '../core/config';
 import { state } from '../core/state';
@@ -111,7 +111,7 @@ export class Projectile {
         // BOMB LOGIC: Fly to fixed point, no homing
         if (this.tower && this.tower.type === 'Bomb') {
             this.targetPoint = { x: target!.x, y: target!.y };
-            this.speed = speed || Config.TOWER_BOMB_PROJECTILE_SPEED;
+            this.speed = speed || TowerData['Bomb'].projectileSpeed!;
         } else {
             this.targetPoint = undefined;
         }
@@ -154,7 +154,14 @@ export class Projectile {
             if (this.tower && this.tower.type === 'Sniper') {
                 drawPath('#a0d8ef', 4, 0.4);
             } else if (this.tower && this.tower.type === 'Bomb') {
-                drawPath('#fca311', 3, 0.4);
+                if (this.isCluster) {
+                    drawPath('#ff4757', 5, 0.5); // Thick fiery red path for parent
+                    drawPath('#fffa65', 2, 0.3); // Inner hot yellow trail
+                } else if (this.tower.specialization === 'cluster') {
+                    drawPath('#ff7675', 2.5, 0.35); // Sleeker red trail for fragments
+                } else {
+                    drawPath('#fca311', 3, 0.4); // Standard bomb trail
+                }
             } else if (this.isHoming) {
                 drawPath('#ff6b6b', 6, 0.5);
                 drawPath('#ffe600', 2, 0.3); // Inner
@@ -182,16 +189,39 @@ export class Projectile {
             g.rect(-8, -4, 16, 8).stroke({ color: '#ffffff', alpha: 1, width: 1 });
 
         } else if (this.tower && this.tower.type === 'Bomb') {
-            const radius = 9;
-            const bodyColor = this.tower.specialization === 'nuke' ? '#2d3436' : '#5e1212';
-            const coreColor = this.tower.specialization === 'nuke' ? '#badc58' : '#ff7675';
-
-            g.circle(0, 0, radius).fill({ color: bodyColor });
-            g.circle(-radius * 0.3, -radius * 0.3, radius * 0.4).fill({ color: '#ffffff', alpha: 0.2 });
-            g.circle(0, 0, radius * 0.3).fill({ color: coreColor });
+            const isParentCluster = this.isCluster; // Only parent bomb has isCluster = true
+            const isMiniBomb = !this.isCluster && this.tower.specialization === 'cluster';
             
-            g.circle(0, 0, radius).stroke({ color: coreColor, alpha: 0.44, width: 4 });
-            g.circle(0, 0, radius).stroke({ color: coreColor, alpha: 1, width: 1.5 });
+            if (isParentCluster) {
+                const radius = 10; // slightly larger for the main payload
+                const bodyColor = '#2f3542';
+                g.circle(0, 0, radius).fill({ color: bodyColor });
+                g.circle(0, 0, radius).stroke({ color: '#d63031', width: 1.5 });
+                g.circle(0, 0, radius + 2).stroke({ color: '#ff4757', alpha: 0.4, width: 1 });
+                
+                // Sub-munitions visible on body
+                for (let i = 0; i < 3; i++) {
+                    const ang = (Math.PI * 2 / 3) * i + state.animTime * 0.05;
+                    g.circle(Math.cos(ang) * 5.5, Math.sin(ang) * 5.5, 2.0).fill({ color: '#fffa65' });
+                }
+                g.circle(0, 0, 3).fill({ color: '#ffffff' });
+            } else if (isMiniBomb) {
+                const radius = 5; // smaller mini fragmentation pellets
+                g.circle(0, 0, radius).fill({ color: '#ff4757' });
+                g.circle(0, 0, radius * 0.5).fill({ color: '#fffa65' });
+                g.circle(0, 0, radius).stroke({ color: '#d63031', alpha: 0.8, width: 1 });
+            } else {
+                const radius = 9;
+                const bodyColor = this.tower.specialization === 'nuke' ? '#2d3436' : '#5e1212';
+                const coreColor = this.tower.specialization === 'nuke' ? '#badc58' : '#ff7675';
+
+                g.circle(0, 0, radius).fill({ color: bodyColor });
+                g.circle(-radius * 0.3, -radius * 0.3, radius * 0.4).fill({ color: '#ffffff', alpha: 0.2 });
+                g.circle(0, 0, radius * 0.3).fill({ color: coreColor });
+                
+                g.circle(0, 0, radius).stroke({ color: coreColor, alpha: 0.44, width: 4 });
+                g.circle(0, 0, radius).stroke({ color: coreColor, alpha: 1, width: 1.5 });
+            }
         } else {
             const radius = 4;
             const color = this.tower && this.tower.type === 'Sniper' ? '#a0d8ef' : '#fca311';

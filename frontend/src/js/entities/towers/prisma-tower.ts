@@ -12,9 +12,9 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.0.0 - Migrated rendering to PixiJS.
+ * @last_update: 2026-05-29 / v2.1.0 - Redesigned Level 20 Mastery visuals with levitating crystal shards, light focusing traces, and counter-rotating rings.
  */
-import { Config, TowerData } from '../../core/config';
+import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
 import { FloatingText, createExplosion, Shockwave } from '../../fx/fx';
 import { Tower, tierOf } from './base-tower';
@@ -70,12 +70,7 @@ export class PrismaTower extends Tower {
 
             this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
             
-            if (this.level >= 5) {
-                this.upgradeCost = Math.floor(this.upgradeCost * 1.4);
-            } else {
-                this.upgradeCost *= 2;
-            }
-            this.upgradeCost = roundUpgradeCost(this.upgradeCost);
+            this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
             PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, '#ffea00');
             createExplosion(this.x, this.y, this.currentColor, 10);
@@ -203,8 +198,9 @@ export class PrismaTower extends Tower {
 
     public override getDisplayDamage(): string {
         let baseDps = this.damage * 60;
-        const minDps = Math.floor(baseDps * Config.TOWER_PRISMA_MIN_MULTIPLIER);
-        const maxDps = Math.floor(baseDps * Config.TOWER_PRISMA_MAX_MULTIPLIER);
+        const data = TowerData['Prisma'];
+        const minDps = Math.floor(baseDps * data.prismaMinMultiplier!);
+        const maxDps = Math.floor(baseDps * data.prismaMaxMultiplier!);
         return `${minDps}-${maxDps}`;
     }
 
@@ -244,44 +240,120 @@ export class PrismaTower extends Tower {
             const baseR = (TS / 2 - 4) * scale;
             const rotateOffset = this.constructionTimer > 0 ? (1 - progress) * Math.PI * 2 : 0;
             
-            for (let i = 0; i < 3; i++) {
-                const angle = (Math.PI * 2 / 3) * i - Math.PI / 6 + rotateOffset;
-                const px = Math.cos(angle) * baseR;
-                const py = Math.sin(angle) * baseR;
-                if (i === 0) g.moveTo(px, py);
-                else g.lineTo(px, py);
-            }
-            g.closePath();
-            
-            g.fill({ color: baseColor });
-            
-            for (let i = 0; i < 3; i++) {
-                const angle = (Math.PI * 2 / 3) * i - Math.PI / 6 + rotateOffset;
-                const px = Math.cos(angle) * baseR;
-                const py = Math.sin(angle) * baseR;
-                if (i === 0) g.moveTo(px, py);
-                else g.lineTo(px, py);
-            }
-            g.closePath();
-            g.stroke({ color: 0xffffff, alpha: 0.2, width: 1.5 });
-
-            // Spinning base charging ring
-            const time = state.animTime * 0.003;
-            g.rotation = -time;
-            const ringPath = new PIXI.GraphicsPath();
-            ringPath.arc(0, 0, TS / 3 * scale, 0, Math.PI * 2);
-            // Dashed lines are tricky natively without a custom shader in v8, so we draw segments
-            const segments = 12;
-            for(let i=0; i<segments; i++) {
-                if(i % 2 === 0) {
-                    const a1 = (i / segments) * Math.PI * 2;
-                    const a2 = ((i+1) / segments) * Math.PI * 2;
-                    g.moveTo(Math.cos(a1) * TS/3 * scale, Math.sin(a1) * TS/3 * scale);
-                    g.arc(0, 0, TS/3 * scale, a1, a2);
+            if (this.masteryUnlocked && this.constructionTimer <= 0) {
+                // REDESIGN: Heavy Triangular Mastery Platform with Circuit Traces
+                for (let i = 0; i < 3; i++) {
+                    const angle = (Math.PI * 2 / 3) * i - Math.PI / 6;
+                    const px = Math.cos(angle) * baseR;
+                    const py = Math.sin(angle) * baseR;
+                    if (i === 0) g.moveTo(px, py);
+                    else g.lineTo(px, py);
                 }
+                g.closePath();
+                g.fill({ color: baseColor });
+
+                // Neon inner circuit triangle
+                const innerR = baseR * 0.7;
+                for (let i = 0; i < 3; i++) {
+                    const angle = (Math.PI * 2 / 3) * i - Math.PI / 6;
+                    const px = Math.cos(angle) * innerR;
+                    const py = Math.sin(angle) * innerR;
+                    if (i === 0) g.moveTo(px, py);
+                    else g.lineTo(px, py);
+                }
+                g.closePath();
+                g.stroke({ color: 0xffffff, alpha: 0.35, width: 1.5 * scale });
+
+                const timeVal = state.animTime;
+
+                // 3 Levitating Focus Shards hovering at the corners (calibrated speed)
+                for (let i = 0; i < 3; i++) {
+                    const angle = (Math.PI * 2 / 3) * i - Math.PI / 6;
+                    const bob = Math.sin(timeVal * 0.004 + i * Math.PI * 2 / 3) * 2.5 * scale;
+                    const dist = baseR + 5 * scale + bob;
+                    const sx = Math.cos(angle) * dist;
+                    const sy = Math.sin(angle) * dist;
+                    
+                    const shardSize = 3.5 * scale;
+                    g.moveTo(sx, sy - shardSize)
+                     .lineTo(sx + shardSize, sy)
+                     .lineTo(sx, sy + shardSize)
+                     .lineTo(sx - shardSize, sy)
+                     .closePath()
+                     .fill({ color: baseColor })
+                     .stroke({ color: 0xffffff, width: 1 * scale });
+                }
+
+                // Central Glowing Reactor Containment Pool (calibrated speed)
+                const pulseSize = (TS / 4 + Math.sin(timeVal * 0.003) * 1.5) * scale;
+                g.circle(0, 0, pulseSize).fill({ color: baseColor, alpha: 0.15 });
+                g.circle(0, 0, pulseSize).stroke({ color: baseColor, alpha: 0.4, width: 1 });
+                g.circle(0, 0, pulseSize * 0.6).fill({ color: '#ffffff', alpha: 0.25 });
+
+                // Counter-Rotating Calibration Rings
+                const r1 = TS / 3 * scale;
+                const r2 = (TS / 3 + 3.5) * scale;
+                const spin1 = timeVal * 0.0003;
+                const spin2 = -timeVal * 0.0004;
+
+                // Ring 1 (Dashed arcs)
+                for (let j = 0; j < 4; j++) {
+                    const aStart = spin1 + (j * Math.PI / 2);
+                    const aEnd = aStart + Math.PI / 4;
+                    g.moveTo(Math.cos(aStart) * r1, Math.sin(aStart) * r1);
+                    g.arc(0, 0, r1, aStart, aEnd);
+                }
+                g.stroke({ color: baseColor, alpha: 0.6, width: 1 });
+
+                // Ring 2 (Dashed arcs)
+                for (let j = 0; j < 4; j++) {
+                    const aStart = spin2 + (j * Math.PI / 2);
+                    const aEnd = aStart + Math.PI / 5;
+                    g.moveTo(Math.cos(aStart) * r2, Math.sin(aStart) * r2);
+                    g.arc(0, 0, r2, aStart, aEnd);
+                }
+                g.stroke({ color: 0xffffff, alpha: 0.45, width: 0.8 });
+
+            } else {
+                // Standard triangular base
+                for (let i = 0; i < 3; i++) {
+                    const angle = (Math.PI * 2 / 3) * i - Math.PI / 6 + rotateOffset;
+                    const px = Math.cos(angle) * baseR;
+                    const py = Math.sin(angle) * baseR;
+                    if (i === 0) g.moveTo(px, py);
+                    else g.lineTo(px, py);
+                }
+                g.closePath();
+                
+                g.fill({ color: baseColor });
+                
+                for (let i = 0; i < 3; i++) {
+                    const angle = (Math.PI * 2 / 3) * i - Math.PI / 6 + rotateOffset;
+                    const px = Math.cos(angle) * baseR;
+                    const py = Math.sin(angle) * baseR;
+                    if (i === 0) g.moveTo(px, py);
+                    else g.lineTo(px, py);
+                }
+                g.closePath();
+                g.stroke({ color: 0xffffff, alpha: 0.2, width: 1.5 });
+
+                // Spinning base charging ring
+                const time = state.animTime * 0.003;
+                g.rotation = -time;
+                const ringPath = new PIXI.GraphicsPath();
+                ringPath.arc(0, 0, TS / 3 * scale, 0, Math.PI * 2);
+                const segments = 12;
+                for(let i=0; i<segments; i++) {
+                    if(i % 2 === 0) {
+                        const a1 = (i / segments) * Math.PI * 2;
+                        const a2 = ((i+1) / segments) * Math.PI * 2;
+                        g.moveTo(Math.cos(a1) * TS/3 * scale, Math.sin(a1) * TS/3 * scale);
+                        g.arc(0, 0, TS/3 * scale, a1, a2);
+                    }
+                }
+                g.stroke({ color: baseColor, width: 1 });
+                g.rotation = 0; // reset
             }
-            g.stroke({ color: baseColor, width: 1 });
-            g.rotation = 0; // reset
             
             // Level indicator
             if (this.level > 1 && this.pixiLevelText) {
@@ -324,27 +396,85 @@ export class PrismaTower extends Tower {
         }
 
         if (part === 'turret') {
-            const crystalY = this.constructionTimer > 0 ? -20 * (1 - progress) : 0;
-            const crystalAngle = this.constructionTimer > 0 ? (1 - progress) * Math.PI * 8 : 0;
-            // Note: Since `pixiTurretGraphics` is already rotated by `this.angle` in `BaseTower.updatePixi()`,
-            // we just apply local offset rotation here.
-            g.rotation = crystalAngle;
-            
             const prismR = 10 * scale;
-            for(let step = 0; step < 2; step++) {
-                g.moveTo(prismR * 1.3, crystalY);
-                g.lineTo(-prismR * 0.7, crystalY + prismR * 0.8);
-                g.lineTo(-prismR * 0.4, crystalY);
-                g.lineTo(-prismR * 0.7, crystalY - prismR * 0.8);
-                g.closePath();
+
+            if (this.masteryUnlocked && this.constructionTimer <= 0) {
+                // REDESIGN: Levitating Cluster of Highly Polished Shards/Crystals
+                const isFiring = this.target && state.enemies.includes(this.target) && this.target.hp > 0;
+                const timeVal = state.animTime;
                 
-                if (step === 0) {
-                    g.fill({ color: this.currentColor, alpha: 0.9 });
-                } else {
-                    g.stroke({ color: 0xffffff, alpha: 1, width: 1 });
+                // Spin faster if actively firing! (calibrated speed)
+                const rotSpeed = isFiring ? timeVal * 0.0035 : timeVal * 0.001;
+                
+                g.rotation = this.angle; // Base turret rotation tracks the enemy target
+
+                // 1. Primary Central focus crystal (pulsing core - calibrated speed)
+                const corePulse = 1.0 + 0.15 * Math.sin(timeVal * 0.005);
+                const cR = prismR * 1.15 * corePulse;
+
+                g.moveTo(cR * 1.3, 0)
+                 .lineTo(-cR * 0.7, cR * 0.8)
+                 .lineTo(-cR * 0.4, 0)
+                 .lineTo(-cR * 0.7, -cR * 0.8)
+                 .closePath()
+                 .fill({ color: this.currentColor, alpha: 0.95 })
+                 .stroke({ color: 0xffffff, width: 1.5 * scale });
+                 
+                // White inner diamond glow
+                g.moveTo(cR * 0.8, 0)
+                 .lineTo(-cR * 0.4, cR * 0.4)
+                 .lineTo(-cR * 0.2, 0)
+                 .lineTo(-cR * 0.4, -cR * 0.4)
+                 .closePath()
+                 .fill({ color: '#ffffff', alpha: 0.8 });
+
+                // 2. Three orbiting satellite shards channeling light
+                const orbitRadius = prismR * 1.7;
+                for (let i = 0; i < 3; i++) {
+                    const orbAngle = rotSpeed + (i * Math.PI * 2 / 3);
+                    const ox = Math.cos(orbAngle) * orbitRadius;
+                    const oy = Math.sin(orbAngle) * orbitRadius;
+                    
+                    const sSize = 3.5 * scale;
+                    const shardRot = orbAngle + Math.PI; // shards point inward towards core
+                    
+                    g.moveTo(ox + Math.cos(shardRot) * sSize * 1.3, oy + Math.sin(shardRot) * sSize * 1.3)
+                     .lineTo(ox + Math.cos(shardRot + 2) * sSize * 0.8, oy + Math.sin(shardRot + 2) * sSize * 0.8)
+                     .lineTo(ox + Math.cos(shardRot + Math.PI) * sSize * 0.5, oy + Math.sin(shardRot + Math.PI) * sSize * 0.5)
+                     .lineTo(ox + Math.cos(shardRot - 2) * sSize * 0.8, oy + Math.sin(shardRot - 2) * sSize * 0.8)
+                     .closePath()
+                     .fill({ color: this.currentColor, alpha: 0.85 })
+                     .stroke({ color: 0xffffff, width: 1 * scale });
+                     
+                    // Connection laser trace lines from satellites to central core (calibrated speed)
+                    const traceAlpha = isFiring ? 0.75 : 0.25 + 0.15 * Math.sin(timeVal * 0.003 + i * 2);
+                    const traceWidth = isFiring ? 1.5 * scale : 0.8 * scale;
+                    g.moveTo(ox, oy).lineTo(0, 0).stroke({ color: this.currentColor, alpha: traceAlpha, width: traceWidth });
+                }
+
+            } else {
+                // Standard 2D prism diamond
+                const crystalY = this.constructionTimer > 0 ? -20 * (1 - progress) : 0;
+                const crystalAngle = this.constructionTimer > 0 
+                    ? (1 - progress) * Math.PI * 8 
+                    : 0;
+                
+                g.rotation = this.angle + crystalAngle;
+                
+                for(let step = 0; step < 2; step++) {
+                    g.moveTo(prismR * 1.3, crystalY);
+                    g.lineTo(-prismR * 0.7, crystalY + prismR * 0.8);
+                    g.lineTo(-prismR * 0.4, crystalY);
+                    g.lineTo(-prismR * 0.7, crystalY - prismR * 0.8);
+                    g.closePath();
+                    
+                    if (step === 0) {
+                        g.fill({ color: this.currentColor, alpha: 0.9 });
+                    } else {
+                        g.stroke({ color: 0xffffff, alpha: 1, width: 1 });
+                    }
                 }
             }
-            g.rotation = 0; // reset
         }
     }
 
@@ -407,7 +537,7 @@ export class PrismaTower extends Tower {
             }
         }
 
-        const progress = Math.min(1.0, lockTime / Config.TOWER_PRISMA_CHARGE_FRAMES);
+        const progress = Math.min(1.0, lockTime / TowerData['Prisma'].prismaChargeFrames!);
         const widthMultiplier = isSplit ? 0.85 : (1.0 + progress * 2.0);
 
         const colorNum = parseInt(colorStr.replace('#', '0x'), 16);
@@ -479,10 +609,75 @@ export class PrismaTower extends Tower {
             g.circle(x1, y1, flareR * 0.5).fill({ color: 0xffffff, alpha: 0.8 });
         }
 
-        // Target explosion
+        // Holographic Targeting Reticle
         const targetRadius = (isSplit ? 8 : (12 + progress * 24)) * widthMultiplier;
-        g.circle(x2, y2, targetRadius).fill({ color: colorNum, alpha: isSplit ? 0.6 : (0.5 + progress * 0.5) });
-        g.circle(x2, y2, targetRadius * 0.4).fill({ color: 0xffffff, alpha: 0.8 });
+
+        // 1. Thin outer boundary ring (soft target outline)
+        g.circle(x2, y2, targetRadius).stroke({ 
+            color: colorNum, 
+            alpha: isSplit ? 0.25 : (0.12 + progress * 0.18), 
+            width: 1.0 
+        });
+
+        // 2. Concentric inner soft glow ring
+        g.circle(x2, y2, targetRadius * 0.85).stroke({ 
+            color: colorNum, 
+            alpha: isSplit ? 0.35 : (0.2 + progress * 0.35), 
+            width: 1.5 
+        });
+
+        // 3. Rotating Tech-HUD Arcs / Brackets
+        if (!isSplit) {
+            const rot = state.animTime * 0.04;
+            const numArcs = 3;
+            const arcAngle = (Math.PI * 2) / numArcs;
+            const gap = 0.45; // Gap in radians between brackets
+            
+            for (let i = 0; i < numArcs; i++) {
+                const startAngle = rot + i * arcAngle;
+                const endAngle = startAngle + arcAngle - gap;
+                const rArc = targetRadius * 1.05;
+                
+                // Draw rotating arc
+                g.moveTo(x2 + Math.cos(startAngle) * rArc, y2 + Math.sin(startAngle) * rArc);
+                g.arc(x2, y2, rArc, startAngle, endAngle);
+            }
+            g.stroke({ 
+                color: colorNum, 
+                alpha: 0.4 + progress * 0.5, 
+                width: 2.0 
+            });
+        }
+
+        // 4. Precision Crosshair Ticks (stops outside center to keep target visible)
+        if (!isSplit && progress > 0.2) {
+            const innerBound = targetRadius * 0.35;
+            const outerBound = targetRadius * 0.7;
+            const tickAlpha = 0.3 + progress * 0.5;
+            const tickWidth = 1.2 * widthMultiplier;
+            
+            g.moveTo(x2 - outerBound, y2).lineTo(x2 - innerBound, y2)
+             .moveTo(x2 + innerBound, y2).lineTo(x2 + outerBound, y2)
+             .moveTo(x2, y2 - outerBound).lineTo(x2, y2 - innerBound)
+             .moveTo(x2, y2 + innerBound).lineTo(x2, y2 + outerBound)
+             .stroke({ color: 0xffffff, alpha: tickAlpha, width: tickWidth });
+        }
+
+        // 5. Shrinking Energy Pulse (dynamic focusing effect)
+        if (!isSplit && progress > 0.1) {
+            const pulseProgress = (state.animTime * 0.02) % 1.0;
+            const pulseRadius = targetRadius * (1.0 - pulseProgress);
+            g.circle(x2, y2, pulseRadius).stroke({ 
+                color: colorNum, 
+                alpha: (1.0 - pulseProgress) * (0.35 + progress * 0.45), 
+                width: 1.5 
+            });
+        }
+
+        // 6. Central Precision Core (very small, semi-transparent focal point)
+        const coreRadius = Math.max(3, targetRadius * 0.15);
+        g.circle(x2, y2, coreRadius).fill({ color: 0xffffff, alpha: 0.35 + progress * 0.35 });
+        g.circle(x2, y2, coreRadius).stroke({ color: colorNum, alpha: 0.5 + progress * 0.3, width: 1.0 });
 
         if (!isSplit && progress > 0.4) {
             const flareSize = 16 * progress * widthMultiplier;
@@ -543,8 +738,9 @@ export class PrismaTower extends Tower {
 
     public override _acquireAndFire(): void {
         if (this.specialization === 'refraction') {
-            const progress = Math.min(1.0, this.lockTimer / Config.TOWER_PRISMA_CHARGE_FRAMES);
-            const multiplier = Config.TOWER_PRISMA_MIN_MULTIPLIER + (Config.TOWER_PRISMA_MAX_MULTIPLIER - Config.TOWER_PRISMA_MIN_MULTIPLIER) * (progress * progress);
+            const data = TowerData['Prisma'];
+            const progress = Math.min(1.0, this.lockTimer / data.prismaChargeFrames!);
+            const multiplier = data.prismaMinMultiplier! + (data.prismaMaxMultiplier! - data.prismaMinMultiplier!) * (progress * progress);
             const finalDmg = this.damage * multiplier;
 
             const rangeSq = this.range * this.range;
@@ -593,8 +789,9 @@ export class PrismaTower extends Tower {
                 return;
             }
 
-            const progress = Math.min(1.0, this.lockTimer / Config.TOWER_PRISMA_CHARGE_FRAMES);
-            const multiplier = Config.TOWER_PRISMA_MIN_MULTIPLIER + (Config.TOWER_PRISMA_MAX_MULTIPLIER - Config.TOWER_PRISMA_MIN_MULTIPLIER) * (progress * progress);
+            const data = TowerData['Prisma'];
+            const progress = Math.min(1.0, this.lockTimer / data.prismaChargeFrames!);
+            const multiplier = data.prismaMinMultiplier! + (data.prismaMaxMultiplier! - data.prismaMinMultiplier!) * (progress * progress);
             const finalDmg = this.damage * multiplier;
 
             const actualDmg = this.target.takeDamage(finalDmg, this);

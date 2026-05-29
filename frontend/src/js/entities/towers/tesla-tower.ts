@@ -14,7 +14,7 @@
  * ----------------------------------
  * @last_update: 2026-05-29 / v2.0.0 - Migrated rendering to PixiJS.
  */
-import { Config, TowerData } from '../../core/config';
+import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
 import { FloatingText, createExplosion } from '../../fx/fx';
 import { Tower, tierOf } from './base-tower';
@@ -59,17 +59,11 @@ export class TeslaTower extends Tower {
             const data = TowerData['Tesla'];
             this.damage += data.damagePerLevel;
             this.range += data.rangePerLevel;
-            this.fireRate = Math.max(Config.TOWER_MIN_FIRE_RATE, this.fireRate - data.fireRateDecrease);
+            this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
 
             this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
             
-            // Flattening costs: 2.0x before level 5, 1.4x after
-            if (this.level >= 5) {
-                this.upgradeCost = Math.floor(this.upgradeCost * 1.4);
-            } else {
-                this.upgradeCost *= 2;
-            }
-            this.upgradeCost = roundUpgradeCost(this.upgradeCost);
+            this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
             PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, '#4cc9f0');
             createExplosion(this.x, this.y, this.currentColor, 10);
@@ -156,11 +150,27 @@ export class TeslaTower extends Tower {
             }
 
             if (this.masteryUnlocked) {
-                const mstColor = this.specialization === 'highvolt' ? '#a29bfe' : '#81ecec';
-                // Extra outer ring segments
+                const mstColor = this.specialization === 'highvolt' ? '#a29bfe' : (this.specialization === 'stun' ? '#81ecec' : '#00ffff');
+                const rotOffset = state.animTime * 0.001; // slow continuous rotation of outer base arcs
+                
+                // 1. Extra outer ring segments - beautifully rotating
                 for (let i = 0; i < 4; i++) {
-                    g.arc(0, 0, r + 2 * scale, i * Math.PI/2, i * Math.PI/2 + Math.PI/4);
+                    const startAngle = i * Math.PI/2 + rotOffset;
+                    const endAngle = i * Math.PI/2 + Math.PI/4 + rotOffset;
+                    g.arc(0, 0, r + 2.5 * scale, startAngle, endAngle);
                     g.stroke({ color: mstColor, width: 2 });
+                }
+
+                // 2. High-tech cybernetic power grid traces on the octagonal base
+                g.circle(0, 0, r * 0.75).stroke({ color: mstColor, alpha: 0.22, width: 1 });
+                g.circle(0, 0, r * 0.45).stroke({ color: mstColor, alpha: 0.12, width: 1 });
+                
+                // Floating energy node points shifting slowly
+                for (let i = 0; i < 4; i++) {
+                    const angle = (Math.PI / 2) * i + state.animTime * 0.0004;
+                    const px = Math.cos(angle) * r * 0.6;
+                    const py = Math.sin(angle) * r * 0.6;
+                    g.circle(px, py, 1.5).fill({ color: mstColor, alpha: 0.75 });
                 }
             }
             
@@ -219,30 +229,80 @@ export class TeslaTower extends Tower {
                 coilColor2 = '#00cec9';
             }
             
-            // Since radial gradients require custom shaders in PIXI Graphics, we'll draw concentric circles
-            g.circle(0, coilY, coilRadius).fill({ color: coilColor2 });
-            g.circle(0, coilY, coilRadius * 0.5).fill({ color: coilColor1 });
-            g.circle(0, coilY, coilRadius).stroke({ color: 0xffffff, width: 2 });
+            if (this.masteryUnlocked && this.constructionTimer <= 0) {
+                // REDESIGN: Floating Reactor Core with Orbiting Satellite Nodes & Magnetic Containment Rings
+                const time = state.animTime;
+                
+                // 1. Central floating core (glows, pulses and changes size dynamically)
+                const pulseOffset = Math.sin(time * 0.015) * 1.0;
+                const coreRadius = (coilRadius + pulseOffset) * scale;
+                g.circle(0, coilY, coreRadius).fill({ color: coilColor2, alpha: 0.8 });
+                g.circle(0, coilY, coreRadius * 0.55).fill({ color: '#ffffff' });
+                g.circle(0, coilY, coreRadius).stroke({ color: coilColor1, width: 2 });
+                
+                // Extra intense glowing outer core circle
+                g.circle(0, coilY, coreRadius + 2.5).stroke({ color: coilColor2, alpha: 0.45, width: 1.5 });
+                
+                // 2. Counter-rotating magnetic containment rings
+                const shieldRad = r + 8;
+                const rot1 = time * 0.0025;
+                const rot2 = -time * 0.0015;
+                
+                // Outer ring 1
+                g.arc(0, coilY, shieldRad, rot1, rot1 + Math.PI * 0.4);
+                g.arc(0, coilY, shieldRad, rot1 + Math.PI, rot1 + Math.PI * 1.4);
+                g.stroke({ color: coilColor2, width: 2, alpha: 0.7 });
+                
+                // Inner ring 2
+                g.arc(0, coilY, shieldRad - 3.5, rot2, rot2 + Math.PI * 0.3);
+                g.arc(0, coilY, shieldRad - 3.5, rot2 + Math.PI, rot2 + Math.PI * 1.3);
+                g.stroke({ color: '#ffffff', width: 1.5, alpha: 0.5 });
+                
+                // 3. Orbiting mini-conductors/satellite nodes (3 nodes at 120-deg offsets)
+                const orbitRadius = coilRadius + 6;
+                for (let i = 0; i < 3; i++) {
+                    const orbitAngle = time * 0.009 + (i * Math.PI * 2 / 3);
+                    const ox = Math.cos(orbitAngle) * orbitRadius;
+                    const oy = coilY + Math.sin(orbitAngle) * orbitRadius;
+                    
+                    // Draw node
+                    g.circle(ox, oy, 2.5).fill({ color: '#ffffff' });
+                    g.circle(ox, oy, 2.5).stroke({ color: coilColor2, width: 1.5 });
+                    
+                    // Add mini static discharges between reactor core and satellite nodes
+                    if (Math.random() < 0.25) {
+                        const mx = (ox / 2) + (Math.random() - 0.5) * 3;
+                        const my = (coilY + oy) / 2 + (Math.random() - 0.5) * 3;
+                        g.moveTo(0, coilY).lineTo(mx, my).lineTo(ox, oy).stroke({ color: coilColor1, width: 1, alpha: 0.6 });
+                    }
+                }
+            } else {
+                // Standard Tesla Tower Turret drawing logic
+                g.circle(0, coilY, coilRadius).fill({ color: coilColor2 });
+                g.circle(0, coilY, coilRadius * 0.5).fill({ color: coilColor1 });
+                g.circle(0, coilY, coilRadius).stroke({ color: 0xffffff, width: 2 });
 
-            if (this.constructionTimer > 0 && Math.random() < 0.6) {
-                const targetAngle = Math.random() * Math.PI * 2;
-                const tx = Math.cos(targetAngle) * r;
-                const ty = Math.sin(targetAngle) * r;
-                const mx = (tx / 2) + (Math.random() - 0.5) * 8 * scale;
-                const my = (coilY + ty) / 2 + (Math.random() - 0.5) * 8 * scale;
-                g.moveTo(0, coilY).lineTo(mx, my).lineTo(tx, ty).stroke({ color: '#81ecec', width: 1 });
+                if (this.constructionTimer > 0 && Math.random() < 0.6) {
+                    const targetAngle = Math.random() * Math.PI * 2;
+                    const tx = Math.cos(targetAngle) * r;
+                    const ty = Math.sin(targetAngle) * r;
+                    const mx = (tx / 2) + (Math.random() - 0.5) * 8 * scale;
+                    const my = (coilY + ty) / 2 + (Math.random() - 0.5) * 8 * scale;
+                    g.moveTo(0, coilY).lineTo(mx, my).lineTo(tx, ty).stroke({ color: '#81ecec', width: 1 });
+                }
             }
             
-            const time = state.animTime * 0.005;
-            const pulse = (Math.sin(time) * 2 + 8) * scale;
+            // Draw general animations (pulsing outer ring, discharge shockwave)
+            const timeVal = state.animTime * 0.005;
+            const pulse = (Math.sin(timeVal) * 2 + 8) * scale;
             g.circle(0, 0, pulse).stroke({ color: 0xffffff, alpha: 0.4, width: 1 });
 
             if (this.auraTime > 0) {
                 const maxDuration = 35;
-                const progress = 1 - this.auraTime / maxDuration;
-                const auraPulse = progress * this.range;
-                const auraColor = this.specialization === 'highvolt' ? '#a29bfe' : '#81ecec';
-                const alpha = 1 - progress;
+                const progressVal = 1 - this.auraTime / maxDuration;
+                const auraPulse = progressVal * this.range;
+                const auraColor = this.specialization === 'highvolt' ? '#a29bfe' : (this.specialization === 'stun' ? '#81ecec' : '#00ffff');
+                const alpha = 1 - progressVal;
                 g.circle(0, 0, auraPulse).stroke({ color: auraColor, width: 2.0, alpha: alpha });
             }
         }
@@ -307,6 +367,10 @@ export class TeslaTower extends Tower {
                 const targetIds = this._targetIdsBuffer;
                 targetIds.length = 0;
 
+                let arcColor = '#00ffff';
+                if (this.specialization === 'highvolt') arcColor = '#a29bfe';
+                else if (this.specialization === 'stun') arcColor = '#81ecec';
+
                 for (let i = 0; i < enemiesInRange.length; i++) {
                     const enemy = enemiesInRange[i];
                     targetIds.push(enemy.id);
@@ -321,6 +385,34 @@ export class TeslaTower extends Tower {
                         enemy.deadMarked = true;
                         this.kills++;
                     }
+
+                    // Spawn visual electrical discharge arc from the tower center to the enemy center
+                    PoolManager.getTeslaArc(this.x, this.y, enemy.x, enemy.y, arcColor);
+
+                    if (this.masteryUnlocked) {
+                        // Level 20 Mastery Discharge: Double Jagged Arc + Branching static leaps
+                        PoolManager.getTeslaArc(this.x, this.y, enemy.x, enemy.y, arcColor);
+
+                        // Primary jumps to a secondary nearby target (forking electricity visually)
+                        let closestChainTarget: Enemy | null = null;
+                        let closestDistSq = 90 * 90; // chain range max 90px
+                        for (let j = 0; j < state.enemies.length; j++) {
+                            const potential = state.enemies[j];
+                            if (potential.id === enemy.id || potential.hp <= 0 || potential.deadMarked) continue;
+                            const dx = potential.x - enemy.x;
+                            const dy = potential.y - enemy.y;
+                            const distSq = dx * dx + dy * dy;
+                            if (distSq < closestDistSq) {
+                                closestDistSq = distSq;
+                                closestChainTarget = potential;
+                            }
+                        }
+
+                        if (closestChainTarget) {
+                            // Fork visual lightning discharge
+                            PoolManager.getTeslaArc(enemy.x, enemy.y, closestChainTarget.x, closestChainTarget.y, arcColor);
+                        }
+                    }
                 }
                 
                 let fr = this.fireRate;
@@ -328,7 +420,9 @@ export class TeslaTower extends Tower {
                 
                 this.fireCooldown = fr;
                 this.auraTime = 35;
-                createExplosion(this.x, this.y, '#00ffff', 5);
+                
+                const explosionColor = this.specialization === 'highvolt' ? '#a29bfe' : (this.specialization === 'stun' ? '#81ecec' : '#00ffff');
+                createExplosion(this.x, this.y, explosionColor, 5);
 
                 if (!state.projectileEvents) state.projectileEvents = [];
                 state.projectileEvents.push({

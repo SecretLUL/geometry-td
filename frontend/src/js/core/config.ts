@@ -1,7 +1,7 @@
 /*
  * @file: frontend\src\js\core\config.ts
  * @purpose: Static configuration settings for game grid, starting resources, cost/damage of basic/specialized towers, and enemy attributes.
- * @dependencies: None
+ * @dependencies: ./utils
  * 
  * --- KI-INTEGRATIONS-DIREKTIVE ---
  * Diese Datei unterliegt einer strikten Dokumentationspflicht.
@@ -12,8 +12,10 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-28 / v1.5.0 - Added GAME_SPEEDS constants (NORMAL, FAST, SUPER_FAST) to eliminate magic numbers.
+ * @last_update: 2026-05-29 / v2.4.1 - Reduced Collector spawn frequency, increased HP/reward config.
  */
+import { roundUpgradeCost } from './utils';
+
 export const Config = {
     CANVAS_COLS: 15,
     CANVAS_ROWS: 15,
@@ -31,50 +33,6 @@ export const Config = {
     TOWER_MAX_LEVEL: 20,
     TOWER_SPECIALIZATION_LEVEL: 10,
     TOWER_MASTERY_LEVEL: 20,
-
-    // Tower Parameters
-    TOWER_BASE_COST: 50,
-    TOWER_BASE_DAMAGE: 10,
-    TOWER_DAMAGE_PER_LEVEL: 5,
-    TOWER_BASE_RANGE: 180,
-    TOWER_RANGE_PER_LEVEL: 10,
-    TOWER_BASE_FIRE_RATE: 60,
-
-    TOWER_SNIPER_COST: 200,
-    TOWER_SNIPER_DAMAGE: 1200,
-    TOWER_SNIPER_DAMAGE_PER_LEVEL: 600,
-    TOWER_SNIPER_RANGE: 9999,
-    TOWER_SNIPER_RANGE_PER_LEVEL: 0,
-    TOWER_SNIPER_FIRE_RATE: 450,
-    TOWER_SNIPER_PROJECTILE_SPEED: 40,
-    TOWER_BOMB_PROJECTILE_SPEED: 3,
-
-    TOWER_BOMB_COST: 100,
-    TOWER_BOMB_DAMAGE: 280,
-    TOWER_BOMB_DAMAGE_PER_LEVEL: 80,
-    TOWER_BOMB_RANGE: 100,
-    TOWER_BOMB_RANGE_PER_LEVEL: 5,
-    TOWER_BOMB_FIRE_RATE: 140,
-    TOWER_BOMB_FIRE_RATE_DECREASE: 7.22,
-    TOWER_BOMB_AOE_RADIUS: 80,
-    TOWER_BOMB_AOE_RADIUS_PER_LEVEL: 12,
-
-    TOWER_TESLA_COST: 150,
-    TOWER_TESLA_DAMAGE: 120,
-    TOWER_TESLA_DAMAGE_PER_LEVEL: 40,
-    TOWER_TESLA_RANGE: 120,
-    TOWER_TESLA_RANGE_PER_LEVEL: 8,
-    TOWER_TESLA_FIRE_RATE: 210,
-
-    TOWER_PRISMA_COST: 250,
-    TOWER_PRISMA_DAMAGE: 1.0,
-    TOWER_PRISMA_DAMAGE_PER_LEVEL: 1.5,
-    TOWER_PRISMA_RANGE: 150,
-    TOWER_PRISMA_RANGE_PER_LEVEL: 8,
-    TOWER_PRISMA_FIRE_RATE: 1,
-    TOWER_PRISMA_MIN_MULTIPLIER: 0.25,
-    TOWER_PRISMA_MAX_MULTIPLIER: 25.0,
-    TOWER_PRISMA_CHARGE_FRAMES: 480, // 8 seconds at 60 FPS
 
     TOWER_MIN_FIRE_RATE: 10,
     TOWER_FIRE_RATE_DECREASE: 10,
@@ -275,12 +233,12 @@ export const EnemyData: Record<string, EnemyConfig> = {
     'Collector': {
         category: 'Special Minions',
         unlockWave: 5,
-        poolWeight: 0.03,
+        poolWeight: 0.003,
         name: 'Collector',
         icon: '💰',
         color: '#ffd700',
         description: 'Ein seltener und schwer fassbarer Dieb, der riesigen Reichtum birgt.',
-        hp: 40,
+        hp: 50,
         speed: 100,
         reward: 100,
         difficulty: 4,
@@ -361,6 +319,14 @@ export interface TowerStatsConfig {
     aoeRadius?: number;
     aoeRadiusPerLevel?: number;
     colors: string[];
+    costScaling: {
+        earlyMultiplier: number;
+        lateMultiplier: number;
+        thresholdLevel: number;
+    };
+    prismaMinMultiplier?: number;
+    prismaMaxMultiplier?: number;
+    prismaChargeFrames?: number;
     specializations: Record<string, TowerSpecConfig>;
 }
 
@@ -376,6 +342,11 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         fireRateDecrease: 10,
         projectileSpeed: 15,
         colors: ['#0f3460', '#123e75', '#1a508b', '#205e9e', '#2b6cb0', '#3182ce', '#4299e1', '#63b3ed', '#90cdf4', '#cbd5e0', '#d6bcfa', '#b794f4', '#9f7aea', '#805ad5', '#ecc94b', '#ecc94b', '#ecc94b', '#f6ad55', '#f687b3', '#ffffff'],
+        costScaling: {
+            earlyMultiplier: 2.0,
+            lateMultiplier: 1.4,
+            thresholdLevel: 5
+        },
         specializations: {
             'missiles': {
                 name: 'Homing Missiles',
@@ -417,24 +388,29 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         fireRateDecrease: 28,
         projectileSpeed: 40,
         colors: ['#2b2b2b', '#333333', '#3d3d3d', '#444444', '#4f4f4f', '#5a5a5a', '#666666', '#717171', '#808080', '#8c8c8c', '#999999', '#a6a6a6', '#b3b3b3', '#c0c0c0', '#cccccccc', '#d9d9d9', '#e6e6e6', '#f2f2f2', '#fbfbfb', '#ffffff'],
+        costScaling: {
+            earlyMultiplier: 2.0,
+            lateMultiplier: 1.4,
+            thresholdLevel: 5
+        },
         specializations: {
             'ricochet': {
                 name: 'Ricochet',
                 desc: '4 Hits, 0.4s Speed',
-                masteryDesc: '8 Hits, 0.67s Speed',
+                masteryDesc: '8 Hits, 0.2s Speed',
                 color: '#00b894',
                 values: {
                     normalHits: 4,
                     masteryHits: 8,
-                    normalFireRate: 90,
-                    masteryFireRate: 40,
+                    normalFireRate: 24,
+                    masteryFireRate: 12,
                     ricochetRange: 150
                 }
             },
             'bounty': {
                 name: 'Bounty Hunter',
-                desc: '+250g/Kill, 2.0x DMG',
-                masteryDesc: '+1000g/Kill, 4.5x DMG',
+                desc: '+250g/Kill, 2.0x DMG, 2.5s Speed',
+                masteryDesc: '+1000g/Kill, 4.5x DMG, 1.5s Speed',
                 color: '#f1c40f',
                 multipliers: {
                     normalDmg: 2.0,
@@ -442,7 +418,9 @@ export const TowerData: Record<string, TowerStatsConfig> = {
                 },
                 values: {
                     normalBounty: 250,
-                    masteryBounty: 1000
+                    masteryBounty: 1000,
+                    normalFireRate: 150,
+                    masteryFireRate: 90
                 }
             }
         }
@@ -450,25 +428,32 @@ export const TowerData: Record<string, TowerStatsConfig> = {
     'Bomb': {
         type: 'Bomb',
         baseCost: 100,
-        baseDamage: 280,
-        damagePerLevel: 80,
+        baseDamage: 350,
+        damagePerLevel: 120,
         baseRange: 100,
         rangePerLevel: 5,
         baseFireRate: 140,
-        fireRateDecrease: 7.22,
+        fireRateDecrease: 4.5,
         projectileSpeed: 3,
         aoeRadius: 80,
-        aoeRadiusPerLevel: 12,
+        aoeRadiusPerLevel: 4,
         colors: ['#4a0e0e', '#530f0f', '#5e1212', '#691414', '#731616', '#7f1818', '#8c1a1a', '#991c1c', '#a61e1e', '#b32020', '#bf2222', '#cc2424', '#d92626', '#e62828', '#f22b2b', '#ff3333', '#ff4040', '#ff5050', '#ff6060', '#ffffff'],
+        costScaling: {
+            earlyMultiplier: 2.0,
+            lateMultiplier: 1.4,
+            thresholdLevel: 5
+        },
         specializations: {
             'nuke': {
                 name: 'Nuke',
-                desc: 'Radioaktive Strahlung, 1.5x Radius',
-                masteryDesc: '2.2x Radius',
+                desc: 'Radioaktive Strahlung, 0.8x Radius, 2.0x DMG',
+                masteryDesc: '1.2x Radius, 4.5x DMG',
                 color: '#2d3436',
                 multipliers: {
-                    normalAoe: 1.5,
-                    masteryAoe: 2.2
+                    normalAoe: 0.8,
+                    masteryAoe: 1.2,
+                    normalDmg: 2.0,
+                    masteryDmg: 4.5
                 }
             },
             'cluster': {
@@ -487,12 +472,17 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         type: 'Tesla',
         baseCost: 150,
         baseDamage: 120,
-        damagePerLevel: 40,
+        damagePerLevel: 55,
         baseRange: 120,
-        rangePerLevel: 8,
+        rangePerLevel: 3,
         baseFireRate: 210,
         fireRateDecrease: 10,
         colors: ['#002244', '#003366', '#003c77', '#004080', '#004c99', '#0059b3', '#0066cc', '#0073e6', '#0080ff', '#1a8cff', '#3399ff', '#4db8ff', '#66c2ff', '#80d4ff', '#99e0ff', '#b3e6ff', '#ccf2ff', '#e6f7ff', '#f2faff', '#ffffff'],
+        costScaling: {
+            earlyMultiplier: 2.0,
+            lateMultiplier: 1.4,
+            thresholdLevel: 5
+        },
         specializations: {
             'highvolt': {
                 name: 'High Voltage',
@@ -527,6 +517,14 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         baseFireRate: 1,
         fireRateDecrease: 0,
         colors: ['#9c6f00', '#b8860b', '#c7960c', '#d4af37', '#e3bf3b', '#ffd700', '#ffe01a', '#ffea00', '#fff033', '#ffff00', '#ffff4d', '#ffff66', '#ffff80', '#ffff99', '#ffffb3', '#ffffcc', '#ffffe6', '#fffacd', '#fff8dc', '#ffffff'],
+        costScaling: {
+            earlyMultiplier: 2.0,
+            lateMultiplier: 1.4,
+            thresholdLevel: 5
+        },
+        prismaMinMultiplier: 0.25,
+        prismaMaxMultiplier: 25.0,
+        prismaChargeFrames: 480,
         specializations: {
             'meltdown': {
                 name: 'Meltdown Overdrive',
@@ -554,3 +552,67 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         }
     }
 };
+
+export const TowerBalancer = {
+    /** Berechnet die Upgrade-Kosten für einen bestimmten Turmtyp und ein bestimmtes Level */
+    getUpgradeCost(type: string, level: number, currentCost: number): number {
+        const stats = TowerData[type];
+        if (!stats) return currentCost * 2;
+        
+        const scale = stats.costScaling;
+        let newCost = currentCost;
+        if (level >= scale.thresholdLevel) {
+            newCost = Math.floor(currentCost * scale.lateMultiplier);
+        } else {
+            newCost = currentCost * scale.earlyMultiplier;
+        }
+        return roundUpgradeCost(newCost);
+    },
+
+    /** Berechnet den Schaden für ein bestimmtes Level */
+    getDamageForLevel(type: string, level: number, baseDamage: number): number {
+        const stats = TowerData[type];
+        if (!stats) return baseDamage;
+        
+        if (type === 'Bomb') {
+            if (level === 19) return 4500;
+            if (level === 20) return 13500;
+            return baseDamage + ((level - 1) * stats.damagePerLevel);
+        }
+        
+        let dmg = baseDamage + (level * stats.damagePerLevel);
+        if (stats.damageLevelBonus) {
+            dmg += level * stats.damageLevelBonus;
+        }
+        return dmg;
+    },
+
+    /** Berechnet die Reichweite für ein bestimmtes Level */
+    getRangeForLevel(type: string, baseRange: number): number {
+        const stats = TowerData[type];
+        if (!stats) return baseRange;
+        return baseRange + stats.rangePerLevel;
+    },
+
+    /** Berechnet die Feuerrate für ein bestimmtes Level */
+    getFireRateForLevel(type: string, level: number, currentFireRate: number): number {
+        const stats = TowerData[type];
+        if (!stats) return currentFireRate;
+        
+        if (type === 'Base') {
+            const attackSpeed = 1.0 + 9.0 * (level - 1) / (Config.TOWER_MAX_LEVEL - 1);
+            return 60 / attackSpeed;
+        } else if (type === 'Bomb') {
+            if (level === 19) {
+                return 40.0;
+            } else if (level === 20) {
+                return 55.0;
+            } else {
+                return Math.max(Config.TOWER_MIN_FIRE_RATE, currentFireRate - stats.fireRateDecrease);
+            }
+        } else {
+            return Math.max(Config.TOWER_MIN_FIRE_RATE, currentFireRate - stats.fireRateDecrease);
+        }
+    }
+};
+
