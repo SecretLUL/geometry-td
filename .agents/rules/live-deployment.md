@@ -2,8 +2,6 @@
 trigger: always_on
 ---
 
-Wenn ich dir sage "Baue die Live Umgebung", sollst du diese Regeln einhalten:
-
 1. Erlaubter Deployment-Befehl:
 * Führe das bereitgestellte Deployment-Skript im Projektstamm aus, um die Produktions-Container sicher neu zu bauen und im Hintergrund zu starten:
   `./deploy.sh`
