@@ -1,0 +1,69 @@
+services:
+  # =========================================================================
+  # 1. LIVE-UMGEBUNG (PRODUCTION) -> geometry-td.ammar-nas.duckdns.org
+  # =========================================================================
+  frontend-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: gtd-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "8181:80" # Dein Reverse Proxy (z.B. NPM) leitet die Live-Domain hierher
+
+  backend-prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: gtd-backend-prod
+    restart: unless-stopped
+    user: node
+    ports:
+      - "7171:3000" # Live-Backend Port
+    environment:
+      - FRONTEND_URL=http://gtd-frontend-prod
+      - NODE_ENV=production
+    cap_add:
+      - SYS_ADMIN
+
+  # =========================================================================
+  # 2. ENTWICKLUNGS-UMGEBUNG (DEV) -> gtd-dev.ammar-nas.duckdns.org
+  # =========================================================================
+  frontend-dev:
+    image: node:24-bookworm-slim
+    container_name: gtd-frontend-dev
+    restart: unless-stopped
+    user: root
+    working_dir: /home/node/app
+    ports:
+      - "7777:5173" # Dein Reverse Proxy leitet die Dev-Domain hierher
+    volumes:
+      - /volume1/docker/geometry-td/frontend:/home/node/app
+      - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
+    command: >
+      sh -c "npm install && npm run dev -- --host"
+
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: gtd-backend-dev
+    restart: unless-stopped
+    user: root
+    working_dir: /home/node/app
+    ports:
+      - "7676:3000" # Separates Dev-Backend auf Port 7676!
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - /volume1/docker/geometry-td/backend:/home/node/app
+      - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
+    command: >
+      sh -c "chown -R node:node /home/node/app/node_modules && runuser -u node -- sh -c 'npm install && npm run dev'"
+    cap_add:
+      - SYS_ADMIN
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1.5G

@@ -1,0 +1,71 @@
+/*
+ * @file: frontend\src\js\ui\icons.ts
+ * @purpose: Stores inline SVG path templates for tower/upgrade visual buttons in the UI panel.
+ * @dependencies: None
+ * 
+ * --- KI-INTEGRATIONS-DIREKTIVE ---
+ * Diese Datei unterliegt einer strikten Dokumentationspflicht.
+ * 1. Dieser Header ist ein integraler Bestandteil des Codes.
+ * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
+ *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
+ * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
+ * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
+ *    vordringliche Kontext-Information.
+ * ----------------------------------
+ * @last_update: 2026-05-20 / v1.0.0
+ */
+export const ICONS: Record<string, string> = {
+    Base: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+        <!-- Cannon barrel -->
+        <rect x="16" y="13" width="13" height="6" rx="2" fill="#fff"/>
+        <!-- Turret circle -->
+        <circle cx="14" cy="16" r="7" fill="#4299e1"/>
+        <!-- Highlight -->
+        <circle cx="11" cy="13" r="2.5" fill="rgba(255,255,255,0.25)"/>
+    </svg>`,
+
+    Sniper: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+        <!-- Crosshair rings -->
+        <circle cx="16" cy="16" r="10" stroke="#a0d8ef" stroke-width="1.5" fill="none"/>
+        <circle cx="16" cy="16" r="5" stroke="#a0d8ef" stroke-width="1.5" fill="none"/>
+        <!-- Cross hairs -->
+        <line x1="16" y1="4" x2="16" y2="28" stroke="#a0d8ef" stroke-width="1.5"/>
+        <line x1="4" y1="16" x2="28" y2="16" stroke="#a0d8ef" stroke-width="1.5"/>
+        <!-- Center dot -->
+        <circle cx="16" cy="16" r="2" fill="#fff"/>
+    </svg>`,
+
+    Bomb: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+        <!-- Bomb body -->
+        <circle cx="16" cy="18" r="9" fill="#ff4040"/>
+        <!-- Fuse cap -->
+        <rect x="14" y="7" width="5" height="4" rx="1" fill="#888"/>
+        <!-- Fuse wire -->
+        <path d="M16 7 Q22 4 24 2" stroke="#fca311" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Spark -->
+        <circle cx="24" cy="2" r="2.5" fill="#ffb703"/>
+        <!-- Shine -->
+        <circle cx="12" cy="14" r="2.5" fill="rgba(255,255,255,0.2)"/>
+    </svg>`,
+
+    Tesla: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+        <!-- Octagon base -->
+        <path d="M10 4 L22 4 L28 10 L28 22 L22 28 L10 28 L4 22 L4 10 Z" fill="#0059b3"/>
+        <!-- Core -->
+        <circle cx="16" cy="16" r="6" fill="#fff"/>
+        <!-- Electricity bolts -->
+        <path d="M16 10 L16 4 M16 22 L16 28 M10 16 L4 16 M22 16 L28 16" stroke="#00ffff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 12 L8 8 M20 20 L24 24 M12 20 L8 24 M20 12 L24 8" stroke="#00ffff" stroke-width="2" stroke-linecap="round"/>
+    </svg>`,
+
+    Prisma: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+        <!-- Triangle Base -->
+        <path d="M16 4 L28 26 L4 26 Z" fill="#b8860b" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1"/>
+        <!-- Floating central diamond crystal -->
+        <path d="M16 9 L21 16 L16 23 L11 16 Z" fill="#ffd700"/>
+        <path d="M16 9 L16 23" stroke="#ffffff" stroke-width="1"/>
+        <path d="M11 16 L21 16" stroke="#ffffff" stroke-width="0.5"/>
+        <!-- Glow accents -->
+        <circle cx="16" cy="16" r="3" fill="#ffffff" opacity="0.8"/>
+    </svg>`
+};

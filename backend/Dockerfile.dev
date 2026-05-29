@@ -1,0 +1,18 @@
+FROM node:24-bookworm-slim
+
+# Install chromium and dumb-init under root user
+RUN apt-get update && apt-get install -y \
+    chromium \
+    dumb-init \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /home/node/app
+
+# The node user has UID/GID 1000, aligning with default host environments
+USER node
+
+# Use dumb-init to supervise processes and reap zombies
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+CMD ["sh", "-c", "npm install && npm run dev"]

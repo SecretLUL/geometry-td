@@ -1,0 +1,672 @@
+/*
+ * @file: frontend\src\css\mobile.css
+ * @purpose: Styling and orientation lock modal for mobile users, making sure layouts fit small touch devices properly.
+ * @dependencies: CSS values
+ * 
+ * --- KI-INTEGRATIONS-DIREKTIVE ---
+ * Diese Datei unterliegt einer strikten Dokumentationspflicht.
+ * 1. Dieser Header ist ein integraler Bestandteil des Codes.
+ * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
+ *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
+ * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
+ * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
+ *    vordringliche Kontext-Information.
+ * ----------------------------------
+ * @last_update: 2026-05-21 / v1.5.0 - Added min-height constraint to bottom-controls and max-height scroll behavior to the mobile context shop to prevent clipping/cutoffs.
+ */
+/* ── Mobile Optimization & Orientation Lock ── */
+
+/* ── Orientation Lock Overlay ── */
+#orientation-lock {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 10, 26, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 10000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    padding: 30px;
+    font-family: 'Outfit', sans-serif;
+    border: 1px solid rgba(76, 201, 240, 0.1);
+}
+
+#orientation-lock .phone-icon {
+    width: 80px;
+    height: 140px;
+    border: 4px solid #4cc9f0;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    position: relative;
+    animation: rotate-phone 2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+#orientation-lock .phone-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background: #4cc9f0;
+    border-radius: 50%;
+}
+
+@keyframes rotate-phone {
+    0% { transform: rotate(0deg); }
+    40%, 100% { transform: rotate(-90deg); }
+}
+
+#orientation-lock h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #fff, #4cc9f0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#orientation-lock p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 300px;
+}
+
+/* Show lock only on mobile (small screens) in portrait */
+@media screen and (max-width: 1024px) and (orientation: portrait) and (pointer: coarse) {
+    #orientation-lock {
+        display: flex;
+    }
+}
+
+
+/* ── Mobile HUD Optimization (Landscape) ── */
+@media screen and (max-width: 950px) and (orientation: landscape) {
+    #game-hud {
+        top: 10px;
+        padding: 0 15px;
+        pointer-events: none;
+    }
+
+    #game-hud::before, #game-hud::after {
+        display: none; /* Hide decorative lines to save space */
+    }
+
+    .hud-group {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .hud-item {
+        min-height: auto;
+        height: 44px;
+        width: auto !important;
+        padding: 0 12px;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        background: rgba(22, 22, 50, 0.85);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .hud-item::before { display: none; }
+
+    .hud-item .hud-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hud-item .hud-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .hud-content {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 4px;
+    }
+
+    .hud-label {
+        display: none; /* Space saver */
+    }
+
+    .hud-value {
+        font-size: 1.1rem;
+    }
+
+    #interestPreview {
+        font-size: 0.8rem;
+        margin-left: 4px;
+    }
+
+    /* Wave Display specific tweak */
+    .hud-item.wave {
+        padding: 0 15px;
+    }
+    .hud-item.wave::before {
+        content: 'W:';
+        font-weight: 800;
+        color: var(--tesla-cyan);
+        font-size: 0.8rem;
+        margin-right: 2px;
+    }
+
+    /* UI Panel Toggle */
+    #mobile-ui-toggle {
+        display: flex !important;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        background: var(--tesla-cyan);
+        border-radius: 50%;
+        z-index: 1001;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
+        border: none;
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #mobile-ui-toggle.active {
+        transform: rotate(45deg);
+        background: #ff3366;
+        box-shadow: 0 0 20px rgba(255, 51, 102, 0.4);
+    }
+
+    #ui-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding-bottom: 100px; /* Space for toggle */
+    }
+
+    #ui-panel.mobile-open {
+        transform: translateX(0);
+    }
+
+    .bottom-controls {
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    /* Tower Buttons more compact */
+    .tower-btn {
+        padding: 6px;
+        gap: 6px;
+        font-size: 0.8rem;
+    }
+    .btn-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* Smaller Game Over Screen */
+    .game-over-content {
+        padding: 20px;
+        max-width: 90vw;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .stats-grid-container {
+        gap: 10px;
+    }
+}
+
+/* Hide toggle on desktop */
+#mobile-ui-toggle {
+    display: none;
+}
+
+/* ── Main Menu Scaling (index.html) ── */
+@media screen and (max-width: 950px) and (orientation: landscape) {
+    .portal-container {
+        height: 95vh !important;
+        max-width: 95vw !important;
+        border-radius: 12px !important;
+    }
+
+    .portal-header {
+        padding: 15px 25px 10px !important;
+        gap: 10px !important;
+    }
+
+    .portal-title {
+        font-size: 1.8rem !important;
+        letter-spacing: 6px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .portal-subtitle {
+        font-size: 0.7rem !important;
+        letter-spacing: 3px !important;
+    }
+
+    .portal-tabs {
+        gap: 20px !important;
+    }
+
+    .portal-tab {
+        font-size: 0.8rem !important;
+        padding: 5px 0 !important;
+    }
+
+    .portal-tab.active::after {
+        bottom: -11px !important;
+    }
+
+    .portal-body {
+        padding: 15px 25px !important;
+    }
+
+    .mission-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+        gap: 15px !important;
+    }
+
+    .mission-header {
+        height: 100px !important;
+        font-size: 3rem !important;
+    }
+
+    .mission-name {
+        font-size: 1.2rem !important;
+    }
+
+    .mission-stat-item {
+        font-size: 0.8rem !important;
+    }
+
+    /* Stats tab scaling */
+    .stats-hero {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 15px !important;
+    }
+
+    .stats-large-card {
+        padding: 15px !important;
+    }
+
+    .stats-large-card .value {
+        font-size: 2.5rem !important;
+    }
+
+    /* Lexicon scaling */
+    #tab-lexicon > div {
+        flex-direction: row !important;
+        gap: 15px !important;
+    }
+
+    #lexiconList {
+        flex: 0 0 200px !important;
+    }
+
+    #lexTitle {
+        font-size: 1.4rem !important;
+    }
+
+    #lexIcon {
+        width: 100px !important;
+        height: 100px !important;
+    }
+    
+    #lexiconCanvas {
+        width: 100px !important;
+        height: 100px !important;
+    }
+}
+
+
+/* ── Contextual Mobile Shop ── */
+#context-shop {
+    position: fixed;
+    z-index: 2000;
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(76, 201, 240, 0.3);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
+    min-width: 120px;
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
+    animation: context-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#context-shop.hidden {
+    display: none;
+}
+
+#context-shop.closing {
+    animation: context-pop-out 0.15s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+    pointer-events: none; /* Disable interaction while fading out */
+}
+
+@keyframes context-pop {
+    from { opacity: 0; transform: scale(0.8) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes context-pop-out {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.8) translateY(10px); }
+}
+
+
+.context-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.context-btn:active {
+    background: var(--tesla-cyan);
+    color: #000;
+    transform: scale(0.95);
+}
+
+.context-btn .cost {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fca311;
+}
+
+.context-btn.too-expensive {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.context-btn.cancel-btn {
+    background: rgba(255, 51, 102, 0.1) !important;
+    border-color: rgba(255, 51, 102, 0.3) !important;
+    color: #ff3366 !important;
+    justify-content: center !important;
+    margin-top: 5px !important;
+}
+
+.context-btn.cancel-btn:active {
+    background: #ff3366 !important;
+    color: #fff !important;
+    transform: scale(0.95) !important;
+}
+
+/* ── Compact & Elegant HUD for Narrow / Portrait Screens (e.g. Split-Screen) ── */
+@media screen and (max-width: 1200px), screen and (orientation: portrait) {
+    #game-hud {
+        top: 15px !important;
+        padding: 0 16px !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        pointer-events: none !important;
+    }
+
+    #game-hud::before,
+    #game-hud::after {
+        display: none !important; /* Hide decorative vertical lines */
+    }
+
+    .hud-group {
+        flex-direction: row !important;
+        gap: 10px !important;
+    }
+
+    .hud-group.left {
+        align-items: center !important;
+    }
+
+    .hud-group.right {
+        align-items: center !important;
+    }
+
+    .hud-item {
+        min-height: auto !important;
+        height: 42px !important;
+        width: auto !important;
+        padding: 0 16px !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        background: rgba(13, 13, 31, 0.75) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(16px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+        margin: 0 !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        pointer-events: auto !important; /* Enable hover states */
+    }
+
+    .hud-item:hover {
+        transform: translateY(-1px) !important;
+    }
+
+    /* Specific overrides for host indicator to match other capsules */
+    #hostIndicator {
+        min-height: auto !important;
+        height: 42px !important;
+        width: auto !important;
+        padding: 0 16px !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        border-radius: 24px !important;
+        background: rgba(13, 13, 31, 0.75) !important;
+        border: 1px solid rgba(76, 201, 240, 0.3) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(76, 201, 240, 0.05) !important;
+        backdrop-filter: blur(16px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+        margin: 0 !important;
+        pointer-events: auto !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    #hostIndicator:hover {
+        transform: translateY(-1px) !important;
+    }
+
+    .hud-item::before,
+    #hostIndicator::before {
+        display: none !important; /* Hide standard desktop linear gradient */
+    }
+
+    /* Left/Right capsule vertical accent lines */
+    .hud-item::after,
+    #hostIndicator::after {
+        display: none !important;
+    }
+
+    /* Unique Vector Glow effects for each capsule */
+    .hud-item.lives {
+        border-left: 2px solid #ff3366 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 51, 102, 0.15) !important;
+    }
+    .hud-item.lives:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 51, 102, 0.35) !important;
+    }
+
+    .hud-item.gold {
+        border-left: 2px solid #fca311 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(252, 163, 17, 0.15) !important;
+    }
+    .hud-item.gold:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(252, 163, 17, 0.35) !important;
+    }
+
+    .hud-item.wave {
+        border-left: 2px solid #00d4ff !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 212, 255, 0.15) !important;
+    }
+    .hud-item.wave:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 212, 255, 0.35) !important;
+    }
+
+    #hostIndicator {
+        border-left: 2px solid #4cc9f0 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(76, 201, 240, 0.15) !important;
+    }
+    #hostIndicator:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(76, 201, 240, 0.35) !important;
+    }
+
+    /* Layout structure inside capsules */
+    .hud-content {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+        width: auto !important;
+    }
+
+    .hud-label {
+        display: none !important; /* Hide large "LEBEN", "GOLD" labels */
+    }
+
+    .hud-value-container {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    .hud-value {
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.2) !important;
+    }
+
+    #hostIndicatorText {
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        line-height: 1 !important;
+    }
+
+    #interestPreview {
+        font-size: 0.85rem !important;
+        margin-left: 2px !important;
+    }
+
+    /* Wave Display specific W: prefix for context */
+    .hud-item.wave::before {
+        content: 'Welle:';
+        font-weight: 700;
+        color: #00d4ff;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-right: 2px;
+    }
+
+    /* Scrollable sidebar improvements - no floating overlay overlap */
+    .bottom-controls {
+        position: static !important;
+        width: 100% !important;
+        margin-top: 25px !important;
+        padding-bottom: 10px !important;
+    }
+    
+    #ui-panel {
+        padding-bottom: 30px !important;
+    }
+
+    /* ── Responsive adjustments for Alerts and Indicators on Smaller Screens ── */
+    #game-notifications {
+        bottom: 15px !important;
+        left: 15px !important;
+        top: auto !important;
+        transform: none !important;
+        max-width: 280px !important;
+        width: calc(100% - 30px) !important;
+        gap: 6px !important;
+    }
+    .game-alert {
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        gap: 2px !important;
+        width: 100% !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+    }
+    .alert-header {
+        font-size: 0.65rem !important;
+        gap: 4px !important;
+    }
+    .alert-title {
+        font-size: 0.85rem !important;
+        margin-bottom: 0px !important;
+    }
+    .alert-desc {
+        font-size: 0.75rem !important;
+        line-height: 1.3 !important;
+    }
+    .alert-meta {
+        font-size: 0.75rem !important;
+        gap: 8px !important;
+        margin-top: 2px !important;
+        padding-top: 4px !important;
+    }
+    
+    #cheatIndicator {
+        top: 70px !important;
+        padding: 6px 16px !important;
+        border-radius: 8px !important;
+    }
+    #cheatIndicatorText {
+        font-size: 0.8rem !important;
+        letter-spacing: 1px !important;
+    }
+}
+
+/* Keep buttons fixed at the bottom of the sidebar on desktop/tablet split-screen (width > 800px and height >= 550px) */
+@media screen and (min-width: 801px) and (min-height: 550px) {
+    .bottom-controls {
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        width: calc(var(--ui-panel-width) - 40px) !important;
+        margin-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+}
+

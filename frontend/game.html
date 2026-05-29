@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Tower Defense</title>
+    <link rel="icon" type="image/png" href="src/assets/favicon.png">
+    <meta name="description" content="Strategisches Tower-Defense-Spiel mit mehreren Kartenoptionen, verschiedenen Turm-Typen und endlosen Wellen.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/css/base.css">
+    <link rel="stylesheet" href="src/css/components.css">
+    <link rel="stylesheet" href="src/css/game.css">
+    <link rel="stylesheet" href="src/css/mobile.css">
+    <link rel="stylesheet" href="src/css/game-custom.css">
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+    <div id="fps-display" class="hidden" style="position: absolute; bottom: 20px; right: 20px; z-index: 9999; pointer-events: none; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: bold; color: #00ff88; text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);"></div>
+
+    <!-- ── Orientation Lock ────────────────────────────────────── -->
+    <div id="orientation-lock">
+        <div class="phone-icon"></div>
+        <h2>Querformat nötig</h2>
+        <p>Bitte drehe dein Gerät ins Querformat (Landscape), um die Schlacht zu beginnen!</p>
+    </div>
+    
+    <!-- ── Loading Screen ───────────────────────────────────────── -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <h1 class="loading-text">Loading...</h1>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p id="loader-status">Assets werden initialisiert...</p>
+        </div>
+    </div>
+
+
+
+    <!-- ── Hover Tooltip ───────────────────────────────────────── -->
+    <div id="tooltip" class="hidden"></div>
+    <div id="context-shop" class="hidden"></div>
+
+    <!-- ── Game Container ─────────────────────────────────────── -->
+    <div id="game-container">
+        <div id="canvas-wrapper" style="position: relative; line-height: 0; flex: 1; background: transparent; overflow: hidden;">
+        <!-- High-Tech Notification Center -->
+        <div id="game-notifications"></div>
+
+        <!-- Global Cheat Indicator -->
+        <div id="cheatIndicator" class="hidden">
+            <span id="cheatIndicatorText">
+                ⚠️ CHEATS AKTIV ⚠️
+            </span>
+        </div>
+
+        <!-- Benchmark Indicator -->
+        <div id="benchmarkIndicator" class="hidden">
+            <span>
+                ⚙️ BENCHMARK LÄUFT... ⚙️
+            </span>
+        </div>
+
+
+        <div id="game-hud">
+            <div class="hud-group left">
+                <div class="hud-item lives">
+                    <div class="hud-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff3366"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                    <div class="hud-content">
+                        <span class="hud-label">Leben</span>
+                        <span class="hud-value" id="livesDisplay">20</span>
+                    </div>
+                </div>
+                <div class="hud-item gold">
+                    <div class="hud-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fca311"><circle cx="12" cy="12" r="10" stroke="#fca311" stroke-width="2" fill="none"/><text x="12" y="16" text-anchor="middle" fill="#fca311" font-size="12" font-weight="bold" font-family="Arial">$</text></svg>
+                    </div>
+                    <div class="hud-content">
+                        <span class="hud-label">Gold</span>
+                        <div class="hud-value-container">
+                            <span class="hud-value" id="goldDisplay">100</span>
+                            <span id="interestPreview">+5g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-group right">
+                <div class="hud-item" id="hostIndicator" style="border: 1px solid rgba(76, 201, 240, 0.3); background: rgba(22, 22, 50, 0.75); border-radius: 10px; padding: clamp(10px, 2vh, 20px); display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8); min-height: 80px; width: clamp(140px, 18vw, 200px); backdrop-filter: blur(10px); position: relative; overflow: hidden;">
+                    <div style="content: ''; position: absolute; top: 0; left: 0; right: 0; height: 100%; background: linear-gradient(45deg, rgba(255, 255, 255, 0.03), transparent); pointer-events: none;"></div>
+                    <div class="hud-content" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <span class="hud-label" style="font-size: 0.85rem; color: #a8a8b3; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; line-height: 1;">Rolle</span>
+                            <span class="hud-value" id="hostIndicatorText" style="font-size: 1.5rem; font-weight: 800; color: #4cc9f0; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); line-height: 1;">👥 CLIENT</span>
+                        </div>
+                        <div id="networkStatus" title="Netzwerk: WebRTC (Direkt &amp; Schnell)" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(0, 255, 136, 0.1); border: 1.5px solid #00ff88; color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.2); transition: all 0.3s ease;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="2" fill="currentColor"></circle>
+                                <path d="M12 18v3"></path>
+                                <path d="M5 12a10 10 0 0 1 14 0"></path>
+                                <path d="M8.5 12a5 5 0 0 1 7 0"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="hud-item wave">
+                    <div class="hud-content">
+                        <span class="hud-label">Welle</span>
+                        <span class="hud-value" id="waveDisplay">1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="canvas-container" style="position: relative;">
+            <div id="pixi-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;"></div>
+            <canvas id="mapCanvas" style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+            <canvas id="gameCanvas" style="position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;"></canvas>
+        </div>
+
+        <!-- ── Boss HP Bar ────────────────────────────────────────── -->
+        <div id="bossHpContainer" class="hidden">
+            <div id="bossName">M U T T E R S C H I F F</div>
+            <div id="bossHpBar">
+                <div id="bossHpFill"></div>
+            </div>
+        </div>
+        </div>
+
+        <div id="ui-panel">
+            <div class="controls">
+                <p class="section-label">Türme</p>
+
+                <!-- Tower selection buttons with SVG icons -->
+                <div class="tower-select">
+                    <button id="selectBaseTower" class="tower-btn" data-type="Base">
+                        <span class="btn-icon"></span>
+                        <span class="btn-label">Base<br><small>50g</small></span>
+                    </button>
+                    <button id="selectSniperTower" class="tower-btn" data-type="Sniper">
+                        <span class="btn-icon"></span>
+                        <span class="btn-label">Sniper<br><small>200g</small></span>
+                    </button>
+                    <button id="selectBombTower" class="tower-btn" data-type="Bomb">
+                        <span class="btn-icon"></span>
+                        <span class="btn-label">Bomb<br><small>100g</small></span>
+                    </button>
+                    <button id="selectTeslaTower" class="tower-btn" data-type="Tesla">
+                        <span class="btn-icon"></span>
+                        <span class="btn-label">Tesla<br><small>150g</small></span>
+                    </button>
+                    <button id="selectPrismaTower" class="tower-btn" data-type="Prisma">
+                        <span class="btn-icon"></span>
+                        <span class="btn-label">Prisma<br><small>250g</small></span>
+                    </button>
+                </div>
+
+                <!-- Cancel placement -->
+                <button id="cancelPlacementBtn" class="cancel-btn hidden">
+                    <span style="font-size: 1.5em; margin-right: 8px; line-height: 0.8;">&times;</span> Abbrechen <kbd>ESC</kbd>
+                </button>
+
+
+                <!-- Game controls -->
+                <div class="button-group">
+                    <button id="startWaveBtn" class="primary-btn">Welle Starten</button>
+                    <button id="autoStartBtn" class="secondary-btn">Auto: Aus</button>
+                    <button id="pauseBtn">Pause</button>
+                    <button id="speedBtn">1x Speed</button>
+                </div>
+
+                <div class="bottom-controls">
+                    <button id="inGameSettingsBtn" class="quit-btn">Einstellungen</button>
+                    <button id="mainMenuBtn" class="quit-btn">Zurück zum Hauptmenü</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile UI Toggle Button -->
+        <button id="mobile-ui-toggle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </button>
+    </div>
+
+
+
+    <!-- ── Upgrade Modal ───────────────────────────────────────── -->
+    <div id="upgradeModal" class="overlay hidden">
+        <div class="menu-content" style="max-width: 650px; width: 90%; padding: 60px;">
+            <h2 style="font-size: 2.8em; margin-bottom: 25px;">Spezialisierung <small style="font-size: 0.5em; vertical-align: middle; opacity: 0.8;">(Level 5)</small></h2>
+            <p style="font-size: 1.4em; margin-bottom: 25px;">Wähle einen Upgrade-Pfad für <span id="upgradeTowerName" style="color: #4cc9f0; font-weight: bold;"></span>:</p>
+            <div class="upgrade-options" id="upgradeOptionsContainer" style="display:flex; flex-direction:column; gap:20px; margin-top:15px;">
+                <!-- Buttons injected via JS -->
+            </div>
+            <button id="cancelUpgradeBtn" style="margin-top:30px; background:#444; padding: 15px 30px; font-size: 1.1em;">Abbrechen</button>
+        </div>
+    </div>
+
+    <!-- ── Game Over Screen ────────────────────────────────────── -->
+    <div id="gameOverScreen" class="overlay hidden">
+        <div class="game-over-content">
+            <h2 class="glitch-red" data-text="GAME OVER">GAME OVER</h2>
+            
+            <div class="stats-grid-container">
+                <div class="stat-card">
+                    <span class="stat-card-label">Welle</span>
+                    <strong id="go-wave" class="stat-card-value">0</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-label">Rekord</span>
+                    <strong id="go-record" class="stat-card-value">0</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-card-label">Gold</span>
+                    <strong id="go-gold" class="stat-card-value">0</strong>
+                    <div style="font-size: 0.75em; color: #a8a8b3; margin-top: 6px; display: flex; flex-direction: column; gap: 2px; align-items: center; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
+                        <div>Zinsen: <strong id="go-gold-interest" style="color: #00ff88;">0</strong>g</div>
+                        <div>Sonstiges: <strong id="go-gold-rest" style="color: #4cc9f0;">0</strong>g</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="efficiency-section">
+                <h3>TURM-EFFIZIENZ</h3>
+                <div class="table-scroll">
+                    <table id="efficiencyTable" class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Typ</th>
+                                <th>Lvl</th>
+                                <th>Kosten</th>
+                                <th>Schaden</th>
+                            </tr>
+                        </thead>
+                        <tbody id="efficiencyTbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button id="restartBtn" class="hero-btn">NEU STARTEN</button>
+        </div>
+    </div>
+
+    <!-- ── Pause Modal Overlay ──────────────────────────────────────── -->
+    <div id="pauseOverlay" class="overlay hidden" style="background: rgba(10, 10, 26, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+        <div class="menu-content" style="max-width: 550px; background: linear-gradient(135deg, rgba(22, 33, 62, 0.8) 0%, rgba(13, 27, 62, 0.8) 100%); border: 2px solid #ffb703; box-shadow: 0 0 50px rgba(255, 183, 3, 0.35), inset 0 0 20px rgba(255, 183, 3, 0.1); border-radius: 24px; backdrop-filter: blur(20px); text-align: center; padding: 45px 50px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 25px;">
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: rgba(255, 183, 3, 0.1); border: 2px solid #ffb703; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255, 183, 3, 0.2); animation: pulse-orange-glow 2s infinite alternate;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffb703" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="6" y="4" width="4" height="16" fill="#ffb703" />
+                        <rect x="14" y="4" width="4" height="16" fill="#ffb703" />
+                    </svg>
+                </div>
+                <h1 style="color: #ffb703; font-size: 2.4em; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 15px rgba(255, 183, 3, 0.4); margin: 10px 0 0 0; font-family: 'Outfit', sans-serif;">Spiel Pausiert</h1>
+                <p id="pauseTipText" style="color: #a8a8b3; font-size: 1.05em; font-style: italic; max-width: 400px; line-height: 1.6; margin: 12px 0 0 0;">„Prismalaser laden ihren Schaden über Zeit auf. Perfekt gegen dicke Bosse!“</p>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; margin-top: 10px;">
+                <button id="resumeGameBtn" class="primary-btn" style="background: linear-gradient(135deg, #ffb703 0%, #fb8500 100%); color: #0d0d1f; border: none; font-size: 1.25em; font-weight: 800; padding: 18px 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(255, 183, 3, 0.35); text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease;">
+                    Weiter Spielen
+                </button>
+                <div style="display: flex; gap: 15px; width: 100%;">
+                    <button id="pauseSettingsBtn" class="secondary-btn" style="flex: 1; padding: 14px 20px; font-weight: 700; border-radius: 10px; border: 1px solid rgba(76, 201, 240, 0.3); color: #4cc9f0; background: rgba(76, 201, 240, 0.05); display: flex; align-items: center; justify-content: center;">
+                        Einstellungen
+                    </button>
+                    <button id="pauseQuitBtn" class="secondary-btn" style="flex: 1; padding: 14px 20px; font-weight: 700; border-radius: 10px; border: 1px solid rgba(255, 51, 102, 0.3); color: #ff3366; background: rgba(255, 51, 102, 0.05); display: flex; align-items: center; justify-content: center;">
+                        Hauptmenü
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Quit Confirmation Modal ────────────────────────────────────── -->
+    <div id="quitConfirmModal" class="overlay hidden">
+        <div class="menu-content" style="max-width: 500px;">
+            <h2>Spiel beenden?</h2>
+            <p style="margin-bottom: 30px; font-size: 1.1em; color: #ccc;">Dein aktueller Fortschritt in dieser Welle geht verloren. Möchtest du wirklich zum Hauptmenü zurückkehren?</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button id="confirmQuitBtn" class="primary-btn" style="padding: 15px 30px;">Ja, Beenden</button>
+                <button id="cancelQuitBtn" style="padding: 15px 30px; background: #333;">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── In-Game Settings Modal ────────────────────────────────────── -->
+    <div id="inGameSettingsModal" class="overlay hidden" style="background: rgba(10, 10, 26, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+        <div class="settings-modal-content">
+            <div class="settings-header">
+                <div class="settings-header-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </div>
+                <h2>Einstellungen</h2>
+            </div>
+            
+            <div class="settings-list">
+                <!-- Sound Volume Slider Card -->
+                <div class="settings-card">
+                    <div class="settings-info">
+                        <div class="settings-label-container">
+                            <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                            <label for="igSoundVolume">Sound-Lautstärke</label>
+                        </div>
+                        <span class="settings-desc">Effekte, Schüsse und Explosionen</span>
+                    </div>
+                    <div class="settings-control">
+                        <input type="range" id="igSoundVolume" class="ig-range-slider" min="0" max="100" value="50">
+                    </div>
+                </div>
+
+                <!-- Music Volume Slider Card -->
+                <div class="settings-card">
+                    <div class="settings-info">
+                        <div class="settings-label-container">
+                            <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                            <label for="igMusicVolume">Musik-Lautstärke</label>
+                        </div>
+                        <span class="settings-desc">Hintergrund-Synthwave-Tracks</span>
+                    </div>
+                    <div class="settings-control">
+                        <input type="range" id="igMusicVolume" class="ig-range-slider" min="0" max="100" value="50">
+                    </div>
+                </div>
+
+                <!-- Performance Mode Toggle Switch Card -->
+                <div class="settings-card">
+                    <div class="settings-info">
+                        <div class="settings-label-container">
+                            <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                            <label for="igPerfModeToggle">Performance-Modus</label>
+                        </div>
+                        <span class="settings-desc">Deaktiviert VFX-Partikel für maximale FPS</span>
+                    </div>
+                    <div class="settings-control">
+                        <label class="ig-switch">
+                            <input type="checkbox" id="igPerfModeToggle">
+                            <span class="ig-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- FPS Display Toggle Switch Card -->
+                <div class="settings-card">
+                    <div class="settings-info">
+                        <div class="settings-label-container">
+                            <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+                            <label for="igFpsToggle">FPS-Anzeige</label>
+                        </div>
+                        <span class="settings-desc">Blendet die FPS-Anzeige in der Spielecke ein</span>
+                    </div>
+                    <div class="settings-control">
+                        <label class="ig-switch">
+                            <input type="checkbox" id="igFpsToggle">
+                            <span class="ig-switch-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Refresh Rate Select Dropdown Card -->
+                <div class="settings-card">
+                    <div class="settings-info">
+                        <div class="settings-label-container">
+                            <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            <label for="igRefreshRateSelect">Bildwiederholrate</label>
+                        </div>
+                        <span class="settings-desc">Passt die Spielphysik an deinen Monitor an</span>
+                    </div>
+                    <div class="settings-control">
+                        <select id="igRefreshRateSelect" class="ig-select">
+                            <option value="60">60 Hz (Standard)</option>
+                            <option value="90">90 Hz</option>
+                            <option value="120">120 Hz</option>
+                            <option value="144">144 Hz</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="closeSettingsBtn" class="ig-close-btn">Schließen</button>
+        </div>
+    </div>
+
+    <!-- ── Mod Menu ────────────────────────────────────────────────────────── -->
+    <div id="modMenu" class="mod-menu-window hidden">
+        <div class="mod-menu-header" id="modMenuHeader">
+            <h2 style="color: #ffb703; text-shadow: 0 0 15px rgba(255, 183, 3, 0.5); margin: 0; font-size: 1.4em;">Mod Menü (Cheat)</h2>
+            <button id="modCloseBtnSmall" class="close-x">&times;</button>
+        </div>
+        <div class="mod-menu-body">
+            <div class="mod-buttons" style="display: flex; flex-direction: column; gap: 12px;">
+                <button id="modGoldBtn" class="secondary-btn" style="width: 100%;">Infinite Gold: AUS</button>
+                <button id="modLifeBtn" class="secondary-btn" style="width: 100%;">God Mode: AUS</button>
+                <button id="modWinBtn" class="secondary-btn" style="width: 100%;">Welle sofort beenden</button>
+                <button id="modLoseBtn" class="secondary-btn" style="width: 100%; color: #ff3366; border-color: rgba(255, 51, 102, 0.3);">Game Over simulieren</button>
+                
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="number" id="modWaveInput" value="1" min="1" style="width: 80px; background: rgba(0,0,0,0.3); border: 1px solid #4cc9f0; color: #fff; border-radius: 8px; padding: 10px; font-size: 1.1em; outline: none;">
+                    <button id="modSetWaveBtn" class="primary-btn" style="flex: 1; white-space: nowrap;">Welle setzen</button>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <button id="modStartBenchmarkBtn" class="primary-btn" style="flex: 1; background: linear-gradient(to bottom, #9b5de5, #f15bb5); border-color: rgba(155, 93, 229, 0.4); text-shadow: 0 0 10px rgba(155, 93, 229, 0.5);">Benchmark Starten</button>
+                    <button id="modUndoBenchmarkBtn" class="secondary-btn" style="flex: 1; color: #ff9f1c; border-color: rgba(255, 159, 28, 0.3);">Benchmark Rückgängig</button>
+                </div>
+            </div>
+            <button id="modCloseBtn" style="margin-top: 20px; background: #333; width: 100%;">Schließen</button>
+        </div>
+    </div>
+	
+	<script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="src/js/core/game.ts"></script>
+</body>
+</html>

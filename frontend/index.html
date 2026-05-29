@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometry Tower Defense - Entry Portal</title>
+    <link rel="icon" type="image/png" href="src/assets/favicon.png">
+    <meta name="description" content="Kommandozentrale für TrueTowerDefense. Wähle deine Mission und starte die Simulation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/css/base.css">
+    <link rel="stylesheet" href="src/css/components.css">
+    <link rel="stylesheet" href="src/css/menu.css">
+    <link rel="stylesheet" href="src/css/mobile.css">
+    <link rel="stylesheet" href="src/css/index-custom.css">
+</head>
+<body class="menu-page">
+
+    <canvas id="bgCanvas"></canvas>
+    <div id="fps-display" class="hidden" style="position: absolute; top: 20px; left: 20px; z-index: 9999; pointer-events: none; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: bold; color: #00ff88; text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);"></div>
+
+    <!-- ── Orientation Lock ────────────────────────────────────── -->
+    <div id="orientation-lock">
+        <div class="phone-icon"></div>
+        <h2>Querformat nötig</h2>
+        <p>Bitte drehe dein Gerät ins Querformat (Landscape), um die Simulation zu betreten!</p>
+    </div>
+
+    <div class="menu-layout-wrapper">
+        <div class="portal-container">
+            <header class="portal-header">
+                <div class="title-block">
+                    <h1 class="portal-title" data-text="Geometry Tower Defense">Geometry Tower Defense</h1>
+                    <div class="portal-subtitle">Advanced Combat Simulation</div>
+                </div>
+                <nav class="portal-tabs">
+                    <button class="portal-tab active" data-tab="maps">Maps</button>
+                    <button class="portal-tab" data-tab="lexicon">Database</button>
+                    <button class="portal-tab" data-tab="settings">Einstellungen</button>
+                </nav>
+            </header>
+
+            <main class="portal-body">
+                
+                <!-- Maps Tab -->
+                <div id="tab-maps" class="tab-content-wrapper">
+                    <div class="mission-grid">
+                        <!-- Spiral Map -->
+                        <div class="mission-card" data-map="The Spiral">
+                            <div class="mission-header" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+                                <span style="filter: drop-shadow(0 0 15px var(--tesla-cyan));">🌀</span>
+                            </div>
+                            <div class="mission-content">
+                                <div class="mission-name">
+                                    <span>THE SPIRAL <span class="mission-player-count" data-map="The Spiral" style="font-size: 0.6em; color: var(--tesla-cyan); margin-left: 10px; background: rgba(76,201,240,0.1); padding: 2px 6px; border-radius: 4px; vertical-align: middle;">0/4</span></span>
+                                    <div class="difficulty-dots">
+                                        <div class="dot active easy"></div>
+                                        <div class="dot active med"></div>
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                    </div>
+                                </div>
+                                <div class="mission-stats">
+                                    <div class="mission-stat-item">
+                                        <span class="mission-stat-label">Pfad-Länge</span>
+                                        <span class="mission-stat-value">Extrem Lang</span>
+                                    </div>
+                                    <div class="mission-stat-item">
+                                        <span class="mission-stat-label">Schwierigkeit</span>
+                                        <span class="mission-stat-value" style="color: #ffcc00;">Medium</span>
+                                    </div>
+                                </div>
+                                <button class="mission-btn glitch-hover">START SIMULATION</button>
+                            </div>
+                        </div>
+
+                        <!-- Quantum Bypass Map -->
+                        <div class="mission-card" data-map="Quantum Bypass">
+                            <div class="mission-header" style="background: linear-gradient(135deg, #0f0c29, #00f2fe, #24243e);">
+                                <span style="filter: drop-shadow(0 0 15px var(--tesla-cyan));">⚛️</span>
+                            </div>
+                            <div class="mission-content">
+                                <div class="mission-name">
+                                    <span>QUANTUM BYPASS <span class="mission-player-count" data-map="Quantum Bypass" style="font-size: 0.6em; color: var(--tesla-cyan); margin-left: 10px; background: rgba(76,201,240,0.1); padding: 2px 6px; border-radius: 4px; vertical-align: middle;">0/4</span></span>
+                                    <div class="difficulty-dots">
+                                        <div class="dot active easy"></div>
+                                        <div class="dot active med"></div>
+                                        <div class="dot active med"></div>
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                    </div>
+                                </div>
+                                <div class="mission-stats">
+                                    <div class="mission-stat-item">
+                                        <span class="mission-stat-label">Pfad-Länge</span>
+                                        <span class="mission-stat-value">Mittellang</span>
+                                    </div>
+                                    <div class="mission-stat-item">
+                                        <span class="mission-stat-label">Schwierigkeit</span>
+                                        <span class="mission-stat-value" style="color: #ffcc00;">Medium+</span>
+                                    </div>
+                                </div>
+                                <button class="mission-btn glitch-hover">START SIMULATION</button>
+                            </div>
+                        </div>
+
+                        <!-- ZigZag Map -->
+                        <div class="mission-card" data-map="The ZigZag">
+                            <div class="mission-header" style="background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);">
+                                <span style="filter: drop-shadow(0 0 15px var(--bomb-red));">⚡</span>
+                            </div>
+                            <div class="mission-content">
+                                <div class="mission-name">
+                                    <span>THE ZIGZAG <span class="mission-player-count" data-map="The ZigZag" style="font-size: 0.6em; color: var(--tesla-cyan); margin-left: 10px; background: rgba(76,201,240,0.1); padding: 2px 6px; border-radius: 4px; vertical-align: middle;">0/4</span></span>
+                                    <div class="difficulty-dots">
+                                        <div class="dot active easy"></div>
+                                        <div class="dot active med"></div>
+                                        <div class="dot active hard"></div>
+                                        <div class="dot active hard"></div>
+                                        <div class="dot"></div>
+                                    </div>
+                                </div>
+                                <div class="mission-stats">
+                                    <div class="mission-stat-item">
+                                        <span class="mission-stat-label">Pfad-Länge</span>
+                                        <span class="mission-stat-value">Kompakt</span>
+                                    </div>
+                                    <div class="mission-stat-item">
+                                        <span class="mission-stat-label">Schwierigkeit</span>
+                                        <span class="mission-stat-value" style="color: #ff3366;">Schwer</span>
+                                    </div>
+                                </div>
+                                <button class="mission-btn glitch-hover">START SIMULATION</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lexicon Tab (Reusing existing logic/structure) -->
+                <div id="tab-lexicon" class="tab-content-wrapper hidden">
+                    <div style="display: flex; gap: 30px; height: 100%; overflow: hidden;">
+                        <div style="flex: 0 0 350px; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 20px; overflow-y: auto; height: 100%;" id="lexiconList">
+                            <!-- Injected -->
+                        </div>
+                        <div style="flex: 1; padding-left: 10px; display: none; flex-direction: column; height: 100%; overflow-y: auto;" id="lexiconDetails">
+                            <h2 id="lexTitle" style="font-size: 2.2rem; margin: 0 0 10px 0; letter-spacing: 4px; text-transform: uppercase;"></h2>
+                            <div style="display: flex; gap: 40px; margin-bottom: 15px;">
+                                <div id="lexIcon" style="width: 180px; height: 180px; background: rgba(0,0,0,0.4); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.5); flex-shrink: 0;">
+                                    <canvas id="lexiconCanvas" width="180" height="180"></canvas>
+                                </div>
+                                <div style="flex: 1;">
+                                    <p id="lexDescription" style="font-size: 1rem; color: #a8a8b3; line-height: 1.5; margin-bottom: 15px;"></p>
+                                    <div class="stat-grid">
+                                        <div class="stat-row">
+                                            <strong>HP</strong>
+                                            <div class="stat-bar-container"><div class="stat-bar-fill" id="lexHpBar"></div></div>
+                                        </div>
+                                        <div class="stat-row">
+                                            <strong>Speed</strong>
+                                            <div class="stat-bar-container"><div class="stat-bar-fill" id="lexSpeedBar"></div></div>
+                                        </div>
+                                        <div class="stat-row">
+                                            <strong>Reward</strong>
+                                            <div class="stat-bar-container"><div class="stat-bar-fill" id="lexRewardBar"></div></div>
+                                        </div>
+                                        <div class="stat-row" style="margin-top: 10px;">
+                                            <strong>Danger</strong>
+                                            <span id="lexDifficultyStars" style="color: var(--gold); letter-spacing: 5px; font-size: 1.2rem;"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 40px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="flex: 1;">
+                                    <div style="color: var(--tesla-cyan); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">Abilities</div>
+                                    <div id="lexAbility" style="color: #fff; font-weight: 600;"></div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="color: var(--bomb-red); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">Tactical Weakness</div>
+                                    <div id="lexWeakness" style="color: #fff; font-weight: 600;"></div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="color: var(--gold); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">First Detection</div>
+                                    <div id="lexMinWave" style="color: #fff; font-weight: 600;"></div>
+                                </div>
+                            </div>
+                            <p id="lexFlavor" style="margin-top: 25px; font-style: italic; color: #aaa; border-left: 3px solid rgba(76, 201, 240, 0.4); padding-left: 15px; padding-bottom: 25px; line-height: 1.6;"></p>
+                        </div>
+                        <div id="lexiconPlaceholder" style="flex: 1; display: flex; align-items: center; justify-content: center; color: #444; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 4px;">
+                            Select Entity to Analyze
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="tab-settings" class="tab-content-wrapper hidden">
+                    <div class="settings-list" style="max-width: 650px; margin: 0 auto;">
+
+                        <!-- Sound Volume -->
+                        <div class="settings-card">
+                            <div class="settings-info">
+                                <div class="settings-label-container">
+                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                    <label for="soundVolume">Sound-Lautstärke</label>
+                                </div>
+                                <span class="settings-desc">Effekte, Schüsse und Explosionen</span>
+                            </div>
+                            <div class="settings-control">
+                                <input type="range" id="soundVolume" class="ig-range-slider" min="0" max="100" value="50">
+                            </div>
+                        </div>
+
+                        <!-- Music Volume -->
+                        <div class="settings-card">
+                            <div class="settings-info">
+                                <div class="settings-label-container">
+                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                                    <label for="musicVolume">Musik-Lautstärke</label>
+                                </div>
+                                <span class="settings-desc">Hintergrund-Synthwave-Tracks</span>
+                            </div>
+                            <div class="settings-control">
+                                <input type="range" id="musicVolume" class="ig-range-slider" min="0" max="100" value="50">
+                            </div>
+                        </div>
+
+                        <!-- Performance Mode -->
+                        <div class="settings-card">
+                            <div class="settings-info">
+                                <div class="settings-label-container">
+                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                                    <label for="perfModeToggle">Performance-Modus</label>
+                                </div>
+                                <span class="settings-desc">Reduziert auf 30 FPS für niedrigen Energieverbrauch</span>
+                            </div>
+                            <div class="settings-control">
+                                <label class="ig-switch">
+                                    <input type="checkbox" id="perfModeToggle">
+                                    <span class="ig-switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- FPS Display -->
+                        <div class="settings-card">
+                            <div class="settings-info">
+                                <div class="settings-label-container">
+                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+                                    <label for="fpsToggle">FPS-Anzeige</label>
+                                </div>
+                                <span class="settings-desc">Blendet die FPS-Anzeige in der Menüecke ein</span>
+                            </div>
+                            <div class="settings-control">
+                                <label class="ig-switch">
+                                    <input type="checkbox" id="fpsToggle">
+                                    <span class="ig-switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Refresh Rate -->
+                        <div class="settings-card">
+                            <div class="settings-info">
+                                <div class="settings-label-container">
+                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                    <label for="refreshRateSelect">Bildwiederholrate</label>
+                                </div>
+                                <span class="settings-desc">Passt die Spielphysik an deinen Monitor an</span>
+                            </div>
+                            <div class="settings-control">
+                                <select id="refreshRateSelect" class="ig-select">
+                                    <option value="60">60 Hz (Standard)</option>
+                                    <option value="90">90 Hz</option>
+                                    <option value="120">120 Hz</option>
+                                    <option value="144">144 Hz</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- Einklappbarer Changelog Container -->
+        <div id="changelog-panel" class="changelog-container collapsed">
+            <!-- Angedockter Toggle Button für das Changelog -->
+            <button id="changelog-toggle" class="changelog-toggle-btn" title="Changelog ein-/ausblenden">
+                <span id="changelog-pulse" class="pulse-dot hidden"></span>
+                <span class="toggle-text">CHANGELOG</span>
+                <span class="toggle-icon">◀</span>
+            </button>
+            <div class="changelog-header">
+                <div class="changelog-title-block">
+                    <h3>SYSTEM LOG</h3>
+                    <span class="changelog-status"><span class="pulse-green"></span> SEC-ONLINE</span>
+                </div>
+                <p class="changelog-desc">Chronologische Aufzeichnung aller Simulationstransfers aus der DEV-Umgebung.</p>
+            </div>
+            
+            <div id="changelog-list" class="changelog-list-content">
+                <div class="changelog-loading">Lade Simulationstransfers...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="src/js/ui/menu.ts"></script>
+</body>
+</html>

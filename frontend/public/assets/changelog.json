@@ -1,0 +1,222 @@
+[
+  {
+    "isComment": true,
+    "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
+  },
+  {
+    "version": "v2.3.0",
+    "date": "28. Mai 2026",
+    "status": "active",
+    "changes": [
+      { "type": "fix", "desc": "Z-Index-Reihenfolge korrigiert: Weg-Animationen und Spawnpunkte liegen nun sauber unter den Feinden und Türmen." }
+    ]
+  },
+  {
+    "version": "v2.4.0",
+    "date": "29. Mai 2026",
+    "status": "active",
+    "changes": [
+      { "type": "fix", "desc": "Verzögerung bei Client-Upgrades durch optimistic UI und Entfernung des Server-Rate-Limitings behoben." },
+      { "type": "fix", "desc": "Spezialisierungsauswahl wird nun bei allen Türmen für Clients korrekt getriggert." },
+      { "type": "fix", "desc": "Upgrades auf Level 20 von spezialisierten Türmen werden nun korrekt auf dem Client registriert." },
+      { "type": "fix", "desc": "Koop-Synchronisation: Fehler bei Turm-Level, visuellen Upgrades und Level-10-Spezialisierungen für Clients behoben." },
+      { "type": "fix", "desc": "Koop-Synchronisation: Level-Offset bei spezialisierten Türmen für beitretende Clients behoben." },
+      { "type": "fix", "desc": "Nuke-Strahlungszone: Überlappende Bereiche verschmelzen nun performant und nutzen ein dezentes transparentes Design." },
+      { "type": "fix", "desc": "Benchmark-System korrigiert: Spawnt jetzt Level-20-Türme und entfernt PixiJS-Sprites beim Zurücksetzen." },
+      { "type": "perf", "desc": "Canvas 2D Rendering Engine vollständig entfernt und durch reines PixiJS WebGL-Rendering ersetzt." },
+      { "type": "perf", "desc": "UI und Menü (inkl. Lexikon) auf PixiJS Applikationen portiert." },
+      { "type": "fix", "desc": "Absturz bei clampCamera vor vollständiger PixiJS-Initialisierung behoben." },
+      { "type": "fix", "desc": "Interaktions-Blockade behoben: Pointer-Events direkt an den PixiJS-Canvas weitergeleitet." },
+      { "type": "fix", "desc": "Koop-Synchronisation: Turm-Level für spät beitretende (Late-Joiner) Clients bei der Initialisierung korrigiert." },
+      { "type": "fix", "desc": "Visuelle Effekte beim Turm-Upgrade erscheinen nun nur noch für den aktiven Spieler und nicht mehr doppelt." },
+      { "type": "fix", "desc": "Gegner waren auf Client-Seite unsichtbar: updatePixi() wird nun nach jeder Interpolationsrunde aufgerufen." },
+      { "type": "fix", "desc": "Swarm-Gegner war auf dem Host unsichtbar: SwarmEnemy.update() ruft jetzt wie BaseEnemy korrekt updatePixi() auf." },
+      { "type": "fix", "desc": "Gepoolte Gegner waren nach Wiederverwendung unsichtbar: getPooledEnemy() ruft jetzt initPixi() auf, um den Sprite wieder sichtbar zu machen." },
+      { "type": "fix", "desc": "Boss-HP-Anzeige durch Beheben eines Layout-Clippings nach der WebGL-Migration reaktiviert." }
+    ]
+  },
+  {
+    "version": "v2.3.0",
+    "date": "28. Mai 2026",
+    "status": "active",
+    "changes": [
+      { "type": "fix", "desc": "Unsichtbarkeit von Tesla- und Sniper-Türmen durch Korrektur der update-Overrides und draw-part-Unterstützung gelöst." },
+      { "type": "fix", "desc": "Prisma-Laserstrahlen auf dem 2D-Overlay reaktiviert und Host-Recoil-Decay implementiert." },
+      { "type": "fix", "desc": "Unsichtbarkeit aller Spezialtürme durch PIXI-Rebake im Subklassen-Konstruktor behoben." },
+      { "type": "fix", "desc": "Bauen-Texturen-Update und Skalierungs-Animationen im Game-Loop korrigiert." },
+      { "type": "fix", "desc": "Weg-Animationen nativ nach WebGL migriert, Photonentempo beruhigt und Basis-Schild-Segment korrigiert." },
+      { "type": "fix", "desc": "Race Condition behoben: PoolManager.init() läuft jetzt nach initPixi(), sodass alle Pool-Objekte GPU-Sprites erhalten." },
+      { "type": "fix", "desc": "WebGL Context Lost behoben: PixiJS erhält beim Init korrekte Canvas-Dimensionen (kein 0x0-Kontext mehr)." },
+      { "type": "fix", "desc": "Gegner-Sprites bleiben nach Erreichen der Base nicht mehr sichtbar (pixiSprite.visible = false bei Entfernung)." },
+      { "type": "fix", "desc": "Client-Türme werden nun korrekt gerendert: tower.updatePixi() im Client-Update-Loop ergänzt." },
+      { "type": "fix", "desc": "WebGL-Warnung 'Alpha-premult and y-flip deprecated' durch app.renderer.generateTexture() statt PIXI.Texture.from(canvas) behoben." },
+      { "type": "fix", "desc": "WebGL Context Restoration Handler hinzugefügt." },
+      { "type": "fix", "desc": "Construction- und Stun-Animationen für Client-Türme repariert." },
+      { "type": "fix", "desc": "TypeError in clampCamera durch sicheren Zugriff auf app.canvas behoben." },
+      { "type": "fix", "desc": "Fehlende Canvas-Anzeige und Interaktion behoben: Canvas-Instanzen an echte DOM-Elemente statt an Offscreen-Fragmente gebunden." },
+      { "type": "fix", "desc": "Unsichtbarkeit der platzierten Türme behoben: draw() nutzt nun die lokalen Koordinaten beim Texturen-Baking statt globaler Koordinaten." },
+      { "type": "fix", "desc": "Einfrieren von Projektilen behoben: update() führt nun die PixiJS-Render-Updates auch für inaktive Instanzen aus, damit Flugbahnen verblassen." },
+      { "type": "fix", "desc": "Z-Index-Reihenfolge korrigiert: Weg-Animationen und Spawnpunkte liegen nun sauber unter den Feinden und Türmen." },
+      { "type": "security", "desc": "Inline-CSS aus index.html und game.html in separate Dateien extrahiert." },
+      { "type": "security", "desc": "Rate-Limiting im Backend integriert, um Socket-Spamming und DoS-Angriffe zu blockieren." },
+      { "type": "perf", "desc": "Backend-Dev Container mit harten Memory- und CPU-Limits ausgestattet, um Host-OOMs zu verhindern." },
+      { "type": "perf", "desc": "Nginx-Caching und Gzip-Kompression für alle statischen Frontend-Assets aktiviert." },
+      { "type": "feature", "desc": "Optionaler TURN-Server Fallback für WebRTC hinter restriktiven Firewalls vorbereitet." },
+      { "type": "fix", "desc": "Globale window.onerror und unhandledrejection Handler hinzugefügt, um Browser-Crashes sauber abzufangen." },
+      { "type": "fix", "desc": "Zod-Validierungsfehler auf dem Server behoben, der den Turm-Bau, Upgrades und Verkauf für Koop-Clients blockierte." },
+      { "type": "fix", "desc": "Positionierungsfehler von vorhergesagten Client-Türmen in der linken oberen Ecke behoben." },
+      { "type": "perf", "desc": "Layered Multi-Canvas-Rendering für statische Kartenhintergründe implementiert." },
+      { "type": "perf", "desc": "Sichtbarkeitsprüfung (View Culling) für alle Türme, Feinde und Partikel hinzugefügt." },
+      { "type": "perf", "desc": "Ganzzahliges Koordinaten-Rendering (Integer Snap) zur Umgehung von CPU-Anti-Aliasing eingeführt." },
+      { "type": "perf", "desc": "Spatial-Hashing-Grid zur Vermeidung von Speicherallokationen im Game-Loop vorinitialisiert." },
+      { "type": "fix", "desc": "Einfrieren von Karten-Animationen durch Verlagerung auf den dynamischen Canvas behoben." }
+    ]
+  },
+  {
+    "version": "v2.1.0",
+    "date": "28. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "perf", "desc": "Circular Buffer (Ringpuffer) für hocheffiziente Multiplayer-Interpolation eingeführt." },
+      { "type": "feature", "desc": "STUN/ICE-Server-Konfiguration dynamisiert und vom Backend an Clients übertragen." },
+      { "type": "perf", "desc": "Puppeteer-Konsolenlogs im Backend gefiltert, um I/O-Flaschenhälse zu eliminieren." },
+      { "type": "refactor", "desc": "Zentrale Spielgeschwindigkeiten in Config.ts ausgelagert, um Magic Numbers zu vermeiden." },
+      { "type": "feature", "desc": "Visuelle Antennen-Anzeige für Netzwerk-Degradierung bei WebRTC-Ausfall hinzugefügt." }
+    ]
+  },
+  {
+    "version": "v2.0.0",
+    "date": "28. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "fix", "desc": "Synchrones, zustandsbasiertes Locking für join_mission zur Vermeidung von Race Conditions implementiert." },
+      { "type": "fix", "desc": "Intensive any-Nutzung in inbound.ts, outbound.ts, context.ts, types.ts und server.ts durch präzise Interfaces ersetzt." },
+      { "type": "fix", "desc": "Robusteres Lifecycle-Management für Headless-Browser mit Timeouts, Race-Condition-Schutz und periodischen Health-Checks implementiert." },
+      { "type": "security", "desc": "Strikte Schema-Validierung (Zod) im Backend für alle WebSocket-Ereignisse eingeführt." },
+      { "type": "security", "desc": "Puppeteer-Sandbox reaktiviert und unprivilegierten Container-User eingeführt." },
+      { "type": "perf", "desc": "DOM-Caching im Game Loop: getElementById-Aufrufe aus dem Hot-Path entfernt (60–144× pro Sekunde)." },
+      { "type": "perf", "desc": "Boss-HP-Bar: Bis zu 10 DOM-Traversals pro Frame durch gecachte Referenzen ersetzt." },
+      { "type": "perf", "desc": "FPS-Anzeige im Hauptmenü: Zweite requestAnimationFrame-Schleife (fpsLoop) eliminiert." },
+      { "type": "perf", "desc": "FPS-Anzeige: getElementById und localStorage-Zugriff auf einmalige Initialisierung reduziert." },
+      { "type": "fix", "desc": "Zwei tote const-limit-Variablen in fx.ts entfernt." },
+      { "type": "fix", "desc": "Vergessene [DEBUG 1/2/3]-console.log-Aufrufe beim Tower-Bau entfernt." },
+      { "type": "fix", "desc": "20 informationelle console.log-Aufrufe in WebRTC und Multiplayer entfernt." },
+      { "type": "fix", "desc": "Doppelten Datei-Header in config.ts bereinigt." }
+    ]
+  },
+  {
+    "version": "v1.9.2",
+    "date": "27. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "fix", "desc": "Laser-Sweeper im Hauptmenü laufen nun framerate-unabhängig mit konstanter Geschwindigkeit." },
+      { "type": "fix", "desc": "Performance-Modus senkt die FPS des Hauptmenüs korrekt auf 30 (statt wie zuvor zu erhöhen)." },
+      { "type": "feature", "desc": "System-Tab im Hauptmenü im Premium-Card-Design neu gestaltet (identisch mit In-Game-Einstellungen)." },
+      { "type": "feature", "desc": "Tab 'Missions' in 'Maps' umbenannt." },
+      { "type": "feature", "desc": "Tab 'System' in 'Einstellungen' umbenannt." },
+      { "type": "feature", "desc": "Tab 'Intel' (Statistiken) aus dem Hauptmenü entfernt." }
+    ]
+  },
+  {
+    "version": "v1.9.1",
+    "date": "27. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "feature", "desc": "In-Game Einstellungsmenü vergrößert und im edlen Glassmorphismus-Design neu gestaltet." },
+      { "type": "feature", "desc": "Singleplayer-Partien pausieren nun automatisch beim Öffnen der Einstellungen." }
+    ]
+  },
+  {
+    "version": "v1.9.0",
+    "date": "27. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "balance", "desc": "Prisma-Laser: Maximaler Schaden drastisch erhöht, Ladezeit verlängert." },
+      { "type": "feature", "desc": "Turm-Tooltips auf dem Spielfeld und im Shop einheitlich lokalisiert." },
+      { "type": "feature", "desc": "Kills-Anzeige vollständig aus allen Tooltips entfernt." },
+      { "type": "feature", "desc": "Spezial- und Upgrade-Zeilen im Shop-Tooltip ausgeblendet." },
+      { "type": "feature", "desc": "Getrennte Schadens- und Speed-Werte beim Prisma-Laser zu DPS zusammengefasst." },
+      { "type": "feature", "desc": "Maximales Turmlevel auf 20 erhöht." },
+      { "type": "feature", "desc": "Spezialisierungs-Auswahl auf Level 10 verschoben." },
+      { "type": "feature", "desc": "Mastery-Freischaltung auf Level 20 verschoben." },
+      { "type": "balance", "desc": "Alle Spezialisierungen und Masteries stark gebufft." },
+      { "type": "perf", "desc": "Globale Level-Schwellenwerte in eine Single Source of Truth ausgelagert." },
+      { "type": "fix", "desc": "Fehler behoben, durch den der Abbrechen-Button im Baumodus nicht reagierte." },
+      { "type": "balance", "desc": "Upgrade-Kosten für alle Türme auf saubere Intervalle gerundet." }
+    ]
+  },
+  {
+    "version": "v1.8.0",
+    "date": "27. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "feature", "desc": "Visuell optimierte, hexagonale Level-Anzeige für Türme hinzugefügt." }
+    ]
+  },
+  {
+    "version": "v1.7.0",
+    "date": "27. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "balance", "desc": "Zinssatz von 15% auf 10% gesenkt." },
+      { "type": "balance", "desc": "Schwierigkeitsanstieg durch stärkere HP-Skalierung beschleunigt." },
+      { "type": "balance", "desc": "Exponentielles Gold-Wachstum bei besiegten Gegnern reduziert." },
+      { "type": "feature", "desc": "Allgemeines Spieltempo erhöht und Zeitraffer-Modi beschleunigt." }
+    ]
+  },
+  {
+    "version": "v1.6.0",
+    "date": "27. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "fix", "desc": "WebRTC-Verbindungsfehler behoben und Netzwerk-Lags bei Fallback optimiert." }
+    ]
+  },
+  {
+    "version": "v1.5.0",
+    "date": "27. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "fix", "desc": "Fehler behoben, durch den Goldverlust bei Upgrades über Level 10 hinaus möglich war." },
+      { "type": "feature", "desc": "Abkürzung hoher Goldbeträge mit K und M im HUD und Game Over Screen hinzugefügt." }
+    ]
+  },
+  {
+    "version": "v1.4.0",
+    "date": "23. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "fix", "desc": "Zentralisierter Boss-Lebensbalken für Clients hinzugefügt." },
+      { "type": "feature", "desc": "Spalte 'g / DMG' im Game Over Screen entfernt." }
+    ]
+  },
+  {
+    "version": "v1.3.0",
+    "date": "22. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "feature", "desc": "WebRTC Signaling Relay für Koop-Multiplayer integriert." },
+      { "type": "perf", "desc": "High-DPI Skalierung für Lexikon-Previews hinzugefügt." },
+      { "type": "balance", "desc": "Pfad-Länge auf der Karte 'The Spiral' erhöht." }
+    ]
+  },
+  {
+    "version": "v1.2.0",
+    "date": "18. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "feature", "desc": "Echtzeit-Cheats und Host-Panel eingeführt." },
+      { "type": "fix", "desc": "Kritisches Speicherleck bei Headless-Host-Browsern behoben." },
+      { "type": "perf", "desc": "Ressourcenbereinigung für inaktive Räume optimiert." }
+    ]
+  },
+  {
+    "version": "v1.1.0",
+    "date": "10. Mai 2026",
+    "status": "stable",
+    "changes": [
+      { "type": "feature", "desc": "Koop-Lobby-Synchronisierung komplett überarbeitet." },
+      { "type": "balance", "desc": "Upgrade-Preise für Laser-Türme leicht angehoben." }
+    ]
+  }
+]
