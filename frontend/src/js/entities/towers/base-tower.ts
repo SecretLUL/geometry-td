@@ -97,7 +97,7 @@ export class Tower {
         this.colors = data.colors;
         this.currentColor = this.colors[0];
 
-        this.constructionDuration = 30;
+        this.constructionDuration = 90; // 3x slower: 1.5s at 60 FPS
         this.constructionTimer = this.constructionDuration;
 
         this.initPixi();

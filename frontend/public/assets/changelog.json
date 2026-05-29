@@ -32,7 +32,9 @@
       { "type": "fix", "desc": "Gegner waren auf Client-Seite unsichtbar: updatePixi() wird nun nach jeder Interpolationsrunde aufgerufen." },
       { "type": "fix", "desc": "Swarm-Gegner war auf dem Host unsichtbar: SwarmEnemy.update() ruft jetzt wie BaseEnemy korrekt updatePixi() auf." },
       { "type": "fix", "desc": "Gepoolte Gegner waren nach Wiederverwendung unsichtbar: getPooledEnemy() ruft jetzt initPixi() auf, um den Sprite wieder sichtbar zu machen." },
-      { "type": "fix", "desc": "Boss-HP-Anzeige durch Beheben eines Layout-Clippings nach der WebGL-Migration reaktiviert." }
+      { "type": "fix", "desc": "Boss-HP-Anzeige durch Beheben eines Layout-Clippings nach der WebGL-Migration reaktiviert." },
+      { "type": "fix", "desc": "Tesla Tower Schießanimation verlangsamt und mit elegantem Ausblende-Effekt versehen." },
+      { "type": "fix", "desc": "Bauanimationen aller Türme um das Dreifache verlangsamt für eine angenehmere Spieldynamik." }
     ]
   },
   {

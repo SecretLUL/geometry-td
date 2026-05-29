@@ -42,7 +42,7 @@ export class TeslaTower extends Tower {
         this.currentColor = this.colors[0];
         this.auraTime = 0;
 
-        this.constructionDuration = 65; // approx 1.08s
+        this.constructionDuration = 195; // 3x slower: 3.0s at 60 FPS
         this.constructionTimer = this.constructionDuration;
 
         this.redrawPixiBase();
@@ -238,9 +238,12 @@ export class TeslaTower extends Tower {
             g.circle(0, 0, pulse).stroke({ color: 0xffffff, alpha: 0.4, width: 1 });
 
             if (this.auraTime > 0) {
-                const auraPulse = (1 - this.auraTime / 15) * this.range;
+                const maxDuration = 35;
+                const progress = 1 - this.auraTime / maxDuration;
+                const auraPulse = progress * this.range;
                 const auraColor = this.specialization === 'highvolt' ? '#a29bfe' : '#81ecec';
-                g.circle(0, 0, auraPulse).stroke({ color: auraColor, width: 1.5 });
+                const alpha = 1 - progress;
+                g.circle(0, 0, auraPulse).stroke({ color: auraColor, width: 2.0, alpha: alpha });
             }
         }
     }
@@ -324,7 +327,7 @@ export class TeslaTower extends Tower {
                 if (this.specialization === 'stun') fr = Math.floor(fr * 1.3);
                 
                 this.fireCooldown = fr;
-                this.auraTime = 15;
+                this.auraTime = 35;
                 createExplosion(this.x, this.y, '#00ffff', 5);
 
                 if (!state.projectileEvents) state.projectileEvents = [];

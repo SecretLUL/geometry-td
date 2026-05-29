@@ -38,7 +38,7 @@ export class SniperTower extends Tower {
         this.colors = data.colors;
         this.currentColor = this.colors[0];
 
-        this.constructionDuration = 40; // approx 0.67s
+        this.constructionDuration = 120; // 3x slower: 2.0s at 60 FPS
         this.constructionTimer = this.constructionDuration;
 
         this.redrawPixiBase();

@@ -44,7 +44,7 @@ export class BombTower extends Tower {
         this.colors = data.colors;
         this.currentColor = this.colors[0];
 
-        this.constructionDuration = 55; // approx 0.92s
+        this.constructionDuration = 165; // 3x slower: 2.75s at 60 FPS
         this.constructionTimer = this.constructionDuration;
         
         // Re-bake now that type and colors are set correctly

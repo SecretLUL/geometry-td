@@ -231,7 +231,7 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
                 }
             } else if (event.type === 'tesla') {
                 if (tower) {
-                    tower.auraTime = 15;
+                    tower.auraTime = 35;
                     createExplosion(tower.x, tower.y, '#00ffff', 5);
                 }
 

@@ -45,7 +45,7 @@ export class PrismaTower extends Tower {
         this.lockTimer = 0;
         this.beamTarget = null;
 
-        this.constructionDuration = 80; // approx 1.33s
+        this.constructionDuration = 240; // 3x slower: 4.0s at 60 FPS
         this.constructionTimer = this.constructionDuration;
 
         if (typeof window !== 'undefined' && app && app.renderer) {
