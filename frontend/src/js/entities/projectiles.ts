@@ -20,7 +20,7 @@ import { FloatingText, createExplosion, RadiationArea, Shockwave } from '../fx/f
 import { getDistanceSq, getNearbyEnemies } from '../core/utils';
 import { Enemy, Tower, Vector2D } from '../types';
 import { PoolManager } from '../core/pool';
-import { app, entitiesContainer } from '../core/game/viewport';
+import { app, entitiesContainer, inactivePoolContainer } from '../core/game/viewport';
 import * as PIXI from 'pixi.js';
 
 // ─── Projectile ───────────────────────────────────────────────────────────────
@@ -123,8 +123,8 @@ export class Projectile {
                 this.bodyGraphics = new PIXI.Graphics();
                 this.pixiSprite.addChild(this.trailGraphics);
                 this.pixiSprite.addChild(this.bodyGraphics);
-                entitiesContainer.addChild(this.pixiSprite);
             }
+            entitiesContainer.addChild(this.pixiSprite);
             this.pixiSprite.visible = true;
             if (this.bodyGraphics) {
                 this.bodyGraphics.clear();
@@ -469,7 +469,7 @@ export class Projectile {
 
         if (this.pixiSprite) {
             if (!this.active && this.trailCount === 0) {
-                this.pixiSprite.visible = false;
+                inactivePoolContainer.addChild(this.pixiSprite);
             } else {
                 this.pixiSprite.visible = true;
                 this.redrawTrail();

@@ -44,6 +44,14 @@ let lastBtnAutoStart: boolean | null = null;
 let lastBtnWave = -1;
 let lastRenderedWebRTCStatus: string | null = null;
 
+let cachedTowerBtns: NodeListOf<Element> | null = null;
+function getTowerBtns(): NodeListOf<Element> {
+    if (!cachedTowerBtns) {
+        cachedTowerBtns = document.querySelectorAll('.tower-btn');
+    }
+    return cachedTowerBtns;
+}
+
 export function updateUI(): void {
     updateHudDisplay();
 
@@ -165,7 +173,7 @@ export function updateUI(): void {
             }
         }
 
-        document.querySelectorAll('.tower-btn').forEach(btn => {
+        getTowerBtns().forEach(btn => {
             const htmlBtn = btn as HTMLElement;
             const type = htmlBtn.dataset.type;
             if (!type || !TowerData[type]) return;
@@ -246,7 +254,7 @@ export function updateUI(): void {
             }
         });
 
-        document.querySelectorAll('.tower-btn').forEach(btn => {
+        getTowerBtns().forEach(btn => {
             const htmlBtn = btn as HTMLElement;
             if (benchmarkActive && !state.isHost) {
                 htmlBtn.style.opacity = '0.4';
@@ -270,7 +278,7 @@ export function updateUI(): void {
 export function cancelPlacement(): void {
 
     state.selectedTowerType = null;
-    document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove('selected'));
+    getTowerBtns().forEach(b => b.classList.remove('selected'));
     const cancelBtn = getEl('cancelPlacementBtn');
     if (cancelBtn) cancelBtn.classList.add('hidden');
 }
@@ -278,7 +286,7 @@ export function cancelPlacement(): void {
 
 export function setupUI(startWaveCallback: () => void, canvas: HTMLCanvasElement): void {
     // Inject SVG icons into tower buttons
-    document.querySelectorAll('.tower-btn').forEach(btn => {
+    getTowerBtns().forEach(btn => {
         const htmlBtn = btn as HTMLElement;
         const type = htmlBtn.dataset.type;
         if (type && ICONS[type]) {

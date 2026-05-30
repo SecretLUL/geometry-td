@@ -12,14 +12,14 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.2.1 - Increased path energy photon density to 20 for more frequent animated guide dots.
+ * @last_update: 2026-05-30 / v2.0.0 - Optimized rendering performance: cached static paths, sprite pooled photons, and GPU-rotated spawner graphics.
  */
 import { state } from '../state';
 import { Config } from '../config';
 import { drawRangeCircle, drawGhostTower } from '../../entities/towers/index';
 import { drawMap, waypoints } from '../map';
 import { updateContextShopPosition } from '../../ui/modals';
-import { clampCamera, mapContainer, pathAnimContainer, pathAnimGraphics, entitiesContainer, uiContainer, app } from './viewport';
+import { clampCamera, mapContainer, pathAnimContainer, staticPathGraphics, pathAnimGraphics, entitiesContainer, uiContainer, app } from './viewport';
 import * as PIXI from 'pixi.js';
 
 export function getPointAlongPath(waypoints: {x: number, y: number}[], t: number): {x: number, y: number} {
@@ -68,6 +68,78 @@ let fpsText: PIXI.Text | null = null;
 
 let pauseGraphics: PIXI.Graphics | null = null;
 let pauseText: PIXI.Text | null = null;
+
+// --- Performance Cache & Optimization variables ---
+let photonTexture: PIXI.Texture | null = null;
+const photonSprites: PIXI.Sprite[] = [];
+let rotatingSpawnerGraphics: PIXI.Graphics | null = null;
+
+function getPhotonTexture(): PIXI.Texture {
+    if (!photonTexture && typeof window !== 'undefined' && app && app.renderer) {
+        const g = new PIXI.Graphics();
+        g.circle(0, 0, 6).fill({ color: 0x00f2fe, alpha: 0.15 });
+        g.circle(0, 0, 3).fill({ color: 0x00f2fe, alpha: 0.75 });
+        g.circle(0, 0, 1.5).fill({ color: 0xffffff, alpha: 1.0 });
+        photonTexture = app.renderer.generateTexture(g);
+        g.destroy();
+    }
+    return photonTexture || PIXI.Texture.WHITE;
+}
+
+function initPhotonSprites(): void {
+    if (photonSprites.length > 0) return;
+    const tex = getPhotonTexture();
+    const numPhotons = 20;
+    for (let i = 0; i < numPhotons; i++) {
+        const sprite = new PIXI.Sprite(tex);
+        sprite.anchor.set(0.5);
+        sprite.visible = false;
+        pathAnimContainer.addChild(sprite);
+        photonSprites.push(sprite);
+    }
+}
+
+function redrawStaticPaths(): void {
+    if (!staticPathGraphics) return;
+    staticPathGraphics.clear();
+
+    if (waypoints.length > 1) {
+        staticPathGraphics.moveTo(waypoints[0].x, waypoints[0].y);
+        for (let i = 1; i < waypoints.length; i++) {
+            staticPathGraphics.lineTo(waypoints[i].x, waypoints[i].y);
+        }
+        staticPathGraphics.stroke({ color: 0x00f2fe, alpha: 0.08, width: 14, cap: 'round', join: 'round' });
+
+        staticPathGraphics.moveTo(waypoints[0].x, waypoints[0].y);
+        for (let i = 1; i < waypoints.length; i++) {
+            staticPathGraphics.lineTo(waypoints[i].x, waypoints[i].y);
+        }
+        staticPathGraphics.stroke({ color: 0x00f2fe, alpha: 0.25, width: 5, cap: 'round', join: 'round' });
+    }
+}
+
+function redrawSpawnerGraphics(): void {
+    if (!rotatingSpawnerGraphics) {
+        rotatingSpawnerGraphics = new PIXI.Graphics();
+        pathAnimContainer.addChild(rotatingSpawnerGraphics);
+    }
+    rotatingSpawnerGraphics.clear();
+    
+    if (waypoints.length === 0) return;
+
+    const TS = Config.TILE_SIZE;
+    const dashRadius = TS * 0.58;
+    const numSegments = 12;
+    const angleStep = (Math.PI * 2) / numSegments;
+    for (let i = 0; i < numSegments; i++) {
+        if (i % 2 === 0) {
+            const startAngle = i * angleStep;
+            const endAngle = (i + 0.5) * angleStep;
+            rotatingSpawnerGraphics.arc(0, 0, dashRadius, startAngle, endAngle);
+        }
+    }
+    rotatingSpawnerGraphics.stroke({ color: 0x4cc9f0, alpha: 0.5, width: 1.5 });
+}
 
 export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): void {
     if (isHeadlessMode) return;
@@ -169,6 +241,8 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
         state.mapNeedsRedraw = false;
         lastTileSize = TS;
         drawMap(mapContainer);
+        redrawStaticPaths();
+        redrawSpawnerGraphics();
     }
     
     // PixiJS Panning
@@ -181,30 +255,25 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
     uiGraphics.clear();
     screenDamageGraphics.clear();
 
-    // 1. Draw active energy streams flowing along path waypoints
+    // 1. Draw active energy streams flowing along path waypoints (pooled sprites)
     if (waypoints.length > 1) {
+        initPhotonSprites();
         const time = state.animTime * 0.002;
-        
-        pathAnimGraphics.moveTo(waypoints[0].x, waypoints[0].y);
-        for (let i = 1; i < waypoints.length; i++) {
-            pathAnimGraphics.lineTo(waypoints[i].x, waypoints[i].y);
-        }
-        pathAnimGraphics.stroke({ color: 0x00f2fe, alpha: 0.08, width: 14, cap: 'round', join: 'round' });
-
-        pathAnimGraphics.moveTo(waypoints[0].x, waypoints[0].y);
-        for (let i = 1; i < waypoints.length; i++) {
-            pathAnimGraphics.lineTo(waypoints[i].x, waypoints[i].y);
-        }
-        pathAnimGraphics.stroke({ color: 0x00f2fe, alpha: 0.25, width: 5, cap: 'round', join: 'round' });
-
         const numPhotons = 20;
+        
         for (let j = 0; j < numPhotons; j++) {
             const t = (time * 0.03 + (j / numPhotons)) % 1.0;
             const pos = getPointAlongPath(waypoints, t);
             
-            pathAnimGraphics.circle(pos.x, pos.y, 6).fill({ color: 0x00f2fe, alpha: 0.15 });
-            pathAnimGraphics.circle(pos.x, pos.y, 3).fill({ color: 0x00f2fe, alpha: 0.75 });
-            pathAnimGraphics.circle(pos.x, pos.y, 1.5).fill({ color: 0xffffff, alpha: 1.0 });
+            const sprite = photonSprites[j];
+            if (sprite) {
+                sprite.position.set(pos.x, pos.y);
+                sprite.visible = true;
+            }
+        }
+    } else {
+        for (let sprite of photonSprites) {
+            sprite.visible = false;
         }
     }
 
@@ -228,21 +297,15 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
             end.x - TS * 0.28, end.y
         ], true).fill({ color: 0x00d4ff, alpha: 1.0 });
 
-        const dashRadius = TS * 0.58;
-        const numSegments = 12;
-        const angleStep = (Math.PI * 2) / numSegments;
-        const rotationSpeed = time * 0.75;
-        for (let i = 0; i < numSegments; i++) {
-            if (i % 2 === 0) {
-                const startAngle = rotationSpeed + i * angleStep;
-                const endAngle = rotationSpeed + (i + 0.5) * angleStep;
-                const startX = end.x + dashRadius * Math.cos(startAngle);
-                const startY = end.y + dashRadius * Math.sin(startAngle);
-                pathAnimGraphics.moveTo(startX, startY);
-                pathAnimGraphics.arc(end.x, end.y, dashRadius, startAngle, endAngle);
-            }
+        if (rotatingSpawnerGraphics) {
+            rotatingSpawnerGraphics.visible = true;
+            rotatingSpawnerGraphics.position.set(end.x, end.y);
+            rotatingSpawnerGraphics.rotation = time * 0.75;
         }
-        pathAnimGraphics.stroke({ color: 0x4cc9f0, alpha: 0.5, width: 1.5 });
+    } else {
+        if (rotatingSpawnerGraphics) {
+            rotatingSpawnerGraphics.visible = false;
+        }
     }
 
     // Context Shop Selection Highlight via PixiJS

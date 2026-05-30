@@ -4,11 +4,11 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
-    "version": "v2.3.0",
-    "date": "28. Mai 2026",
+    "version": "v2.5.0",
+    "date": "30. Mai 2026",
     "status": "active",
     "changes": [
-      { "type": "fix", "desc": "Z-Index-Reihenfolge korrigiert: Weg-Animationen und Spawnpunkte liegen nun sauber unter den Feinden und Türmen." }
+      { "type": "perf", "desc": "Gegnerpfade gecacht, Photonen auf Sprite-Pooling umgestellt und Spawner-Ringe auf GPU-Rotation portiert." }
     ]
   },
   {
@@ -60,7 +60,17 @@
       { "type": "fix", "desc": "Boss-HP-Anzeige durch Beheben eines Layout-Clippings nach der WebGL-Migration reaktiviert." },
       { "type": "fix", "desc": "Tesla Tower Schießanimation verlangsamt und mit elegantem Ausblende-Effekt versehen." },
       { "type": "fix", "desc": "Bauanimationen aller Türme um das Dreifache verlangsamt für eine angenehmere Spieldynamik." },
-      { "type": "fix", "desc": "Gegner-Sprites frieren nicht mehr ein, wenn die Welle per Mod-Menü sofort beendet wird." }
+      { "type": "fix", "desc": "Gegner-Sprites frieren nicht mehr ein, wenn die Welle per Mod-Menü sofort beendet wird." },
+      { "type": "perf", "desc": "Feind-Entfernungen im State-Array auf eine O(1)-Swap-and-Pop Operation umgestellt, um die CPU-Last drastisch zu senken." },
+      { "type": "perf", "desc": "DOM-Queries für Tower-Buttons gecacht, um unnötige DOM-Zugriffe in der Game-Loop zu vermeiden." },
+      { "type": "refactor", "desc": "Tote Testdateien entfernt und harte console.log-Aufrufe durch das zentrale Logger-Modul ersetzt." },
+      { "type": "fix", "desc": "Spielgeschwindigkeit durch Fixed-Timestep-Logik von der Framerate entkoppelt, um Schwankungen bei Frame-Drops zu verhindern." },
+      { "type": "fix", "desc": "FPS-Zähler misst nun isoliert die echten Browser-Render-Frames (requestAnimationFrame) und ignoriert Fokus-Wechsel." },
+      { "type": "perf", "desc": "Gegner-Rendern stark optimiert: Ständiges Neuerstellen der Formen im Game-Loop eliminiert, was massives Micro-Stuttering behebt." },
+      { "type": "perf", "desc": "PixiJS Scene Graph aufgeräumt: Inaktive Feinde, Projektile und Partikel werden nun in einen inaktiven Pool-Container verschoben statt unsichtbar im Hauptcontainer zu verbleiben." },
+      { "type": "perf", "desc": "Triangulations-Overhead eliminiert: Schockwellen, Mündungsfeuer und Laser zeichnen sich nur noch einmalig in WebGL und nutzen Skalierung statt ständiger Re-Triangulierung." },
+      { "type": "perf", "desc": "Text-Thrashing behoben: Schadens- und Gold-Popups rendern ihre Textur nur noch bei inhaltlichen Änderungen neu." },
+      { "type": "perf", "desc": "RenderGroups eingeführt: UI, Map und dynamische Entities cachen nun isoliert voneinander ihre Transformationen." }
     ]
   },
   {

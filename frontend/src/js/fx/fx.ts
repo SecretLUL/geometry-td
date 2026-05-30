@@ -1,6 +1,6 @@
 import { state } from '../core/state';
 import { PoolManager } from '../core/pool';
-import { app, entitiesContainer } from '../core/game/viewport';
+import { app, entitiesContainer, inactivePoolContainer } from '../core/game/viewport';
 import * as PIXI from 'pixi.js';
 
 let _particleTexture: PIXI.Texture | null = null;
@@ -56,8 +56,8 @@ export class Particle {
             if (!this.sprite) {
                 this.sprite = new PIXI.Sprite(getParticleTexture());
                 this.sprite.anchor.set(0.5);
-                entitiesContainer.addChild(this.sprite);
             }
+            entitiesContainer.addChild(this.sprite);
             this.sprite.visible = true;
             this.sprite.tint = color; 
             this.sprite.width = size * 2;
@@ -83,7 +83,7 @@ export class Particle {
 
         if (this.life <= 0) {
             this.active = false;
-            if (this.sprite) this.sprite.visible = false;
+            if (this.sprite) inactivePoolContainer.addChild(this.sprite);
         }
     }
 
@@ -151,11 +151,11 @@ export class FloatingText {
                     }
                 });
                 this.textObj.anchor.set(0.5);
-                entitiesContainer.addChild(this.textObj);
             } else {
                 this.textObj.text = this.text;
                 this.textObj.style.fill = this.color;
             }
+            entitiesContainer.addChild(this.textObj);
             this.textObj.visible = true;
             this.textObj.x = this.x;
             this.textObj.y = this.y;
@@ -174,8 +174,6 @@ export class FloatingText {
         if (this.scale > 1) this.scale -= 0.05;
 
         if (this.textObj) {
-            this.textObj.text = this.text; 
-            this.textObj.style.fill = this.color;
             this.textObj.x = this.x;
             this.textObj.y = this.y;
             this.textObj.alpha = Math.max(0, this.life);
@@ -185,7 +183,7 @@ export class FloatingText {
 
         if (this.life <= 0) {
             this.active = false;
-            if (this.textObj) this.textObj.visible = false;
+            if (this.textObj) inactivePoolContainer.addChild(this.textObj);
         }
     }
 
@@ -244,8 +242,8 @@ export class StunRay {
         if (typeof window !== 'undefined' && app.renderer) {
             if (!this.graphics) {
                 this.graphics = new PIXI.Graphics();
-                entitiesContainer.addChild(this.graphics);
             }
+            entitiesContainer.addChild(this.graphics);
             this.graphics.visible = true;
             this.redrawGraphics();
         }
@@ -293,7 +291,7 @@ export class StunRay {
 
         if (this.life <= 0) {
             this.active = false;
-            if (this.graphics) this.graphics.visible = false;
+            if (this.graphics) inactivePoolContainer.addChild(this.graphics);
         }
     }
 
@@ -337,46 +335,39 @@ export class MuzzleFlash {
         if (typeof window !== 'undefined' && app.renderer) {
             if (!this.graphics) {
                 this.graphics = new PIXI.Graphics();
-                entitiesContainer.addChild(this.graphics);
             }
+            entitiesContainer.addChild(this.graphics);
             this.graphics.visible = true;
             this.graphics.x = this.x;
             this.graphics.y = this.y;
             this.graphics.rotation = this.angle;
-            this.redrawGraphics();
+            
+            // Draw once, scale via alpha
+            const g = this.graphics;
+            g.clear();
+            g.circle(0, 0, this.size * 0.7).fill({ color: this.color });
+            g.circle(0, 0, this.size * 0.3).fill({ color: '#ffffff' });
+
+            for (let i = 0; i < 3; i++) {
+                const a = (Math.random() - 0.5) * 0.8;
+                const len = this.size * (1.5 + Math.random());
+                g.moveTo(0, 0);
+                g.lineTo(Math.cos(a) * len, Math.sin(a) * len);
+                g.stroke({ color: '#ffffff', width: 2 });
+            }
         }
         return this;
-    }
-
-    private redrawGraphics() {
-        if (!this.graphics) return;
-        const g = this.graphics;
-        g.clear();
-        if (this.life <= 0) return;
-
-        g.alpha = this.life;
-
-        g.circle(0, 0, this.size * 0.7).fill({ color: this.color });
-        g.circle(0, 0, this.size * 0.3).fill({ color: '#ffffff' });
-
-        for (let i = 0; i < 3; i++) {
-            const a = (Math.random() - 0.5) * 0.8;
-            const len = this.size * (1.5 + Math.random());
-            g.moveTo(0, 0);
-            g.lineTo(Math.cos(a) * len, Math.sin(a) * len);
-            g.stroke({ color: '#ffffff', width: 2 });
-        }
     }
 
     public update(): void {
         if (!this.active) return;
         this.life -= 0.15;
         if (this.graphics) {
-            this.redrawGraphics();
+            this.graphics.alpha = this.life;
         }
         if (this.life <= 0) {
             this.active = false;
-            if (this.graphics) this.graphics.visible = false;
+            if (this.graphics) inactivePoolContainer.addChild(this.graphics);
         }
     }
 
@@ -420,40 +411,36 @@ export class SniperBeam {
         if (typeof window !== 'undefined' && app.renderer) {
             if (!this.graphics) {
                 this.graphics = new PIXI.Graphics();
-                entitiesContainer.addChild(this.graphics);
             }
+            entitiesContainer.addChild(this.graphics);
             this.graphics.visible = true;
-            this.redrawGraphics();
+            
+            // Draw once
+            const g = this.graphics;
+            g.clear();
+            const drawPath = (color: string, width: number, alpha: number) => {
+                g.moveTo(this.startX, this.startY);
+                g.lineTo(this.targetX, this.targetY);
+                g.stroke({ color, width, alpha });
+            };
+
+            drawPath(this.color, 10, 0.2);
+            drawPath(this.color, 5, 0.5);
+            drawPath('#ffffff', 1.5, 1.0);
+            g.alpha = 1.0;
         }
         return this;
-    }
-
-    private redrawGraphics() {
-        if (!this.graphics) return;
-        const g = this.graphics;
-        g.clear();
-        if (this.life <= 0) return;
-
-        const drawPath = (color: string, width: number, alpha: number) => {
-            g.moveTo(this.startX, this.startY);
-            g.lineTo(this.targetX, this.targetY);
-            g.stroke({ color, width, alpha });
-        };
-
-        drawPath(this.color, 10, this.life * 0.2);
-        drawPath(this.color, 5, this.life * 0.5);
-        drawPath('#ffffff', 1.5, this.life);
     }
 
     public update(): void {
         if (!this.active) return;
         this.life -= 0.08;
         if (this.graphics) {
-            this.redrawGraphics();
+            this.graphics.alpha = this.life;
         }
         if (this.life <= 0) {
             this.active = false;
-            if (this.graphics) this.graphics.visible = false;
+            if (this.graphics) inactivePoolContainer.addChild(this.graphics);
         }
     }
 
@@ -497,8 +484,8 @@ export class TeslaArc {
         if (typeof window !== 'undefined' && app.renderer) {
             if (!this.graphics) {
                 this.graphics = new PIXI.Graphics();
-                entitiesContainer.addChild(this.graphics);
             }
+            entitiesContainer.addChild(this.graphics);
             this.graphics.visible = true;
             this.redrawGraphics();
         }
@@ -561,7 +548,7 @@ export class TeslaArc {
 
         if (this.life <= 0) {
             this.active = false;
-            if (this.graphics) this.graphics.visible = false;
+            if (this.graphics) inactivePoolContainer.addChild(this.graphics);
         }
     }
 
@@ -612,30 +599,21 @@ export class RadiationArea {
         if (typeof window !== 'undefined' && app.renderer) {
             if (!this.graphics) {
                 this.graphics = new PIXI.Graphics();
-                entitiesContainer.addChild(this.graphics);
             }
+            entitiesContainer.addChild(this.graphics);
             this.graphics.visible = true;
-            this.redrawGraphics();
+            
+            // Draw once, radius 100
+            const g = this.graphics;
+            g.clear();
+            g.circle(0, 0, 100).fill({ color: 0xbadc58, alpha: 0.05 });
+            g.circle(0, 0, 100).stroke({ color: 0xbadc58, alpha: 0.25, width: 1.5 });
+            g.x = this.x;
+            g.y = this.y;
+            g.scale.set(this.radius / 100);
+            g.alpha = 0.6;
         }
         return this;
-    }
-
-    private redrawGraphics() {
-        if (!this.graphics) return;
-        const g = this.graphics;
-        g.clear();
-        if (this.life <= 0) return;
-
-        // Soft global alpha fading over time
-        g.alpha = Math.max(0, this.life * 0.6);
-        const p = Math.sin(this.pulse) * 4;
-        const radius = this.radius + p;
-
-        // Softer transparent inner fill
-        g.circle(this.x, this.y, radius).fill({ color: 0xbadc58, alpha: 0.05 });
-
-        // Sleek outer edge ring
-        g.circle(this.x, this.y, radius).stroke({ color: 0xbadc58, alpha: 0.25, width: 1.5 });
     }
 
     public update(): void {
@@ -644,12 +622,15 @@ export class RadiationArea {
         this.pulse += 0.1;
 
         if (this.graphics) {
-            this.redrawGraphics();
+            const p = Math.sin(this.pulse) * 4;
+            const currentRadius = this.radius + p;
+            this.graphics.scale.set(currentRadius / 100);
+            this.graphics.alpha = Math.max(0, this.life * 0.6);
         }
 
         if (this.life <= 0) {
             this.active = false;
-            if (this.graphics) this.graphics.visible = false;
+            if (this.graphics) inactivePoolContainer.addChild(this.graphics);
             return;
         }
 
@@ -730,29 +711,25 @@ export class Shockwave {
         if (typeof window !== 'undefined' && app.renderer) {
             if (!this.graphics) {
                 this.graphics = new PIXI.Graphics();
-                entitiesContainer.addChild(this.graphics);
             }
+            entitiesContainer.addChild(this.graphics);
             this.graphics.visible = true;
-            this.redrawGraphics();
+            
+            // Draw once, radius 100
+            const g = this.graphics;
+            g.clear();
+            const isCustomColor = this.color !== '#fff';
+            const mainWidth = isCustomColor ? 5 : 3;
+            g.circle(0, 0, 100).stroke({ color: this.color, alpha: 1, width: mainWidth });
+
+            if (isCustomColor) {
+                g.circle(0, 0, 100).stroke({ color: '#ffffff', alpha: 1, width: 1.5 });
+            }
+            g.x = this.x;
+            g.y = this.y;
+            g.scale.set(0);
         }
         return this;
-    }
-
-    private redrawGraphics() {
-        if (!this.graphics) return;
-        const g = this.graphics;
-        g.clear();
-        if (this.life <= 0) return;
-
-        const isCustomColor = this.color !== '#fff';
-        const mainAlpha = this.life * (isCustomColor ? 0.8 : 0.5);
-        const mainWidth = isCustomColor ? 5 : 3;
-
-        g.circle(this.x, this.y, this.radius).stroke({ color: this.color, alpha: mainAlpha, width: mainWidth });
-
-        if (isCustomColor) {
-            g.circle(this.x, this.y, this.radius).stroke({ color: '#ffffff', alpha: this.life * 0.9, width: 1.5 });
-        }
     }
 
     public update(): void {
@@ -761,12 +738,15 @@ export class Shockwave {
         this.life = 1.0 - (this.radius / this.maxRadius);
         
         if (this.graphics) {
-            this.redrawGraphics();
+            const isCustomColor = this.color !== '#fff';
+            const mainAlpha = this.life * (isCustomColor ? 0.8 : 0.5);
+            this.graphics.scale.set(this.radius / 100);
+            this.graphics.alpha = mainAlpha;
         }
 
         if (this.life <= 0) {
             this.active = false;
-            if (this.graphics) this.graphics.visible = false;
+            if (this.graphics) inactivePoolContainer.addChild(this.graphics);
         }
     }
 

@@ -17,6 +17,7 @@
 
 import { socket, Multiplayer } from './context';
 import { state } from '../state';
+import { logger } from '../logger';
 
 // Standard public STUN servers to resolve external IP and ports over Docker/host networks
 let rtcConfig: RTCConfiguration = {
@@ -105,7 +106,7 @@ function setupCommonPC(pc: RTCPeerConnection, targetId: string): void {
     };
 
     pc.onconnectionstatechange = () => {
-        console.log(`[WebRTC] Connection state with ${targetId}: ${pc.connectionState}`);
+        logger.info(`[WebRTC] Connection state with ${targetId}: ${pc.connectionState}`);
         if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
             if (!weAreHost && pc === clientConnection) {
                 cleanupClientWebRTC();
@@ -121,7 +122,7 @@ function setupCommonPC(pc: RTCPeerConnection, targetId: string): void {
                         }
                     }, 3000);
                 } else {
-                    console.warn(`[WebRTC] Client connection failed after ${MAX_CONNECTION_RETRIES} attempts. Disabling WebRTC retries and falling back to Socket.io.`);
+                    logger.warn(`[WebRTC] Client connection failed after ${MAX_CONNECTION_RETRIES} attempts. Disabling WebRTC retries and falling back to Socket.io.`);
                     state.webRTCStatus = 'failed';
                     if (Multiplayer && Multiplayer.updateUI) {
                         Multiplayer.updateUI();
@@ -146,7 +147,7 @@ function setupCommonPC(pc: RTCPeerConnection, targetId: string): void {
 // Client initiates direct UDP-like PeerConnection to Host
 export function initiateConnectionToHost(hostId: string): void {
     if (!socket || !socket.connected) {
-        console.warn("[WebRTC] Socket not connected. Cannot initiate connection.");
+        logger.warn("[WebRTC] Socket not connected. Cannot initiate connection.");
         return;
     }
 
@@ -180,7 +181,7 @@ export function initiateConnectionToHost(hostId: string): void {
     channel.onclose = () => {
     };
     channel.onerror = (err) => {
-        console.error("[WebRTC] DataChannel error:", err);
+        logger.error("[WebRTC] DataChannel error:", { error: err });
     };
     channel.onmessage = (event: MessageEvent) => {
         if (!onWebRTCMessageReceived) return;
@@ -188,7 +189,7 @@ export function initiateConnectionToHost(hostId: string): void {
             const payload = JSON.parse(event.data);
             onWebRTCMessageReceived(payload);
         } catch (err) {
-            console.error("[WebRTC] Error parsing incoming game state:", err);
+            logger.error("[WebRTC] Error parsing incoming game state:", { error: err });
         }
     };
 
@@ -203,7 +204,7 @@ export function initiateConnectionToHost(hostId: string): void {
                 signal: { type: "offer", offer: pc.localDescription }
             });
         })
-        .catch((err: any) => console.error("[WebRTC] Error creating offer:", err));
+        .catch((err: any) => logger.error("[WebRTC] Error creating offer:", { error: err }));
 }
 
 // Handles incoming WebRTC signaling messages relayed from the server
@@ -212,7 +213,7 @@ export function handleWebRTCSignal(senderId: string, signal: any): void {
 
     if (signal.type === "offer") {
         if (!weAreHost) {
-            console.warn("[WebRTC] Received WebRTC offer but we are not the Host! Ignoring.");
+            logger.warn("[WebRTC] Received WebRTC offer but we are not the Host! Ignoring.");
             return;
         }
 
@@ -248,7 +249,7 @@ export function handleWebRTCSignal(senderId: string, signal: any): void {
                     hostChannels.delete(senderId);
                 };
                 channel.onerror = (err) => {
-                    console.error(`[WebRTC] DataChannel error for client ${senderId}:`, err);
+                    logger.error(`[WebRTC] DataChannel error for client ${senderId}:`, { error: err });
                 };
             }
         };
@@ -263,21 +264,21 @@ export function handleWebRTCSignal(senderId: string, signal: any): void {
                     signal: { type: "answer", answer: pc.localDescription }
                 });
             })
-            .catch((err: any) => console.error(`[WebRTC] Error handling offer from client ${senderId}:`, err));
+            .catch((err: any) => logger.error(`[WebRTC] Error handling offer from client ${senderId}:`, { error: err }));
 
     } else if (signal.type === "answer") {
         if (!weAreHost && clientConnection) {
             clientConnection.setRemoteDescription(new RTCSessionDescription(signal.answer))
-                .catch((err: any) => console.error("[WebRTC] Error setting remote answer:", err));
+                .catch((err: any) => logger.error("[WebRTC] Error setting remote answer:", { error: err }));
         } else if (weAreHost) {
-            console.warn("[WebRTC] Host received an answer packet. Host only processes offers.");
+            logger.warn("[WebRTC] Host received an answer packet. Host only processes offers.");
         }
 
     } else if (signal.type === "candidate") {
         const pc = weAreHost ? hostConnections.get(senderId) : clientConnection;
         if (pc) {
             pc.addIceCandidate(new RTCIceCandidate(signal.candidate))
-                .catch((err: any) => console.error(`[WebRTC] Error adding ICE candidate from ${senderId}:`, err));
+                .catch((err: any) => logger.error(`[WebRTC] Error adding ICE candidate from ${senderId}:`, { error: err }));
         }
     }
 }
@@ -318,7 +319,7 @@ export function broadcastGameStateWebRTC(payload: any): boolean {
             try {
                 channel.send(messageStr);
             } catch (err) {
-                console.error(`[WebRTC] Failed to send game state to client ${clientId}:`, err);
+                logger.error(`[WebRTC] Failed to send game state to client ${clientId}:`, { error: err });
                 allSent = false;
             }
         } else {

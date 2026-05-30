@@ -19,6 +19,7 @@ import { NormalEnemy, ScoutEnemy, BruiserEnemy } from './types/basic';
 import { RegrowerEnemy, ShieldedEnemy, SwarmEnemy } from './types/special';
 import { BossEnemy, DefragmenterEnemy, DefragmenterFragmentEnemy, DefragmenterSubfragmentEnemy } from './types/bosses';
 import { CollectorEnemy, FortressEnemy, SplinterEnemy, SplinterFragmentEnemy } from './types/event';
+import { inactivePoolContainer } from '../../core/game/viewport';
 
 export class EnemyFactory {
     private static nextEnemyId = 1;
@@ -59,10 +60,10 @@ export class EnemyFactory {
     public static releaseEnemyToPool(enemy: Enemy): void {
         if (!enemy || !enemy.typeName) return;
 
-        // WICHTIG: Pixi-Sprite unsichtbar setzen, damit der Gegner sofort verschwindet,
-        // auch wenn er die Base erreicht hat oder gecancelt wurde.
+        // WICHTIG: Pixi-Sprite in den inaktiven Container verschieben, damit der Gegner sofort verschwindet,
+        // auch wenn er die Base erreicht hat oder gecancelt wurde, und Iterationskosten vermieden werden.
         if ((enemy as any).pixiSprite) {
-            (enemy as any).pixiSprite.visible = false;
+            inactivePoolContainer.addChild((enemy as any).pixiSprite);
         }
 
         let pool = this.clientEnemyPool.get(enemy.typeName);

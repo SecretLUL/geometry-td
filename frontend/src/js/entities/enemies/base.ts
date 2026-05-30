@@ -61,10 +61,13 @@ export class BaseEnemy implements Enemy {
     public shieldHp?: number;
     public regenTimer?: number;
     public swarmGroupId?: number;
+    public needsRedraw: boolean = true;
 
     public pixiSprite?: PIXI.Container;
     public bodyGraphics?: PIXI.Graphics;
-    public hpGraphics?: PIXI.Graphics;
+    public flashGraphics?: PIXI.Graphics;
+    public hpGraphics?: PIXI.Graphics; // Used as background
+    public hpFillGraphics?: PIXI.Graphics; // Used for dynamic scaling
     public shieldGraphics?: PIXI.Graphics;
 
     constructor(waveNumber: number) {
@@ -99,15 +102,22 @@ export class BaseEnemy implements Enemy {
         if (!this.pixiSprite) {
             this.pixiSprite = new PIXI.Container();
             this.bodyGraphics = new PIXI.Graphics();
+            this.flashGraphics = new PIXI.Graphics();
             this.hpGraphics = new PIXI.Graphics();
+            this.hpFillGraphics = new PIXI.Graphics();
+            
             this.pixiSprite.addChild(this.bodyGraphics);
+            this.pixiSprite.addChild(this.flashGraphics);
             this.pixiSprite.addChild(this.hpGraphics);
+            this.pixiSprite.addChild(this.hpFillGraphics);
+            
             if (this.shieldActive) {
                 this.shieldGraphics = new PIXI.Graphics();
                 this.pixiSprite.addChild(this.shieldGraphics);
             }
-            entitiesContainer.addChild(this.pixiSprite);
         }
+        entitiesContainer.addChild(this.pixiSprite);
+        this.needsRedraw = true;
         this.pixiSprite.visible = true;
     }
 
@@ -145,6 +155,47 @@ export class BaseEnemy implements Enemy {
     public updatePixi(): void {
         if (!this.pixiSprite || !this.bodyGraphics || !this.hpGraphics) return;
 
+        if (this.needsRedraw) {
+            this.bodyGraphics.clear();
+            const originalFlashTime = this.flashTime;
+            
+            // Draw normal color
+            this.flashTime = 0;
+            this.drawShape(this.bodyGraphics);
+
+            // Draw flash white
+            if (this.flashGraphics) {
+                this.flashTime = 1;
+                this.flashGraphics.clear();
+                this.drawShape(this.flashGraphics);
+            }
+
+            this.flashTime = originalFlashTime;
+
+            // Draw HP background once
+            this.hpGraphics.clear();
+            if (!this.hideHealthBar) {
+                this.hpGraphics.rect(-15, -this.radius - 8, 30, 4).fill({ color: 0xff0000 });
+            }
+
+            // Draw HP fill once (drawn at 0,0, positioned relative)
+            if (this.hpFillGraphics) {
+                this.hpFillGraphics.clear();
+                if (!this.hideHealthBar) {
+                    this.hpFillGraphics.rect(0, 0, 30, 4).fill({ color: 0x00ff00 });
+                    this.hpFillGraphics.position.set(-15, -this.radius - 8);
+                }
+            }
+
+            // Draw shield once
+            if (this.shieldActive && this.shieldGraphics) {
+                this.shieldGraphics.clear();
+                this.shieldGraphics.circle(0, 0, this.radius + 6).stroke({ color: 0x00ffff, width: 2 });
+            }
+
+            this.needsRedraw = false;
+        }
+
         this.pixiSprite.position.set(this.x, this.y);
 
         if (this.speed > 0 && !state.isPaused) {
@@ -159,6 +210,7 @@ export class BaseEnemy implements Enemy {
                 this.rotation += 0.02 * this.speed;
             }
             this.bodyGraphics.rotation = this.rotation;
+            if (this.flashGraphics) this.flashGraphics.rotation = this.rotation;
         }
 
         if (!this.hideHealthBar && (this.typeName === 'DefragmenterFragment' || this.typeName === 'DefragmenterSubfragment')) {
@@ -172,30 +224,44 @@ export class BaseEnemy implements Enemy {
         }
 
         this.bodyGraphics.scale.set(scale);
+        if (this.flashGraphics) this.flashGraphics.scale.set(scale);
 
-        // Draw Shape
-        this.bodyGraphics.clear();
-        this.drawShape(this.bodyGraphics);
-        if (this.flashTime > 0) this.flashTime--;
+        // Flash logic - toggle visibility
+        if (this.flashTime > 0) {
+            this.flashTime--;
+            this.bodyGraphics.visible = false;
+            if (this.flashGraphics) this.flashGraphics.visible = true;
+        } else {
+            this.bodyGraphics.visible = true;
+            if (this.flashGraphics) this.flashGraphics.visible = false;
+        }
 
         // Shield
         if (this.shieldActive) {
             if (!this.shieldGraphics) {
                 this.shieldGraphics = new PIXI.Graphics();
                 this.pixiSprite.addChild(this.shieldGraphics);
+                this.needsRedraw = true; // Draw in next frame
+            } else {
+                this.shieldGraphics.visible = true;
             }
-            this.shieldGraphics.clear();
-            this.shieldGraphics.circle(0, 0, this.radius + 6).stroke({ color: 0x00ffff, width: 2 });
-            this.shieldGraphics.visible = true;
         } else if (this.shieldGraphics) {
             this.shieldGraphics.visible = false;
         }
 
-        // HP Bar
-        this.hpGraphics.clear();
-        if (!this.hideHealthBar) {
-            this.hpGraphics.rect(-15, -this.radius - 8, 30, 4).fill({ color: 0xff0000 });
-            this.hpGraphics.rect(-15, -this.radius - 8, Math.round(30 * Math.max(0, this.hp / this.maxHp)), 4).fill({ color: 0x00ff00 });
+        // HP Bar - update scale.x instead of redrawing
+        if (!this.hideHealthBar && this.hpFillGraphics) {
+            if (this.swarmGroupId) {
+                // SwarmEnemy handles its own HP bar manually
+                this.hpFillGraphics.visible = false;
+            } else {
+                this.hpFillGraphics.scale.x = Math.max(0, this.hp / this.maxHp);
+                this.hpGraphics.visible = true;
+                this.hpFillGraphics.visible = true;
+            }
+        } else {
+            if (!this.swarmGroupId) this.hpGraphics.visible = false;
+            if (this.hpFillGraphics) this.hpFillGraphics.visible = false;
         }
     }
 

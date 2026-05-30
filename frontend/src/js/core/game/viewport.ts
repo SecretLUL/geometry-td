@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.2.1 - Added safety guards in clampCamera and centerCameraOnCell for app.renderer to prevent premature canvas and clientWidth/clientHeight access during early bootstrapping.
+ * @last_update: 2026-05-30 / v1.3.0 - Added staticPathGraphics export and added it to pathAnimContainer.
  */
 import { state } from '../state';
 import { Config } from '../config';
@@ -22,11 +22,13 @@ import { hideContextShop } from '../../ui/modals';
 import * as PIXI from 'pixi.js';
 
 export const app = new PIXI.Application();
-export const mapContainer = new PIXI.Container();
-export const pathAnimContainer = new PIXI.Container();
+export const mapContainer = new PIXI.Container({ isRenderGroup: true });
+export const pathAnimContainer = new PIXI.Container({ isRenderGroup: true });
+export const staticPathGraphics = new PIXI.Graphics();
 export const pathAnimGraphics = new PIXI.Graphics();
-export const entitiesContainer = new PIXI.Container();
-export const uiContainer = new PIXI.Container();
+export const entitiesContainer = new PIXI.Container({ isRenderGroup: true });
+export const uiContainer = new PIXI.Container({ isRenderGroup: true });
+export const inactivePoolContainer = new PIXI.Container(); // NEVER added to stage!
 
 export async function initPixi() {
     const pixiContainer = document.getElementById('pixi-container');
@@ -70,6 +72,7 @@ export async function initPixi() {
     
     app.stage.addChild(mapContainer);
     app.stage.addChild(pathAnimContainer);
+    pathAnimContainer.addChild(staticPathGraphics);
     pathAnimContainer.addChild(pathAnimGraphics);
     app.stage.addChild(entitiesContainer);
     app.stage.addChild(uiContainer);

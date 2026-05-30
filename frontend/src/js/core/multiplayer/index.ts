@@ -26,6 +26,7 @@ import {
     emitHostEndedWave
 } from './outbound';
 import { cleanupAllWebRTC, hasActiveWebRTCClients } from './webrtc';
+import { logger } from '../logger';
 
 // Setup/initialize the Multiplayer object methods
 Multiplayer.init = function(startWaveCallback: (data?: any) => void, updateUICallback: () => void): void {
@@ -57,17 +58,17 @@ Multiplayer.init = function(startWaveCallback: (data?: any) => void, updateUICal
         }) : null;
         setSocket(ioSocket);
     } catch (e) {
-        console.error("Fehler beim Initialisieren von Socket.io:", e);
+        logger.error("Fehler beim Initialisieren von Socket.io:", { error: e });
     }
 
     if (!socket) {
-        console.warn("Socket.io nicht geladen oder Verbindung fehlgeschlagen. Lokaler Modus aktiv.");
+        logger.warn("Socket.io nicht geladen oder Verbindung fehlgeschlagen. Lokaler Modus aktiv.");
         state.isHost = true; // Im lokalen Modus sind wir immer Host
         cleanupAllWebRTC();
         return;
     }
 
-    console.log("Multiplayer-System initialisiert.");
+    logger.info("Multiplayer-System initialisiert.");
 
     // Decoupled host state sync timeout loop (50ms/20Hz for WebRTC, 100ms/10Hz fallback for Socket.io)
     let idleTicks = 0;

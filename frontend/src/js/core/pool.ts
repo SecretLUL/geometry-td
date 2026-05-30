@@ -16,6 +16,7 @@
  */
 import { Particle, FloatingText, StunRay, MuzzleFlash, SniperBeam, RadiationArea, Shockwave, TeslaArc } from '../fx/fx';
 import { Projectile } from '../entities/projectiles';
+import { logger } from './logger';
 import { Enemy, Tower, Vector2D } from '../types';
 import { Config } from './config';
 
@@ -67,7 +68,7 @@ export const PoolManager = {
     groundEffectsList: [] as any[],
 
     init(): void {
-        console.log("Initializing Global Object Pools...");
+        logger.info("Initializing Global Object Pools...");
         this.particles = new ObjectPool<Particle>(() => new Particle(), 2000);
         this.projectiles = new ObjectPool<Projectile>(() => new Projectile(), 500);
         this.floatingTexts = new ObjectPool<FloatingText>(() => new FloatingText(), 200);

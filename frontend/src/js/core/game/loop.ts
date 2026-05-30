@@ -37,6 +37,26 @@ export let lastFpsUpdate = performance.now();
 export let fpsDisplayVal = 60;
 export let framesSinceLastFps = 0;
 
+function measureTrueFps(timestamp: number) {
+    if (!timestamp) timestamp = performance.now();
+    
+    if (timestamp - lastFpsUpdate > 1000) {
+        // Reset after long inactive periods (z.B. Hintergrund-Tab)
+        framesSinceLastFps = 0;
+        lastFpsUpdate = timestamp;
+    } else {
+        framesSinceLastFps++;
+        if (timestamp - lastFpsUpdate >= 500) {
+            fpsDisplayVal = Math.round((framesSinceLastFps * 1000) / (timestamp - lastFpsUpdate));
+            framesSinceLastFps = 0;
+            lastFpsUpdate = timestamp;
+        }
+    }
+    requestAnimationFrame(measureTrueFps);
+}
+// Unabhängig vom Fokus und der Game-Loop starten wir eine reine Render-FPS-Messung
+requestAnimationFrame(measureTrueFps);
+
 // Persistent Map objects to avoid garbage collection thrashing in game loop interpolation
 const state0EnemyMap = new Map<number, any>();
 const currentEnemyMap = new Map<number, Enemy>();
@@ -92,21 +112,15 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
     const tolerance = fromWorker ? 1.0 : 2.0;
     if (elapsed < frameInterval - tolerance) return;
 
+    let consumedTime = 0;
     if (elapsed >= frameInterval) {
+        consumedTime = elapsed - (elapsed % frameInterval);
         lastFrameTime = timestamp - (elapsed % frameInterval);
     } else {
         // If we fired slightly early because of the tolerance, advance the timer
         // by exactly one frame interval to keep the average pacing stable.
+        consumedTime = frameInterval;
         lastFrameTime += frameInterval;
-    }
-
-    // Track FPS metrics
-    framesSinceLastFps++;
-    const fpsNow = performance.now();
-    if (fpsNow - lastFpsUpdate >= 500) {
-        fpsDisplayVal = Math.round((framesSinceLastFps * 1000) / (fpsNow - lastFpsUpdate));
-        framesSinceLastFps = 0;
-        lastFpsUpdate = fpsNow;
     }
 
     // Keep high-brightness HTML DOM FPS overlay hidden (drawn on canvas instead)
@@ -291,7 +305,11 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                 }
             }
 
-            speedAccumulator += state.gameSpeed;
+            // Entkopplung der Spielgeschwindigkeit von der Framerate (Fixed Timestep)
+            // Basis-Logik-Rate: 60 Ticks pro Sekunde (entspricht 16.666 ms pro Tick)
+            const baseTickInterval = 1000 / 60;
+            speedAccumulator += state.gameSpeed * (consumedTime / baseTickInterval);
+            
             while (speedAccumulator >= 1) {
                 speedAccumulator -= 1;
 
@@ -350,7 +368,8 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                             if (tower.pixiSprite) {
                                 tower.pixiSprite.destroy();
                             }
-                            state.towers.splice(i, 1);
+                            state.towers[i] = state.towers[state.towers.length - 1];
+                            state.towers.pop();
 
                             // Trigger UI refresh
                             updateUI();
@@ -461,7 +480,8 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                                     cachedBossHpContainer?.classList.add('hidden');
                                 }
                             }
-                            state.enemies.splice(i, 1);
+                            state.enemies[i] = state.enemies[state.enemies.length - 1];
+                            state.enemies.pop();
                             // Pixi-Sprite verstecken, damit der Gegner sofort aus der Ansicht verschwindet
                             if ((enemy as any).pixiSprite) (enemy as any).pixiSprite.visible = false;
                             createExplosion(enemy.x, enemy.y, enemy.color, 10);
@@ -566,7 +586,8 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                                 }
                             }
 
-                            state.enemies.splice(i, 1);
+                            state.enemies[i] = state.enemies[state.enemies.length - 1];
+                            state.enemies.pop();
                             // Pixi-Sprite verstecken, damit der Gegner sofort aus der Ansicht verschwindet
                             if ((enemy as any).pixiSprite) (enemy as any).pixiSprite.visible = false;
                             updateUI();
@@ -602,27 +623,35 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
             }
 
             // Centralized Boss Bar Coordinator
-            const defragParts = state.enemies.filter(e =>
-                e.typeName === 'Defragmenter' ||
-                e.typeName === 'DefragmenterFragment' ||
-                e.typeName === 'DefragmenterSubfragment'
-            );
+            // Optimiert: Keine Array-Allokation (.filter) pro Frame.
+            let defragPartsCount = 0;
+            let currentHpSum = 0;
+            let defragWaveNumber = state.wave;
+            const baseHp = Config.ENEMY_BASE_HP;
 
-            if (defragParts.length > 0) {
-                const waveNumber = defragParts[0].waveNumber || state.wave;
-                const baseHp = Config.ENEMY_BASE_HP;
-                const hpMultiplier = Config.getHpMultiplier(waveNumber);
-                const totalMaxHp = Math.floor(baseHp * hpMultiplier * 192);
-
-                const currentHpSum = defragParts.reduce((sum, e) => {
+            for (let i = 0; i < state.enemies.length; i++) {
+                const e = state.enemies[i];
+                if (e.typeName === 'Defragmenter' || e.typeName === 'DefragmenterFragment' || e.typeName === 'DefragmenterSubfragment') {
+                    if (defragPartsCount === 0) {
+                        defragWaveNumber = e.waveNumber || state.wave;
+                    }
+                    defragPartsCount++;
+                    
+                    const hpMultiplier = Config.getHpMultiplier(defragWaveNumber);
                     let latentHp = 0;
                     if (e.typeName === 'Defragmenter') {
                         latentHp = Math.floor(baseHp * hpMultiplier * 92);
                     } else if (e.typeName === 'DefragmenterFragment') {
                         latentHp = Math.floor(baseHp * hpMultiplier * 16);
                     }
-                    return sum + Math.max(0, e.hp) + latentHp;
-                }, 0);
+                    currentHpSum += Math.max(0, e.hp) + latentHp;
+                }
+            }
+
+            if (defragPartsCount > 0) {
+                const hpMultiplier = Config.getHpMultiplier(defragWaveNumber);
+                const totalMaxHp = Math.floor(baseHp * hpMultiplier * 192);
+
                 if (cachedBossHpFill) {
                     cachedBossHpFill.style.width = (Math.max(0, currentHpSum) / totalMaxHp * 100) + '%';
                     if (cachedBossHpContainer) {
