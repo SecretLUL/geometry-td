@@ -340,7 +340,8 @@ export interface GameStateSocketPayload {
 /** Type map mapping all multiplayer events to their strict payloads */
 export interface SocketEventMap {
     // Connection
-    'join_mission': string; // Map name
+    'join_mission': string | { mapName: string; mode?: 'singleplayer' | 'public' | 'private'; roomId?: string; action?: string };
+    'room_error': string;
     'ready_to_play': void;
 
     // Setup and Admin
@@ -358,6 +359,8 @@ export interface SocketEventMap {
         waveModified?: boolean;
         playerCount?: number;
         hostId?: string | null;
+        mode?: 'singleplayer' | 'public' | 'private';
+        roomId?: string;
     };
 
     // General sync events

@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-23 / v1.4.0 - Removed changelog tab filters (now always showing 'All') and refactored dynamic loading to support comment metadata headers in changelog.json.
+ * @last_update: 2026-05-30 / v1.7.1 - Centered database lexicon enemy preview shape within the canvas dimensions by setting coordinates to (90, 90).
  */
 import { EnemyData } from '../core/config';
 import { EnemyFactory } from '../entities/enemies';
@@ -32,6 +32,9 @@ class MenuController {
     // Changelog state
     private changelogData: any[];
     private activeFilter: string;
+
+    // Room System Selection state
+    private selectedMapName: string | null = null;
 
     constructor() {
         this.tabs = document.querySelectorAll('.portal-tab');
@@ -54,7 +57,9 @@ class MenuController {
         this.initSettings();
         this.initLexicon();
         this.fetchMissionStats();
+        this.fetchOnlinePlayers();
         this.initChangelog();
+        this.initModeModal();
         
         // Listen to real-time updates from server
         try {
@@ -62,6 +67,9 @@ class MenuController {
             if (socket) {
                 socket.on('mission_stats_update', (stats: Record<string, number>) => {
                     this.updateMissionStatsUI(stats);
+                });
+                socket.on('online_players_update', (count: number) => {
+                    this.updateOnlinePlayersUI(count);
                 });
             }
         } catch(e) {
@@ -81,6 +89,27 @@ class MenuController {
             }
         } catch (err) {
             console.warn('Mission stats fetch failed (server may be offline):', err);
+        }
+    }
+
+    private async fetchOnlinePlayers(): Promise<void> {
+        try {
+            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                            ? 'http://localhost:3000' : '';
+            const response = await fetch(`${baseUrl}/api/online_players`, { cache: 'no-store' });
+            if (response.ok) {
+                const data = await response.json();
+                this.updateOnlinePlayersUI(data.total);
+            }
+        } catch (err) {
+            console.warn('Online players fetch failed (server may be offline):', err);
+        }
+    }
+
+    private updateOnlinePlayersUI(count: number): void {
+        const liveTickerEl = document.getElementById('liveTickerValue');
+        if (liveTickerEl) {
+            liveTickerEl.textContent = String(count);
         }
     }
 
@@ -104,7 +133,25 @@ class MenuController {
     }
 
     // --- Navigation & Tabs ---
+    private positionTabIndicator(): void {
+        const activeTab = document.querySelector('.portal-tab.active') as HTMLElement | null;
+        const indicator = document.querySelector('.portal-tab-indicator') as HTMLElement | null;
+        if (activeTab && indicator) {
+            indicator.style.left = `${activeTab.offsetLeft}px`;
+            indicator.style.width = `${activeTab.offsetWidth}px`;
+        }
+    }
+
     private initTabs(): void {
+        // Initialize the first active tab content
+        const firstActive = Array.from(this.contents).find(c => !c.classList.contains('hidden'));
+        if (firstActive) {
+            firstActive.classList.add('active-tab-content');
+        }
+
+        // Initialize active tab indicator position asynchronously once the DOM renders
+        setTimeout(() => this.positionTabIndicator(), 60);
+
         this.tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const target = tab.dataset.tab;
@@ -113,20 +160,55 @@ class MenuController {
                 }
             });
         });
+
+        // Add resize listener to keep active indicator perfectly aligned on screen resize
+        window.addEventListener('resize', () => this.positionTabIndicator());
     }
 
     private switchTab(tabId: string): void {
+        const currentActive = Array.from(this.contents).find(c => !c.classList.contains('hidden')) as HTMLElement;
+        const targetActive = document.getElementById(`tab-${tabId}`) as HTMLElement;
+        
+        if (!targetActive || currentActive === targetActive) return;
+        
+        // 1. Update tab button states immediately for instant UI feedback
         this.tabs.forEach(t => t.classList.remove('active'));
-        this.contents.forEach(c => c.classList.add('hidden'));
+        const activeTab = document.querySelector(`[data-tab="${tabId}"]`) as HTMLElement | null;
+        if (activeTab) {
+            activeTab.classList.add('active');
+            // Animate the physical tab slider indicator smoothly
+            this.positionTabIndicator();
+        }
         
-        const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
-        if (activeTab) activeTab.classList.add('active');
-        
-        const activeContent = document.getElementById(`tab-${tabId}`);
-        if (activeContent) activeContent.classList.remove('hidden');
-        
-        if (tabId === 'lexicon') {
-            this.initLexicon(); // Refresh Lexicon
+        if (currentActive) {
+            // 2. Fade out current content
+            currentActive.classList.remove('active-tab-content');
+            
+            // 3. Wait for fade-out transition to complete (250ms)
+            setTimeout(() => {
+                currentActive.classList.add('hidden');
+                
+                // 4. Unhide new content (set display, but keeping opacity: 0 and transform: translateY)
+                targetActive.classList.remove('hidden');
+                
+                // 5. Force reflow to register the display change before animating
+                void targetActive.offsetWidth;
+                
+                // 6. Fade in new content smoothly
+                targetActive.classList.add('active-tab-content');
+                
+                if (tabId === 'lexicon') {
+                    this.initLexicon(); // Refresh Lexicon
+                }
+            }, 250); // Matches the 0.25s CSS transition duration!
+        } else {
+            // Fallback for initial load
+            targetActive.classList.remove('hidden');
+            void targetActive.offsetWidth;
+            targetActive.classList.add('active-tab-content');
+            if (tabId === 'lexicon') {
+                this.initLexicon();
+            }
         }
     }
 
@@ -138,19 +220,201 @@ class MenuController {
             htmlCard.addEventListener('click', () => {
                 const mapName = htmlCard.dataset.map;
                 if (!mapName) return;
-                // AAA transition: fade out then redirect
-                const portalContainer = document.querySelector('.portal-container') as HTMLElement;
-                if (portalContainer) {
-                    portalContainer.style.opacity = '0';
-                    portalContainer.style.transform = 'scale(1.1)';
-                    portalContainer.style.transition = '0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-                }
                 
-                setTimeout(() => {
-                    window.location.href = `game.html?map=${encodeURIComponent(mapName)}`;
-                }, 500);
+                this.selectedMapName = mapName;
+
+                // Update Modal Header Map Title
+                const modalMapHeader = document.getElementById('modalMapName');
+                if (modalMapHeader) {
+                    modalMapHeader.textContent = `SEKTOR-ZUGRIFF: ${mapName.toUpperCase()}`;
+                }
+
+                // Show the selection Modal
+                const modal = document.getElementById('modeSelectionModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                }
             });
         });
+    }
+
+    // --- Mode Selection Modal Controller ---
+    private initModeModal(): void {
+        const modal = document.getElementById('modeSelectionModal');
+        const closeModal = document.getElementById('closeModeModal');
+        const startSolo = document.getElementById('startSoloBtn');
+        const startPublic = document.getElementById('startPublicBtn');
+        const createPrivate = document.getElementById('createPrivateBtn');
+        const joinPrivate = document.getElementById('joinPrivateBtnModal');
+        const privateInput = document.getElementById('privateCodeInputModal') as HTMLInputElement | null;
+
+        const directJoin = document.getElementById('directJoinBtn');
+        const directInput = document.getElementById('directCodeInput') as HTMLInputElement | null;
+
+        // URL Error Banner checking
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMsg = urlParams.get('error');
+        if (errorMsg) {
+            this.showErrorBanner(errorMsg);
+        }
+
+        const hideModal = () => {
+            if (modal) modal.classList.add('hidden');
+            this.selectedMapName = null;
+            if (privateInput) privateInput.value = '';
+        };
+
+        // Close on background click or close click
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) hideModal();
+        });
+        closeModal?.addEventListener('click', hideModal);
+
+        // Core transition and redirection helper
+        const transitionAndRedirect = (url: string) => {
+            const portalContainer = document.querySelector('.portal-container') as HTMLElement;
+            if (portalContainer) {
+                portalContainer.style.opacity = '0';
+                portalContainer.style.transform = 'scale(1.1)';
+                portalContainer.style.transition = '0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+            }
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+        };
+
+        // Solo Simulation
+        startSolo?.addEventListener('click', () => {
+            if (!this.selectedMapName) return;
+            transitionAndRedirect(`game.html?map=${encodeURIComponent(this.selectedMapName)}&mode=singleplayer`);
+        });
+
+        // Public Matchmaking
+        startPublic?.addEventListener('click', () => {
+            if (!this.selectedMapName) return;
+            transitionAndRedirect(`game.html?map=${encodeURIComponent(this.selectedMapName)}&mode=public`);
+        });
+
+        // Private Lobby Creation
+        createPrivate?.addEventListener('click', () => {
+            if (!this.selectedMapName) return;
+            transitionAndRedirect(`game.html?map=${encodeURIComponent(this.selectedMapName)}&mode=private&action=create`);
+        });
+
+        // Private Lobby Joining (Modal View)
+        joinPrivate?.addEventListener('click', () => {
+            if (!this.selectedMapName || !privateInput) return;
+            const code = privateInput.value.trim().toUpperCase();
+            if (code.length !== 4) {
+                alert("Bitte gib einen gültigen 4-stelligen Raum-Code ein.");
+                return;
+            }
+            this.verifyAndJoinRoom(code);
+        });
+
+        privateInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const code = privateInput.value.trim().toUpperCase();
+                if (code.length === 4) {
+                    this.verifyAndJoinRoom(code);
+                }
+            }
+        });
+
+        // Direct Code Join View (Quick-Access Bar)
+        directJoin?.addEventListener('click', () => {
+            if (!directInput) return;
+            const code = directInput.value.trim().toUpperCase();
+            if (code.length !== 4) {
+                alert("Bitte gib einen gültigen 4-stelligen Raum-Code ein.");
+                return;
+            }
+            this.verifyAndJoinRoom(code);
+        });
+
+        directInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const code = directInput.value.trim().toUpperCase();
+                if (code.length === 4) {
+                    this.verifyAndJoinRoom(code);
+                }
+            }
+        });
+    }
+
+    private async verifyAndJoinRoom(code: string): Promise<void> {
+        try {
+            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                            ? 'http://localhost:3000' : '';
+            const response = await fetch(`${baseUrl}/api/room/${encodeURIComponent(code)}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.exists) {
+                    // Transition and redirect
+                    const portalContainer = document.querySelector('.portal-container') as HTMLElement;
+                    if (portalContainer) {
+                        portalContainer.style.opacity = '0';
+                        portalContainer.style.transform = 'scale(1.1)';
+                        portalContainer.style.transition = '0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                    }
+                    setTimeout(() => {
+                        window.location.href = `game.html?map=${encodeURIComponent(data.mapName)}&roomId=${encodeURIComponent(code)}&mode=private`;
+                    }, 500);
+                } else {
+                    alert("Zugriff verweigert: Der Raum-Code existiert nicht oder ist abgelaufen.");
+                }
+            } else {
+                alert("Verbindungsfehler bei der Code-Verifizierung.");
+            }
+        } catch (err) {
+            console.warn("Room verification failed:", err);
+            alert("Simulation-Server nicht erreichbar.");
+        }
+    }
+
+    private showErrorBanner(msg: string): void {
+        const portalBody = document.querySelector('.portal-body');
+        if (!portalBody) return;
+
+        // XSS Prevention: Build structural DOM nodes and strictly set textContent
+        const banner = document.createElement('div');
+        banner.className = 'error-banner';
+
+        const icon = document.createElement('div');
+        icon.className = 'error-banner-icon';
+        icon.textContent = '🚨';
+        banner.appendChild(icon);
+
+        const content = document.createElement('div');
+        content.className = 'error-banner-content';
+        
+        const strong = document.createElement('strong');
+        strong.textContent = 'SYSTEM-WARNHINWEIS: ';
+        content.appendChild(strong);
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = msg;
+        content.appendChild(textSpan);
+        
+        banner.appendChild(content);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'error-banner-close';
+        closeBtn.textContent = '×';
+        banner.appendChild(closeBtn);
+
+        closeBtn.addEventListener('click', () => {
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(-10px)';
+            banner.style.transition = '0.3s ease';
+            setTimeout(() => banner.remove(), 300);
+            
+            // Clear parameter from history securely without refresh
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        });
+
+        portalBody.insertBefore(banner, portalBody.firstChild);
     }
 
     // --- Einstellungen (Settings) ---
@@ -414,8 +678,8 @@ class MenuController {
             }
 
             const enemy = EnemyFactory.createEnemy(enemyType as EnemyType, 1, true);
-            enemy.x = 0;
-            enemy.y = 0;
+            enemy.x = 90;
+            enemy.y = 90;
             enemy.hideHealthBar = true;
             
             // Add to stage

@@ -12,8 +12,15 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-20 / v1.0.0
+ * @last_update: 2026-05-30 / v1.1.0 - Registered the BladeRunner font-face globally.
  */
+@font-face {
+    font-family: 'BladeRunner';
+    src: url('/assets/fonts/BLADRMF_.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 :root {
     --tesla-cyan: #00d4ff;
     --sniper-blue: #1a1a2e;

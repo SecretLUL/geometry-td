@@ -169,19 +169,21 @@ export class BackgroundController {
         }
 
         const timestamp = performance.now();
-        const elapsed = timestamp - this.lastFrameTime;
+        let elapsed = timestamp - this.lastFrameTime;
         const frameInterval = 1000 / targetFPS;
 
-        if (elapsed < frameInterval - 2.0) {
+        if (elapsed < frameInterval - 4.0) {
             requestAnimationFrame(() => this.animate());
             return;
         }
 
-        if (elapsed >= frameInterval) {
-            this.lastFrameTime = timestamp - (elapsed % frameInterval);
-        } else {
-            this.lastFrameTime += frameInterval;
+        if (elapsed > 100) {
+            elapsed = frameInterval;
         }
+
+        this.lastFrameTime = timestamp;
+
+        const timeScale = elapsed / 16.666;
 
         const width = this.app.screen.width;
         const height = this.app.screen.height;
@@ -192,8 +194,8 @@ export class BackgroundController {
 
         this.particleGraphics.clear();
         this.particles.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
+            p.x += p.vx * timeScale;
+            p.y += p.vy * timeScale;
             
             if(p.x < 0) p.x = width;
             if(p.x > width) p.x = 0;
@@ -294,9 +296,9 @@ export class BackgroundController {
 
             for (let i = this.laserSparks.length - 1; i >= 0; i--) {
                 const spark = this.laserSparks[i];
-                spark.x += spark.vx;
-                spark.y += spark.vy;
-                spark.life -= spark.decay;
+                spark.x += spark.vx * timeScale;
+                spark.y += spark.vy * timeScale;
+                spark.life -= spark.decay * timeScale;
                 
                 if (spark.life <= 0) {
                     this.laserSparks.splice(i, 1);

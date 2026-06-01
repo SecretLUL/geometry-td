@@ -372,7 +372,10 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
         const onConnect = () => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const mapName = urlParams.get('map') || 'Unknown Map';
-                socket.emit('join_mission', mapName);
+                const mode = urlParams.get('mode') || 'public';
+                const roomId = urlParams.get('roomId') || undefined;
+                const action = urlParams.get('action') || undefined;
+                socket.emit('join_mission', { mapName, mode, roomId, action });
             };
 
             if (socket.connected) {
@@ -382,6 +385,12 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
 
             socket.on('disconnect', () => {
                 cleanupAllWebRTC();
+            });
+
+            socket.on('room_error', (msg: string) => {
+                console.error("Room error:", msg);
+                alert("Sektor-Verbindungsfehler: " + msg);
+                window.location.href = 'index.html?error=' + encodeURIComponent(msg);
             });
 
             socket.on('role_assigned', (data: SocketEventMap['role_assigned']) => {
@@ -425,8 +434,11 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                     enemiesToSpawn, spawnCooldown, gameSpeed,
                     godModeActive, infiniteGoldActive, playerCount,
                     enemyPool, isWaveActive, lives, gold, hostTileSize, autoStartActive,
-                    waveModified, benchmarkActive
+                    waveModified, benchmarkActive, mode, roomId
                 } = data;
+
+                Multiplayer.activeMode = mode;
+                Multiplayer.activeRoomId = roomId;
 
                 if (state.towers) {
                     state.towers.forEach(t => {

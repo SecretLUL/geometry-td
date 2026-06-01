@@ -6,7 +6,15 @@
 import { z } from 'zod';
 
 // 1. Join lobby validation
-export const JoinMissionSchema = z.string().min(1).max(100);
+export const JoinMissionSchema = z.union([
+  z.string().min(1).max(100),
+  z.object({
+    mapName: z.string().min(1).max(100),
+    mode: z.enum(['singleplayer', 'public', 'private']).optional(),
+    roomId: z.string().min(1).max(100).optional(),
+    action: z.string().min(1).max(100).optional(),
+  })
+]);
 
 // 2. Tower Actions - Requests (Client to Host)
 export const RequestPlaceTowerSchema = z.object({

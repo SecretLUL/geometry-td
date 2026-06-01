@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-22 / v1.0.0 - Created base.ts as part of enemies.ts split.
+ * @last_update: 2026-05-30 / v1.1.0 - Allowed initPixi to run on the main menu page without requiring active game viewport app.renderer.
  */
 import { Config } from '../../core/config';
 import { state } from '../../core/state';
@@ -98,7 +98,7 @@ export class BaseEnemy implements Enemy {
     }
 
     public initPixi(): void {
-        if (typeof window === 'undefined' || !app || !app.renderer) return;
+        if (typeof window === 'undefined') return;
         if (!this.pixiSprite) {
             this.pixiSprite = new PIXI.Container();
             this.bodyGraphics = new PIXI.Graphics();
@@ -116,7 +116,9 @@ export class BaseEnemy implements Enemy {
                 this.pixiSprite.addChild(this.shieldGraphics);
             }
         }
-        entitiesContainer.addChild(this.pixiSprite);
+        if (app && app.renderer && entitiesContainer) {
+            entitiesContainer.addChild(this.pixiSprite);
+        }
         this.needsRedraw = true;
         this.pixiSprite.visible = true;
     }

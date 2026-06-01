@@ -50,11 +50,17 @@ Multiplayer.init = function(startWaveCallback: (data?: any) => void, updateUICal
             wantHost = roleParam !== 'client'; // default to host in dev
         }
 
+        const roomIdParam = urlParams.get('roomId');
+        const queryParams: any = { 
+            headless: isHeadless ? 'true' : 'false',
+            wantHost: wantHost ? 'true' : 'false'
+        };
+        if (roomIdParam) {
+            queryParams.roomId = roomIdParam;
+        }
+
         const ioSocket = (window as any).io ? (window as any).io({
-            query: { 
-                headless: isHeadless ? 'true' : 'false',
-                wantHost: wantHost ? 'true' : 'false'
-            }
+            query: queryParams
         }) : null;
         setSocket(ioSocket);
     } catch (e) {
@@ -180,7 +186,23 @@ Multiplayer.updatePlayerCountUI = function(count: number): void {
         }
     }
     if (counterEl) {
-        counterEl.innerText = `👥 ${count} SPIELER VERBUNDEN`;
+        let roomInfoText = `👥 ${count} SPIELER VERBUNDEN`;
+        const activeMode = Multiplayer.activeMode || 'public';
+        const activeRoomId = Multiplayer.activeRoomId;
+
+        let modeLabel = 'ÖFFENTLICH';
+        if (activeMode === 'singleplayer') {
+            modeLabel = 'SINGLEPLAYER';
+        } else if (activeMode === 'private') {
+            modeLabel = 'PRIVAT';
+        }
+
+        roomInfoText += `\n⚙️ MODUS: ${modeLabel}`;
+        if (activeMode === 'private' && activeRoomId) {
+            roomInfoText += `\n🔑 CODE: ${activeRoomId}`;
+        }
+
+        counterEl.innerText = roomInfoText;
     }
 
     // Role switcher button ONLY in Dev environment

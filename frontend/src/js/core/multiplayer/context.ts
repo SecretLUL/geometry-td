@@ -87,6 +87,8 @@ export interface IMultiplayer {
     currentTick: number;
     lastSyncState: SyncFullGameStatePayload | null;
     lastReceivedState: SyncFullGameStatePayload | null;
+    activeMode?: 'singleplayer' | 'public' | 'private';
+    activeRoomId?: string;
 
     init(startWaveCallback: (data?: any) => void, updateUICallback: () => void): void;
     updatePlayerCountUI(count: number): void;

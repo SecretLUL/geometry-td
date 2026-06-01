@@ -27,23 +27,52 @@
     </div>
 
     <div class="menu-layout-wrapper">
-        <div class="portal-container">
-            <header class="portal-header">
+        <div class="portal-main-column">
+            <div class="portal-title-outer-wrapper">
                 <div class="title-block">
-                    <h1 class="portal-title" data-text="Geometry Tower Defense">Geometry Tower Defense</h1>
-                    <div class="portal-subtitle">Advanced Combat Simulation</div>
+                    <h1 class="portal-title">
+                        <span class="word-1">geometry</span>
+                        <div class="main-title-row">
+                            <span class="word-2" data-text="tower">tower</span>
+                            <span class="word-3" data-text="defense">defense</span>
+                        </div>
+                    </h1>
                 </div>
-                <nav class="portal-tabs">
-                    <button class="portal-tab active" data-tab="maps">Maps</button>
-                    <button class="portal-tab" data-tab="lexicon">Database</button>
-                    <button class="portal-tab" data-tab="settings">Einstellungen</button>
-                </nav>
-            </header>
+            </div>
+            
+            <div class="portal-container">
+                <header class="portal-header">
+                    <div class="header-nav-row">
+                        <nav class="portal-tabs">
+                            <button class="portal-tab active" data-tab="maps">Maps</button>
+                            <button class="portal-tab" data-tab="lexicon">Database</button>
+                            <button class="portal-tab" data-tab="settings">Einstellungen</button>
+                            <div class="portal-tab-indicator"></div>
+                        </nav>
+                        <div class="live-ticker-container">
+                            <span class="ticker-pulse"></span>
+                            <span class="ticker-label">COMBATANTS ONLINE:</span>
+                            <span id="liveTickerValue" class="ticker-value">0</span>
+                        </div>
+                    </div>
+                </header>
 
             <main class="portal-body">
                 
                 <!-- Maps Tab -->
                 <div id="tab-maps" class="tab-content-wrapper">
+                    <!-- Direct Code Joiner Component (Cyberpunk Style) -->
+                    <div class="direct-join-bar">
+                        <div class="direct-join-label">
+                            <span class="direct-join-pulse"></span>
+                            <span>DIREKTBEITRITT PER RAUM-CODE:</span>
+                        </div>
+                        <div class="direct-join-controls">
+                            <input type="text" id="directCodeInput" maxlength="4" placeholder="CODE" autocomplete="off" class="direct-input">
+                            <button id="directJoinBtn" class="direct-btn glitch-hover">VERIFIZIEREN & BEITRETEN</button>
+                        </div>
+                    </div>
+
                     <div class="mission-grid">
                         <!-- Spiral Map -->
                         <div class="mission-card" data-map="The Spiral">
@@ -52,7 +81,7 @@
                             </div>
                             <div class="mission-content">
                                 <div class="mission-name">
-                                    <span>THE SPIRAL <span class="mission-player-count" data-map="The Spiral" style="font-size: 0.6em; color: var(--tesla-cyan); margin-left: 10px; background: rgba(76,201,240,0.1); padding: 2px 6px; border-radius: 4px; vertical-align: middle;">0/4</span></span>
+                                    <span>THE SPIRAL</span>
                                     <div class="difficulty-dots">
                                         <div class="dot active easy"></div>
                                         <div class="dot active med"></div>
@@ -82,7 +111,7 @@
                             </div>
                             <div class="mission-content">
                                 <div class="mission-name">
-                                    <span>QUANTUM BYPASS <span class="mission-player-count" data-map="Quantum Bypass" style="font-size: 0.6em; color: var(--tesla-cyan); margin-left: 10px; background: rgba(76,201,240,0.1); padding: 2px 6px; border-radius: 4px; vertical-align: middle;">0/4</span></span>
+                                    <span>QUANTUM BYPASS</span>
                                     <div class="difficulty-dots">
                                         <div class="dot active easy"></div>
                                         <div class="dot active med"></div>
@@ -112,7 +141,7 @@
                             </div>
                             <div class="mission-content">
                                 <div class="mission-name">
-                                    <span>THE ZIGZAG <span class="mission-player-count" data-map="The ZigZag" style="font-size: 0.6em; color: var(--tesla-cyan); margin-left: 10px; background: rgba(76,201,240,0.1); padding: 2px 6px; border-radius: 4px; vertical-align: middle;">0/4</span></span>
+                                    <span>THE ZIGZAG</span>
                                     <div class="difficulty-dots">
                                         <div class="dot active easy"></div>
                                         <div class="dot active med"></div>
@@ -283,6 +312,7 @@
 
             </main>
         </div>
+        </div>
 
         <!-- Einklappbarer Changelog Container -->
         <div id="changelog-panel" class="changelog-container collapsed">
@@ -302,6 +332,51 @@
             
             <div id="changelog-list" class="changelog-list-content">
                 <div class="changelog-loading">Lade Simulationstransfers...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Mode Selection Modal (Premium, Cyber-Glassmorphic) ── -->
+    <div id="modeSelectionModal" class="custom-overlay hidden">
+        <div class="custom-modal-content">
+            <button class="custom-modal-close" id="closeModeModal">&times;</button>
+            <div class="custom-modal-header">
+                <div class="custom-modal-header-icon">🛡️</div>
+                <h2 id="modalMapName">SEKTOR-ZUGRIFFS-PROTOKOLL</h2>
+            </div>
+            <p class="custom-modal-subtitle">Wähle deine Einsatzmethode für die Simulation in diesem Sektor</p>
+            
+            <div class="modes-grid">
+                <!-- Solo Modus -->
+                <div class="mode-card" id="modeCardSolo">
+                    <div class="mode-icon">👤</div>
+                    <h3>Solo-Einsatz</h3>
+                    <p class="mode-desc">Starte eine isolierte Simulation nur für dich. Keine Störungen, reiner Fokus auf deine Taktik.</p>
+                    <button class="mode-action-btn solo-btn glitch-hover" id="startSoloBtn">Solo Starten</button>
+                </div>
+                
+                <!-- Public Modus -->
+                <div class="mode-card" id="modeCardPublic">
+                    <div class="mode-icon">🌐</div>
+                    <h3>Öffentliches Match</h3>
+                    <p class="mode-desc">Tritt einem bestehenden Trupp bei oder öffne diesen Sektor für bis zu 4 Spieler. Teamplay erforderlich!</p>
+                    <button class="mode-action-btn public-btn glitch-hover" id="startPublicBtn">Match Suchen</button>
+                </div>
+                
+                <!-- Private Modus -->
+                <div class="mode-card" id="modeCardPrivate">
+                    <div class="mode-icon">🔐</div>
+                    <h3>Privates Match</h3>
+                    <p class="mode-desc">Generiere einen einzigartigen 4-stelligen Zugangscode oder gib einen Code ein, um mit Freunden zu spielen.</p>
+                    <div class="private-controls">
+                        <button class="mode-action-btn private-create-btn glitch-hover" id="createPrivateBtn">Raum Erstellen</button>
+                        <div class="private-divider">oder</div>
+                        <div class="private-join-box">
+                            <input type="text" id="privateCodeInputModal" maxlength="4" placeholder="CODE" autocomplete="off" class="private-input">
+                            <button class="private-join-btn" id="joinPrivateBtnModal">Beitreten</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

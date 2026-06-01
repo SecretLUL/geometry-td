@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.7.1 - Registered host_ended_wave relay for co-op notifications.
+ * @last_update: 2026-05-30 / v1.8.0 - Added global online players live ticker REST endpoint and WebSocket synchronizers.
  */
 import express, { Request, Response } from 'express';
 import http from 'http';
@@ -99,12 +99,12 @@ function checkRateLimit(socketId: string, event: string, limitMs: number = 100):
   return true;
 }
 
-async function spawnHeadlessHost(mapName: string) {
-  if (activeBrowsers[mapName] && activeBrowsers[mapName].status !== 'failed') return;
+async function spawnHeadlessHost(roomId: string, mapName: string) {
+  if (activeBrowsers[roomId] && activeBrowsers[roomId].status !== 'failed') return;
 
   const instanceId = Math.random().toString(36).substring(2, 15);
-  console.log(`[HEADLESS] Starte Headless-Host für Mission: ${mapName} (ID: ${instanceId})`);
-  activeBrowsers[mapName] = {
+  console.log(`[HEADLESS] Starte Headless-Host für Room: ${roomId} (Map: ${mapName}, ID: ${instanceId})`);
+  activeBrowsers[roomId] = {
     browser: null,
     page: null,
     status: 'launching',
@@ -133,8 +133,8 @@ async function spawnHeadlessHost(mapName: string) {
     );
 
     // Abort if stopped or replaced while launching
-    if (!activeBrowsers[mapName] || activeBrowsers[mapName].instanceId !== instanceId) {
-      console.log(`[HEADLESS] Spawn für ${mapName} abgebrochen (Race-Condition erkannt nach Launch).`);
+    if (!activeBrowsers[roomId] || activeBrowsers[roomId].instanceId !== instanceId) {
+      console.log(`[HEADLESS] Spawn für Room ${roomId} abgebrochen (Race-Condition erkannt nach Launch).`);
       if (browser) await browser.close();
       return;
     }
@@ -146,8 +146,8 @@ async function spawnHeadlessHost(mapName: string) {
       "Timeout beim Öffnen eines neuen Tabs"
     );
 
-    if (!activeBrowsers[mapName] || activeBrowsers[mapName].instanceId !== instanceId) {
-      console.log(`[HEADLESS] Spawn für ${mapName} abgebrochen (Race-Condition erkannt nach newPage).`);
+    if (!activeBrowsers[roomId] || activeBrowsers[roomId].instanceId !== instanceId) {
+      console.log(`[HEADLESS] Spawn für Room ${roomId} abgebrochen (Race-Condition erkannt nach newPage).`);
       if (browser) await browser.close();
       return;
     }
@@ -158,7 +158,7 @@ async function spawnHeadlessHost(mapName: string) {
       const type = msg.type() as string;
       const text = msg.text();
       const isProd = process.env.NODE_ENV === 'production';
-      const isBenchmark = roomStates[mapName]?.benchmarkActive;
+      const isBenchmark = roomStates[roomId]?.benchmarkActive;
 
       // Suppress logs completely in benchmark mode to prevent event loop bottlenecks
       if (isBenchmark) return;
@@ -166,19 +166,19 @@ async function spawnHeadlessHost(mapName: string) {
       // In production, only log warnings and errors
       if (isProd) {
         if (type === 'warning') {
-          console.warn(`[BROWSER WARN][${mapName}]:`, text);
+          console.warn(`[BROWSER WARN][Room ${roomId}]:`, text);
         } else if (type === 'error') {
-          console.error(`[BROWSER ERROR][${mapName}]:`, text);
+          console.error(`[BROWSER ERROR][Room ${roomId}]:`, text);
         }
       } else {
         // In development, log everything
-        console.log(`[BROWSER LOG][${mapName}]:`, text);
+        console.log(`[BROWSER LOG][Room ${roomId}]:`, text);
       }
     });
-    page.on('error', (err: Error) => console.error(`[BROWSER ERROR][${mapName}]:`, err));
-    page.on('pageerror', (err: Error) => console.error(`[BROWSER PAGE-ERROR][${mapName}]:`, err));
+    page.on('error', (err: Error) => console.error(`[BROWSER ERROR][Room ${roomId}]:`, err));
+    page.on('pageerror', (err: Error) => console.error(`[BROWSER PAGE-ERROR][Room ${roomId}]:`, err));
 
-    const url = `${FRONTEND_URL}/game.html?map=${encodeURIComponent(mapName)}&headless=true`;
+    const url = `${FRONTEND_URL}/game.html?map=${encodeURIComponent(mapName)}&headless=true&roomId=${encodeURIComponent(roomId)}`;
     console.log(`[HEADLESS] Lade URL: ${url}`);
 
     // Navigate with 30s timeout
@@ -188,68 +188,68 @@ async function spawnHeadlessHost(mapName: string) {
       "Timeout beim Laden der Frontend-URL"
     );
 
-    if (!activeBrowsers[mapName] || activeBrowsers[mapName].instanceId !== instanceId) {
-      console.log(`[HEADLESS] Spawn für ${mapName} abgebrochen (Race-Condition erkannt nach goto).`);
+    if (!activeBrowsers[roomId] || activeBrowsers[roomId].instanceId !== instanceId) {
+      console.log(`[HEADLESS] Spawn für Room ${roomId} abgebrochen (Race-Condition erkannt nach goto).`);
       if (browser) await browser.close();
       return;
     }
 
-    activeBrowsers[mapName] = {
+    activeBrowsers[roomId] = {
       browser,
       page,
       status: 'running',
       instanceId,
-      launchStartedAt: activeBrowsers[mapName].launchStartedAt
+      launchStartedAt: activeBrowsers[roomId].launchStartedAt
     };
-    console.log(`[HEADLESS] Headless-Host für ${mapName} erfolgreich gestartet.`);
+    console.log(`[HEADLESS] Headless-Host für Room ${roomId} erfolgreich gestartet.`);
   } catch (err) {
-    console.error(`[HEADLESS] Fehler beim Starten des Headless-Hosts für ${mapName}:`, err);
-    if (activeBrowsers[mapName] && activeBrowsers[mapName].instanceId === instanceId) {
-      delete activeBrowsers[mapName];
+    console.error(`[HEADLESS] Fehler beim Starten des Headless-Hosts für Room ${roomId}:`, err);
+    if (activeBrowsers[roomId] && activeBrowsers[roomId].instanceId === instanceId) {
+      delete activeBrowsers[roomId];
     }
     if (browser) {
       try {
         await browser.close();
       } catch (closeErr) {
-        console.error(`[HEADLESS] Fehler beim Schließen des Browsers im Catch-Block für ${mapName}:`, closeErr);
+        console.error(`[HEADLESS] Fehler beim Schließen des Browsers im Catch-Block für Room ${roomId}:`, closeErr);
       }
     }
   }
 }
 
-async function stopHeadlessHost(mapName: string) {
-  const instance = activeBrowsers[mapName];
+async function stopHeadlessHost(roomId: string) {
+  const instance = activeBrowsers[roomId];
   if (!instance) return;
 
-  console.log(`[HEADLESS] Beende Headless-Host für Mission: ${mapName}`);
-  delete activeBrowsers[mapName];
+  console.log(`[HEADLESS] Beende Headless-Host für Room: ${roomId}`);
+  delete activeBrowsers[roomId];
 
   try {
     if (instance.browser) {
       await instance.browser.close();
     }
   } catch (err) {
-    console.error(`[HEADLESS] Fehler beim Beenden des Headless-Hosts für ${mapName}:`, err);
+    console.error(`[HEADLESS] Fehler beim Beenden des Headless-Hosts für Room ${roomId}:`, err);
   }
 }
 
 async function runHeadlessHealthCheck() {
   const now = Date.now();
-  for (const mapName of Object.keys(activeBrowsers)) {
-    const instance = activeBrowsers[mapName];
+  for (const roomId of Object.keys(activeBrowsers)) {
+    const instance = activeBrowsers[roomId];
     if (!instance) continue;
 
     // 1. Stuck in launching state check (> 45 seconds)
     if (instance.status === 'launching') {
       const duration = now - instance.launchStartedAt;
       if (duration > 45000) {
-        console.warn(`[HEALTH-CHECK] Headless-Host für ${mapName} hängt im 'launching' Status seit ${Math.round(duration / 1000)}s. Bereinige...`);
-        delete activeBrowsers[mapName];
+        console.warn(`[HEALTH-CHECK] Headless-Host für Room ${roomId} hängt im 'launching' Status seit ${Math.round(duration / 1000)}s. Bereinige...`);
+        delete activeBrowsers[roomId];
         if (instance.browser) {
           try {
             await instance.browser.close();
           } catch (err) {
-            console.error(`[HEALTH-CHECK] Fehler beim Schließen des hängenden Browsers für ${mapName}:`, err);
+            console.error(`[HEALTH-CHECK] Fehler beim Schließen des hängenden Browsers für Room ${roomId}:`, err);
           }
         }
       }
@@ -257,11 +257,11 @@ async function runHeadlessHealthCheck() {
     }
 
     // 2. Orphan check (no active human players in room)
-    const room = roomStates[mapName];
+    const room = roomStates[roomId];
     const hasHumanPlayers = room && room.playerCount > 0;
     if (!hasHumanPlayers) {
-      console.log(`[HEALTH-CHECK] Keine aktiven menschlichen Spieler mehr für ${mapName}. Beende verwaisten Headless-Browser.`);
-      await stopHeadlessHost(mapName);
+      console.log(`[HEALTH-CHECK] Keine aktiven menschlichen Spieler mehr für Room ${roomId}. Beende verwaisten Headless-Browser.`);
+      await stopHeadlessHost(roomId);
       continue;
     }
 
@@ -274,9 +274,9 @@ async function runHeadlessHealthCheck() {
           "Browser reagiert nicht auf Anfragen"
         );
       } catch (err) {
-        console.error(`[HEALTH-CHECK] Headless-Host für ${mapName} reagiert nicht oder ist abgestürzt:`, err);
-        await stopHeadlessHost(mapName);
-        activeBrowsers[mapName] = {
+        console.error(`[HEALTH-CHECK] Headless-Host für Room ${roomId} reagiert nicht oder ist abgestürzt:`, err);
+        await stopHeadlessHost(roomId);
+        activeBrowsers[roomId] = {
           browser: null,
           page: null,
           status: 'failed',
@@ -377,15 +377,18 @@ interface RoomState {
   autoStartActive: boolean;
   currentTick: number;
   lastReceivedState: SyncFullGameStatePayload | null;
+  mapName: string;
+  mode: 'singleplayer' | 'public' | 'private';
+  roomId: string;
   [key: string]: any;
 }
 
 const roomStates: Record<string, RoomState> = {};
 const roomJoinLocks = new Set<string>();
 
-function initRoomState(mapName: string) {
-  if (!roomStates[mapName]) {
-    roomStates[mapName] = {
+function initRoomState(roomId: string, mapName: string, mode: 'singleplayer' | 'public' | 'private') {
+  if (!roomStates[roomId]) {
+    roomStates[roomId] = {
       hostId: null,
       headlessSocketId: null,
       towers: [],
@@ -408,7 +411,10 @@ function initRoomState(mapName: string) {
       hostTileSize: 40, // Default, updated by host
       autoStartActive: false,
       currentTick: 0,
-      lastReceivedState: null
+      lastReceivedState: null,
+      mapName,
+      mode,
+      roomId
     };
   }
 }
@@ -418,9 +424,26 @@ const missionRooms = ["The Spiral", "The ZigZag", "Quantum Bypass"];
 function getMissionStats(): Record<string, number> {
   const stats: Record<string, number> = {};
   missionRooms.forEach(room => {
-    stats[room] = roomStates[room] ? roomStates[room].playerCount : 0;
+    stats[room] = 0;
   });
+  for (const roomId in roomStates) {
+    const room = roomStates[roomId];
+    if (room.mode === 'public' && stats[room.mapName] !== undefined) {
+      stats[room.mapName] += room.playerCount;
+    }
+  }
   return stats;
+}
+
+function getTotalOnlinePlayers(disconnectingSocketId?: string): number {
+  let count = 0;
+  for (const [id, socket] of io.sockets.sockets) {
+    if (id === disconnectingSocketId) continue;
+    if (!(socket as any).isHeadless && socket.connected) {
+      count++;
+    }
+  }
+  return count;
 }
 
 app.get('/api/mission_stats', (req: Request, res: Response) => {
@@ -429,58 +452,146 @@ app.get('/api/mission_stats', (req: Request, res: Response) => {
   res.json(getMissionStats());
 });
 
+app.get('/api/online_players', (req: Request, res: Response) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.json({ total: getTotalOnlinePlayers() });
+});
+
+app.get('/api/room/:roomId', (req: Request, res: Response) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  const roomId = (req.params.roomId as string).toUpperCase();
+  const room = roomStates[roomId];
+  if (room && room.mode !== 'singleplayer') {
+    res.json({ exists: true, mapName: room.mapName, playerCount: room.playerCount, mode: room.mode });
+  } else {
+    res.json({ exists: false });
+  }
+});
+
 interface CustomSocket extends Socket {
   mission?: string;
   isHeadless?: boolean;
 }
 
 io.on("connection", (socket: CustomSocket) => {
+  socket.isHeadless = socket.handshake.query.headless === 'true';
   console.log(`Spieler verbunden: ${socket.id}`);
   socket.emit("mission_stats_update", getMissionStats());
+  io.emit("online_players_update", getTotalOnlinePlayers());
 
-  socket.on("join_mission", async (rawMapName: unknown) => {
-    const parsed = JoinMissionSchema.safeParse(rawMapName);
+  socket.on("join_mission", async (rawPayload: unknown) => {
+    const parsed = JoinMissionSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] join_mission mit ungültigem Wert:`, rawMapName);
+      console.warn(`[VALIDATION FAILED] join_mission mit ungültigem Wert:`, rawPayload);
       return;
     }
-    const mapName = parsed.data;
+
+    let mapName: string;
+    let mode: 'singleplayer' | 'public' | 'private' = 'public';
+    let roomId: string | undefined;
+    let action: string | undefined;
+
+    if (typeof parsed.data === 'string') {
+      mapName = parsed.data;
+    } else {
+      mapName = parsed.data.mapName;
+      mode = (parsed.data.mode as any) || 'public';
+      roomId = parsed.data.roomId;
+      action = parsed.data.action;
+    }
+
+    const isHeadless = socket.handshake.query.headless === 'true';
+    socket.isHeadless = isHeadless;
+    
+    // Headless-Host can specify roomId in the handshake query
+    if (isHeadless) {
+      const queryRoomId = socket.handshake.query.roomId as string;
+      if (queryRoomId) {
+        roomId = queryRoomId;
+      }
+    }
+
+    let finalRoomId = roomId;
+
+    if (mode === 'singleplayer') {
+      finalRoomId = `single-${socket.id}`;
+    } else if (mode === 'public') {
+      if (!finalRoomId) {
+        // Search open public rooms
+        finalRoomId = Object.keys(roomStates).find(rid => {
+          const r = roomStates[rid];
+          return r.mapName === mapName && r.mode === 'public' && r.playerCount < 4;
+        });
+
+        if (!finalRoomId) {
+          finalRoomId = `pub-${Math.random().toString(36).substring(2, 10)}`;
+        }
+      }
+    } else if (mode === 'private') {
+      if (action === 'create' || !finalRoomId) {
+        let code = '';
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        do {
+          code = '';
+          for (let i = 0; i < 4; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+        } while (roomStates[code]);
+        finalRoomId = code;
+      } else {
+        finalRoomId = finalRoomId.toUpperCase();
+        const targetRoom = roomStates[finalRoomId];
+        if (!targetRoom) {
+          socket.emit('room_error', 'Der angeforderte private Raum existiert nicht oder ist abgelaufen.');
+          return;
+        }
+        if (targetRoom.playerCount >= 4) {
+          socket.emit('room_error', 'Der private Raum ist bereits voll (maximal 4 Spieler).');
+          return;
+        }
+        mapName = targetRoom.mapName;
+      }
+    }
+
+    if (!finalRoomId) {
+      socket.emit('room_error', 'Fehler beim Bestimmen der Raum-ID.');
+      return;
+    }
 
     // Synchrones, zustandsbasiertes Locking für die Raum-Erstellung
-    while (roomJoinLocks.has(mapName)) {
+    while (roomJoinLocks.has(finalRoomId)) {
       await new Promise(resolve => setTimeout(resolve, 5));
     }
-    roomJoinLocks.add(mapName);
+    roomJoinLocks.add(finalRoomId);
 
     try {
-      initRoomState(mapName);
-      const state = roomStates[mapName];
-
-      const isHeadless = socket.handshake.query.headless === 'true';
-      socket.isHeadless = isHeadless;
+      initRoomState(finalRoomId, mapName, mode);
+      const state = roomStates[finalRoomId];
 
       state.sockets.add(socket.id);
 
-      // Development Host Assignment Logic
+      // Dev or isolated singleplayer logic handles host assignment
       const isDevEnv = process.env.NODE_ENV === 'development';
       const wantHost = socket.handshake.query.wantHost === 'true';
-      const shouldBeHost = isHeadless || (isDevEnv && wantHost && !state.hostId);
+      const shouldBeHost = isHeadless || (mode === 'singleplayer') || (isDevEnv && wantHost && !state.hostId) || (!state.hostId);
 
       if (shouldBeHost) {
         if (isHeadless) {
-          console.log(`[HEADLESS] Headless-Host Socket verbunden für Room ${mapName}: ${socket.id}`);
+          console.log(`[HEADLESS] Headless-Host Socket verbunden für Room ${finalRoomId} (${mapName}): ${socket.id}`);
           state.headlessSocketId = socket.id;
         } else {
-          console.log(`[DEV-HOST] Human Player ${socket.id} joined Room ${mapName} as HOST!`);
+          console.log(`[DEV-HOST] Human Player ${socket.id} joined Room ${finalRoomId} (${mapName}) as HOST!`);
         }
         state.hostId = socket.id;
         socket.emit("role_assigned", { isHost: true, iceServers: ICE_SERVERS });
       } else {
-        console.log(`[NETZWERK] Human Player ${socket.id} joined Room ${mapName} as CLIENT`);
+        console.log(`[NETZWERK] Human Player ${socket.id} joined Room ${finalRoomId} (${mapName}) as CLIENT`);
 
-        // Only spawn headless host if there is no active host (headless or human) in the room
-        if (!state.hostId && (!activeBrowsers[mapName] || activeBrowsers[mapName].status === 'failed')) {
-          spawnHeadlessHost(mapName).catch(err => {
+        // Only spawn headless host if there is no active host and it's not singleplayer
+        if (mode !== 'singleplayer' && !state.hostId && (!activeBrowsers[finalRoomId] || activeBrowsers[finalRoomId].status === 'failed')) {
+          spawnHeadlessHost(finalRoomId, mapName).catch(err => {
             console.error("Async spawnHeadlessHost failed:", err);
           });
         }
@@ -502,18 +613,18 @@ io.on("connection", (socket: CustomSocket) => {
       io.emit("mission_stats_update", getMissionStats());
 
       // Asynchroner Beitritt zum Socket.io-Raum erfolgt erst nach der synchronen Zustands-Aktualisierung
-      await socket.join(mapName);
-      socket.mission = mapName;
+      await socket.join(finalRoomId);
+      socket.mission = finalRoomId;
 
       // Update player count for everyone in the same mission (including the new player/host)
-      io.to(mapName).emit("player_count_update", state.playerCount);
+      io.to(finalRoomId).emit("player_count_update", state.playerCount);
 
       const stateToSend = { ...state, sockets: Array.from(state.sockets) };
       socket.emit("full_game_state", stateToSend);
-      console.log(`Spieler ${socket.id} ist Mission ${mapName} beigetreten. (Größe: ${state.playerCount})`);
+      console.log(`Spieler ${socket.id} ist Raum ${finalRoomId} beigetreten. (Größe: ${state.playerCount})`);
     } finally {
       // Lock freigeben
-      roomJoinLocks.delete(mapName);
+      roomJoinLocks.delete(finalRoomId);
     }
   });
 
@@ -882,6 +993,7 @@ io.on("connection", (socket: CustomSocket) => {
     }
     // Update lobby stats for everyone
     io.emit("mission_stats_update", getMissionStats());
+    io.emit("online_players_update", getTotalOnlinePlayers(socket.id));
   });
 });
 
