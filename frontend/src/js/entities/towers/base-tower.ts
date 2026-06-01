@@ -16,9 +16,8 @@
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
-import { FloatingText, createExplosion } from '../../fx/fx';
-import { Projectile } from '../projectiles';
-import { getDistanceSq, getNearbyEnemies, roundUpgradeCost } from '../../core/utils';
+import { createExplosion } from '../../fx/fx';
+import { getDistanceSq, getNearbyEnemies } from '../../core/utils';
 import { Enemy, TowerType, TowerSpecialization } from '../../types';
 import { PoolManager } from '../../core/pool';
 import * as PIXI from 'pixi.js';
@@ -251,7 +250,7 @@ export class Tower {
 
     public drawPixi(g: PIXI.Graphics, part: 'base' | 'turret'): void {
         const TS = Config.TILE_SIZE;
-        const tier = tierOf(this.level);
+
 
         let scale = 1;
         if (this.constructionTimer > 0) {
@@ -346,7 +345,7 @@ export class Tower {
         }
 
         if (part === 'turret') {
-            const turretColor1 = this.specialization === 'heavy' ? '#2d3436' : (this.specialization === 'missiles' ? '#d63031' : '#ccc');
+
             const turretColor2 = this.specialization === 'heavy' ? '#636e72' : (this.specialization === 'missiles' ? '#ff7675' : '#fff');
             
             // Draw turret body
@@ -418,8 +417,7 @@ export class Tower {
         const needsTarget = !this.target || 
                             this.target.hp <= 0 || 
                             this.target.deadMarked || 
-                            getDistanceSq(this.target.x, this.target.y, this.x, this.y) > rangeSq ||
-                            !state.enemies.includes(this.target);
+                            getDistanceSq(this.target.x, this.target.y, this.x, this.y) > rangeSq;
 
         if (needsTarget || this.fireCooldown <= 0) {
             this.target = this.findOptimalTarget();
@@ -514,11 +512,12 @@ export class Tower {
 
         if (this.specialization === 'missiles' && this.missileCooldown <= 0) {
             let missileTarget: Enemy | null = null;
-            if (state.enemies.length > 0) {
-                const enemies = state.enemies.filter(e => !e.deadMarked && e.hp > 0);
-                if (enemies.length > 0) {
-                    enemies.sort((a, b) => b.distanceTravelled - a.distanceTravelled);
-                    missileTarget = enemies[0];
+            let maxDist = -1;
+            for (let i = 0; i < state.enemies.length; i++) {
+                const e = state.enemies[i];
+                if (!e.deadMarked && e.hp > 0 && e.distanceTravelled > maxDist) {
+                    maxDist = e.distanceTravelled;
+                    missileTarget = e;
                 }
             }
 

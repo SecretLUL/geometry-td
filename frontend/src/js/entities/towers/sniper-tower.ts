@@ -16,9 +16,9 @@
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
-import { FloatingText, createExplosion, MuzzleFlash, SniperBeam } from '../../fx/fx';
+import { createExplosion } from '../../fx/fx';
 import { Tower, tierOf } from './base-tower';
-import { getDistanceSq, roundUpgradeCost } from '../../core/utils';
+import { getDistanceSq } from '../../core/utils';
 import { Enemy, TowerSpecialization } from '../../types';
 import { PoolManager } from '../../core/pool';
 import * as PIXI from 'pixi.js';

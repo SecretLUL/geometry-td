@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.5.2 - Fixed frozen enemy sprites when skipping a wave: enemies are now properly released via EnemyFactory.releaseEnemyToPool() before clearing the array.
+ * @last_update: 2026-06-01 / v2.5.3 - Removed unused cancelPlacement import from ui.ts to satisfy strict TypeScript unused checks.
  */
 import { state } from '../core/state';
 import { Config } from '../core/config';
@@ -21,7 +21,7 @@ import { PoolManager } from '../core/pool';
 import { EnemyFactory } from '../entities/enemies';
 import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../entities/towers/index';
 import { map } from '../core/map';
-import { updateUI, cancelPlacement, showGameNotification } from './ui';
+import { updateUI, showGameNotification } from './ui';
 
 export function makeDraggable(element: HTMLElement, handle: HTMLElement): void {
 

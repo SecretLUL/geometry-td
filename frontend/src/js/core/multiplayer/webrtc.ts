@@ -70,12 +70,12 @@ export function cleanupClientWebRTC(): void {
 
 // Clean up host-side WebRTC resources
 export function cleanupHostWebRTC(): void {
-    for (const [id, conn] of hostConnections.entries()) {
+    for (const conn of hostConnections.values()) {
         try { conn.close(); } catch (e) {}
     }
     hostConnections.clear();
     
-    for (const [id, chan] of hostChannels.entries()) {
+    for (const chan of hostChannels.values()) {
         try { chan.close(); } catch (e) {}
     }
     hostChannels.clear();

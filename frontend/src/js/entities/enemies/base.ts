@@ -14,7 +14,6 @@
  * ----------------------------------
  * @last_update: 2026-05-30 / v1.1.0 - Allowed initPixi to run on the main menu page without requiring active game viewport app.renderer.
  */
-import { Config } from '../../core/config';
 import { state } from '../../core/state';
 import { waypoints } from '../../core/map';
 import { createExplosion } from '../../fx/fx';

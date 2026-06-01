@@ -99,9 +99,6 @@ export function resizeCanvas(): void {
 
     if (!state.camera) state.camera = { x: 0, y: 0 };
 
-    // High-DPI: device pixel ratio (2 on Retina, 3 on some mobile screens)
-    const dpr = window.devicePixelRatio || 1;
-
     // Get current UI panel width from CSS
     const uiPanelWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ui-panel-width')) || 240;
 

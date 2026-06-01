@@ -26,7 +26,6 @@ import { logger } from '../logger';
 import { getDistanceSq } from '../utils';
 import { waypoints } from '../map';
 import { Enemy } from '../../types';
-import { app } from './viewport';
 import { handleWaveLogic } from './wave';
 import { drawScene } from './renderer';
 
@@ -480,6 +479,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                                     cachedBossHpContainer?.classList.add('hidden');
                                 }
                             }
+                            enemy.deadMarked = true;
                             state.enemies[i] = state.enemies[state.enemies.length - 1];
                             state.enemies.pop();
                             // Pixi-Sprite verstecken, damit der Gegner sofort aus der Ansicht verschwindet
@@ -586,6 +586,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                                 }
                             }
 
+                            enemy.deadMarked = true;
                             state.enemies[i] = state.enemies[state.enemies.length - 1];
                             state.enemies.pop();
                             // Pixi-Sprite verstecken, damit der Gegner sofort aus der Ansicht verschwindet

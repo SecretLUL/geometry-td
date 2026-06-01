@@ -4,6 +4,36 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.8.1",
+    "date": "1. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Favicon durch eine hochauflösende, cybernetische SVG-Vektorgrafik ersetzt."
+      }
+    ]
+  },
+  {
+    "version": "v2.8.0",
+    "date": "1. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Strikte TypeScript-Prüfung für ungenutzten Code permanent in Front- und Backend-Konfigurationen aktiviert."
+      },
+      {
+        "type": "refactor",
+        "desc": "Sämtliche ungenutzten lokalen Variablen, Parameter und Imports im gesamten Frontend bereinigt."
+      },
+      {
+        "type": "refactor",
+        "desc": "Unbenutzte Hilfsfunktionen und inaktive Express-Routenparameter im Backend vollständig entfernt."
+      }
+    ]
+  },
+  {
     "version": "v2.7.1",
     "date": "30. Mai 2026",
     "status": "active",
@@ -11,6 +41,22 @@
       {
         "type": "fix",
         "desc": "Anzeigefehler der Gegner-Vorschau in der Database behoben."
+      },
+      {
+        "type": "perf",
+        "desc": "O(N log N) Array Sortierung bei Missile-Türmen in eine performante O(N) Schleife umgeschrieben."
+      },
+      {
+        "type": "perf",
+        "desc": "Dynamische Wegpunkt-Längenberechnung im Renderer durch Caching ersetzt, um Frame-Drops zu verhindern."
+      },
+      {
+        "type": "perf",
+        "desc": "O(N) Array.includes() Zielvalidierung im Turm-Loop eliminiert, da entfernte Gegner nun sauber als 'deadMarked' geflaggt werden."
+      },
+      {
+        "type": "perf",
+        "desc": "Projektil Homing-Optimierung: Homing-Raketen suchen sich bei Zielverlust nun das am nächsten liegende gültige Ziel anstatt blind auf Index 0 des Global-Arrays zurückzufallen."
       }
     ]
   },

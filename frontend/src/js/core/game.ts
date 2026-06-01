@@ -20,7 +20,6 @@ import { loadMap } from './map';
 import { updateUI, setupUI } from '../ui/ui';
 import { BackgroundController } from '../ui/background';
 import { AssetLoader } from './loader';
-import { logger } from './logger';
 import { PoolManager } from './pool';
 
 import { app, resizeCanvas, centerCameraOnCell, setupViewportEvents, initPixi } from './game/viewport';

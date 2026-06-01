@@ -88,16 +88,6 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: st
   });
 }
 
-// Rate Limiting helper
-const rateLimits = new Map<string, number>();
-function checkRateLimit(socketId: string, event: string, limitMs: number = 100): boolean {
-  const key = `${socketId}_${event}`;
-  const now = Date.now();
-  const lastTime = rateLimits.get(key) || 0;
-  if (now - lastTime < limitMs) return false;
-  rateLimits.set(key, now);
-  return true;
-}
 
 async function spawnHeadlessHost(roomId: string, mapName: string) {
   if (activeBrowsers[roomId] && activeBrowsers[roomId].status !== 'failed') return;
@@ -446,13 +436,13 @@ function getTotalOnlinePlayers(disconnectingSocketId?: string): number {
   return count;
 }
 
-app.get('/api/mission_stats', (req: Request, res: Response) => {
+app.get('/api/mission_stats', (_req: Request, res: Response) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.json(getMissionStats());
 });
 
-app.get('/api/online_players', (req: Request, res: Response) => {
+app.get('/api/online_players', (_req: Request, res: Response) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.json({ total: getTotalOnlinePlayers() });

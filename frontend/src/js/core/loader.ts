@@ -83,9 +83,9 @@ export class AssetLoader {
         const startTime = Date.now();
         
         // Starte das Laden der Assets im Hintergrund (falls vorhanden)
-        const loadAssetsPromise = this.totalCount > 0 
-            ? Promise.all(this.assets.map(path => this.loadAsset(path)))
-            : Promise.resolve();
+        if (this.totalCount > 0) {
+            Promise.all(this.assets.map(path => this.loadAsset(path)));
+        }
 
         return new Promise<void>((resolve) => {
             const updateLoop = () => {

@@ -19,7 +19,6 @@ import { Config, EnemyData } from '../../../core/config';
 import { state } from '../../../core/state';
 import { createExplosion } from '../../../fx/fx';
 import { PoolManager } from '../../../core/pool';
-import { waypoints } from '../../../core/map';
 import { EnemyFactory } from '../factory';
 import { EnemyType } from '../../../types';
 

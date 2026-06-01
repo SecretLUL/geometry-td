@@ -15,7 +15,6 @@
  * @last_update: 2026-05-29 / v1.4.3 - Initialized originalWave to null in state.
  */
 import { GameState } from '../types';
-import { PoolManager } from './pool';
 import { Config } from './config';
 import { setGameStateRef } from './utils';
 

@@ -16,9 +16,9 @@
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
-import { FloatingText, createExplosion } from '../../fx/fx';
-import { Tower, tierOf } from './base-tower';
-import { getDistanceSq, roundUpgradeCost } from '../../core/utils';
+import { createExplosion } from '../../fx/fx';
+import { Tower } from './base-tower';
+import { getDistanceSq } from '../../core/utils';
 import { Enemy, TowerSpecialization } from '../../types';
 import { PoolManager } from '../../core/pool';
 import * as PIXI from 'pixi.js';
@@ -120,7 +120,7 @@ export class TeslaTower extends Tower {
                 if (spec) baseColor = spec.color;
             }
 
-            const octPath = new PIXI.GraphicsPath();
+
             for (let i = 0; i < 8; i++) {
                 const angle = (Math.PI / 4) * i;
                 const px = Math.cos(angle) * r;

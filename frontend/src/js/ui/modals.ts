@@ -12,12 +12,11 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-27 / v1.10.0 - Use formatNumber utility for Game Over gold stats and efficiency table damage.
+ * @last_update: 2026-06-01 / v1.10.1 - Removed unused PoolManager import to satisfy strict TypeScript unused checks.
  */
 import { state } from '../core/state';
 import { Config, TowerData } from '../core/config';
 import { Multiplayer } from '../core/multiplayer/context';
-import { PoolManager } from '../core/pool';
 import { getEl, formatNumber } from '../core/utils';
 import { updateUI } from './ui';
 import { buildTowerAt } from './events';

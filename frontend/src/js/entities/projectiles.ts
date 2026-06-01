@@ -16,7 +16,7 @@
  */
 import { Config, TowerData } from '../core/config';
 import { state } from '../core/state';
-import { FloatingText, createExplosion, RadiationArea, Shockwave } from '../fx/fx';
+import { createExplosion } from '../fx/fx';
 import { getDistanceSq, getNearbyEnemies } from '../core/utils';
 import { Enemy, Tower, Vector2D } from '../types';
 import { PoolManager } from '../core/pool';
@@ -286,10 +286,26 @@ export class Projectile {
                 }
             }
 
-            if (!this.targetPoint && (!this.target || (this.target as Enemy).hp <= 0)) {
+            if (!this.targetPoint && (!this.target || (this.target as Enemy).hp <= 0 || (this.target as Enemy).deadMarked)) {
                 if (this.isHoming && state.enemies.length > 0) {
-                    // Find new target for homing missile
-                    this.target = state.enemies[0];
+                    // Find closest valid target for homing missile
+                    let bestDistSq = Infinity;
+                    let bestTarget = null;
+                    for (let i = 0; i < state.enemies.length; i++) {
+                        const enemy = state.enemies[i];
+                        if (enemy.hp > 0 && !enemy.deadMarked) {
+                            const dSq = getDistanceSq(enemy.x, enemy.y, this.x, this.y);
+                            if (dSq < bestDistSq) {
+                                bestDistSq = dSq;
+                                bestTarget = enemy;
+                            }
+                        }
+                    }
+                    if (bestTarget) {
+                        this.target = bestTarget;
+                    } else {
+                        this.active = false;
+                    }
                 } else {
                     this.active = false;
                 }

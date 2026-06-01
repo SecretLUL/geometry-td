@@ -22,26 +22,33 @@ import { updateContextShopPosition } from '../../ui/modals';
 import { clampCamera, mapContainer, pathAnimContainer, staticPathGraphics, pathAnimGraphics, entitiesContainer, uiContainer, app } from './viewport';
 import * as PIXI from 'pixi.js';
 
+let cachedWaypoints: {x: number, y: number}[] | null = null;
+let cachedLengths: number[] = [];
+let cachedTotalLength = 0;
+
 export function getPointAlongPath(waypoints: {x: number, y: number}[], t: number): {x: number, y: number} {
     if (waypoints.length === 0) return { x: 0, y: 0 };
     if (waypoints.length === 1) return { x: waypoints[0].x, y: waypoints[0].y };
 
-    let lengths: number[] = [];
-    let totalLength = 0;
-    for (let i = 0; i < waypoints.length - 1; i++) {
-        const dx = waypoints[i+1].x - waypoints[i].x;
-        const dy = waypoints[i+1].y - waypoints[i].y;
-        const len = Math.sqrt(dx*dx + dy*dy);
-        lengths.push(len);
-        totalLength += len;
+    if (cachedWaypoints !== waypoints || waypoints.length !== cachedLengths.length + 1) {
+        cachedWaypoints = waypoints;
+        cachedLengths = [];
+        cachedTotalLength = 0;
+        for (let i = 0; i < waypoints.length - 1; i++) {
+            const dx = waypoints[i+1].x - waypoints[i].x;
+            const dy = waypoints[i+1].y - waypoints[i].y;
+            const len = Math.sqrt(dx*dx + dy*dy);
+            cachedLengths.push(len);
+            cachedTotalLength += len;
+        }
     }
 
     t = ((t % 1) + 1) % 1; // Wrap t between 0 and 1
-    const targetDist = t * totalLength;
+    const targetDist = t * cachedTotalLength;
 
     let accum = 0;
-    for (let i = 0; i < lengths.length; i++) {
-        const len = lengths[i];
+    for (let i = 0; i < cachedLengths.length; i++) {
+        const len = cachedLengths[i];
         if (accum + len >= targetDist) {
             const segmentT = (targetDist - accum) / len;
             const p0 = waypoints[i];
@@ -58,8 +65,6 @@ export function getPointAlongPath(waypoints: {x: number, y: number}[], t: number
 
 const isHeadlessMode = new URLSearchParams(window.location.search).get('headless') === 'true';
 
-let lastCameraX = -9999;
-let lastCameraY = -9999;
 let lastTileSize = -1;
 
 let uiGraphics: PIXI.Graphics | null = null;

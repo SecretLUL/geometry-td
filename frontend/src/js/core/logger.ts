@@ -92,7 +92,7 @@ class Logger {
     }
 
     initGlobalHandlers(): void {
-        window.onerror = (message: string | Event, source?: string, lineno?: number, colno?: number, error?: Error) => {
+        window.onerror = (message: string | Event, source?: string, lineno?: number, _colno?: number, error?: Error) => {
             this.error('RUNTIME_ERR', {
                 m: typeof message === 'string' ? message : message.type,
                 s: source || '',

@@ -16,9 +16,9 @@
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
-import { FloatingText, createExplosion, Shockwave } from '../../fx/fx';
-import { Tower, tierOf } from './base-tower';
-import { getDistanceSq, roundUpgradeCost } from '../../core/utils';
+import { createExplosion } from '../../fx/fx';
+import { Tower } from './base-tower';
+import { getDistanceSq } from '../../core/utils';
 import { Enemy, TowerSpecialization } from '../../types';
 import { PoolManager } from '../../core/pool';
 import * as PIXI from 'pixi.js';
@@ -212,7 +212,6 @@ export class PrismaTower extends Tower {
         const TS = Config.TILE_SIZE;
         let scale = 1;
         let progress = 0;
-        let yOffset = 0;
 
         if (this.constructionTimer > 0) {
             progress = 1 - (this.constructionTimer / this.constructionDuration);

@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-30 / v1.7.1 - Centered database lexicon enemy preview shape within the canvas dimensions by setting coordinates to (90, 90).
+ * @last_update: 2026-06-01 / v1.7.2 - Removed unused local variables (background, particles, activeFilter) to satisfy strict TypeScript type-checking.
  */
 import { EnemyData } from '../core/config';
 import { EnemyFactory } from '../entities/enemies';
@@ -23,15 +23,12 @@ import * as PIXI from 'pixi.js';
 class MenuController {
     private tabs: NodeListOf<HTMLElement>;
     private contents: NodeListOf<HTMLElement>;
-    private background: BackgroundController;
-    private particles: any[];
     private lexiconApp: PIXI.Application | null = null;
     private currentLexiconTickFn: (() => void) | null = null;
     private currentLexiconEnemyType: string | null;
     
     // Changelog state
     private changelogData: any[];
-    private activeFilter: string;
 
     // Room System Selection state
     private selectedMapName: string | null = null;
@@ -39,14 +36,12 @@ class MenuController {
     constructor() {
         this.tabs = document.querySelectorAll('.portal-tab');
         this.contents = document.querySelectorAll('.tab-content-wrapper');
-        this.background = new BackgroundController('bgCanvas');
+        new BackgroundController('bgCanvas');
         
-        this.particles = [];
         this.lexiconApp = null;
         this.currentLexiconEnemyType = null;
         
         this.changelogData = [];
-        this.activeFilter = 'all';
         
         this.init();
     }

@@ -18,17 +18,14 @@ import { state } from '../state';
 import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../../entities/towers/index';
 import { EnemyFactory } from '../../entities/enemies';
 import { Config } from '../config';
-import { createExplosion, FloatingText, createCoinBurst, MuzzleFlash, SniperBeam } from '../../fx/fx';
-import { Projectile } from '../../entities/projectiles';
+import { createExplosion, createCoinBurst } from '../../fx/fx';
 import { showGameNotification, setPauseState } from '../../ui/ui';
 import {
     Enemy,
-    TowerSpecialization,
     GameStateSocketPayload,
     SyncFullGameStatePayload,
     SyncEnemyState,
     SyncTowerState,
-    TowerType,
     ProjectileEvent,
     SyncDeltaGameStatePayload,
     SocketEventMap,
@@ -557,8 +554,6 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                 }
 
                 // Initialisieren von lastReceivedState für zukünftige delta-Updates
-                const hostTile = hostTileSize || Config.TILE_SIZE;
-                const scale = Config.TILE_SIZE / hostTile;
                 Multiplayer.lastReceivedState = {
                     tick: wave || 0,
                     timestamp: performance.now(),
@@ -765,7 +760,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
 
             socket.on('reject_place_tower', (data: SocketEventMap['reject_place_tower']) => {
                 if (state.isHost) return;
-                const { type, col, row } = data;
+                const { col, row } = data;
                 
                 const idx = state.towers.findIndex(t => t.col === col && t.row === row);
                 if (idx !== -1) {
