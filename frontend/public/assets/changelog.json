@@ -4,6 +4,47 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.15.7",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Hauptmenü im Querformat für Mobilgeräte optimiert."
+      },
+      {
+        "type": "fix",
+        "desc": "Darstellung der Bestenliste und unvollständige Höhenanzeige im Querformat korrigiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.15.6",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Login-Formular im Profil-Tab vollständig aufgelöst, nativ integriert und Scrollen für kleine Bildschirme behoben."
+      },
+      {
+        "type": "fix",
+        "desc": "Kleine Lücke auf der rechten Seite der Bestenlisten-Tabelle geschlossen."
+      }
+    ]
+  },
+  {
+    "version": "v2.15.5",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Datenbank-Verbindung für die Live-Umgebung eingerichtet."
+      }
+    ]
+  },
+  {
     "version": "v2.15.4",
     "date": "4. Juni 2026",
     "status": "active",

@@ -1221,46 +1221,44 @@
             min-width: 15px;
             text-align: center;
         }
-
+        
         /* ── Profile Tab Styles ── */
         .profile-container {
             display: flex;
             gap: 30px;
             height: 100%;
             width: 100%;
-            overflow: hidden;
+            overflow-y: auto;
             justify-content: center;
             align-items: center;
         }
 
         .auth-card {
-            background: rgba(13, 13, 31, 0.6);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(76, 201, 240, 0.2);
-            border-radius: 16px;
-            padding: 35px 40px;
             width: 100%;
             max-width: 480px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(76, 201, 240, 0.02);
+            margin: auto;
+            padding: 20px 0;
             animation: container-entry 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .auth-card h2 {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: 800;
             color: #fff;
-            margin: 0 0 8px 0;
+            margin: 0 0 10px 0;
             letter-spacing: 3px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            text-align: center;
         }
 
         .auth-subtitle {
             color: rgba(255, 255, 255, 0.5);
             font-size: 0.85rem;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             letter-spacing: 1px;
+            text-align: center;
         }
 
         .auth-form-group {
@@ -1910,13 +1908,14 @@
             transform: translateY(-1px);
         }
 
+
+
         .leaderboard-table-wrapper {
             flex: 1;
             overflow-y: auto;
             border-radius: 12px;
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding-right: 5px;
         }
 
         .leaderboard-table {

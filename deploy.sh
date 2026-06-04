@@ -8,7 +8,7 @@ echo "======================================================================="
 echo ""
 echo "Rebuilding and deploying production containers (frontend-prod, backend-prod)..."
 echo ""
-docker compose up -d --build frontend-prod backend-prod
+docker compose up -d --build frontend-prod backend-prod db-prod
 echo ""
 echo "======================================================================="
 echo "              DEPLOYMENT DONE! Production is updated."

@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-04 / v2.4.0 - Added background menu music with volume-slider integration.
+ * @last_update: 2026-06-04 / v2.6.0 - Dissolved profile login window container to natively merge forms into UI.
  */
 import { EnemyData } from '../core/config';
 import { EnemyFactory } from '../entities/enemies';
