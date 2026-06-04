@@ -4,6 +4,40 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.11.1",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Live-Reloading für das Backend in der Entwicklungsumgebung aktiviert."
+      }
+    ]
+  },
+  {
+    "version": "v2.11.0",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Benutzerdefinierter Profilbild-Upload mit Canvas-Skalierung integriert."
+      },
+      {
+        "type": "feature",
+        "desc": "Benutzernamen können nun direkt im Dashboard geändert werden."
+      },
+      {
+        "type": "feature",
+        "desc": "Login mit Enter-Taste nach Passwort-Eingabe ermöglicht."
+      },
+      {
+        "type": "feature",
+        "desc": "Auswählbare Option 'Login merken' zur Sitzungsverlängerung hinzugefügt."
+      }
+    ]
+  },
+  {
     "version": "v2.10.0",
     "date": "4. Juni 2026",
     "status": "active",

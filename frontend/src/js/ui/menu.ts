@@ -937,13 +937,14 @@ class MenuController {
         });
 
         // 1. Fetch current session
+        // 1. Fetch current session
         const checkSession = async () => {
             try {
                 const response = await fetch(`${getBaseUrl()}/api/auth/me`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.user) {
-                        showDashboard(data.user.username);
+                        showDashboard(data.user);
                     } else {
                         showAuth();
                     }
@@ -961,12 +962,42 @@ class MenuController {
             if (dashboardSection) { dashboardSection.style.display = 'none'; dashboardSection.classList.add('hidden'); }
         };
 
-        const showDashboard = async (username: string) => {
+        const showDashboard = async (user: { username: string, avatar?: string | null, created_at?: string | Date | null }) => {
             if (authSection) { authSection.style.display = 'none'; authSection.classList.add('hidden'); }
             if (dashboardSection) { dashboardSection.style.display = 'grid'; dashboardSection.classList.remove('hidden'); }
 
             const userEl = document.getElementById('dashboard-username');
-            if (userEl) userEl.textContent = username;
+            if (userEl) userEl.textContent = user.username;
+
+            // Render Avatar
+            const avatarDisplay = document.getElementById('profile-avatar-display');
+            if (avatarDisplay) {
+                avatarDisplay.replaceChildren();
+                if (user.avatar) {
+                    const img = document.createElement('img');
+                    img.src = user.avatar;
+                    img.alt = 'Profile Picture';
+                    avatarDisplay.appendChild(img);
+                } else {
+                    avatarDisplay.textContent = '👤';
+                }
+            }
+
+            // Render joined date
+            const joinedEl = document.getElementById('dashboard-joined');
+            if (joinedEl) {
+                if (user.created_at) {
+                    const date = new Date(user.created_at);
+                    const formattedDate = date.toLocaleDateString('de-DE', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    joinedEl.textContent = `Mitglied seit: ${formattedDate}`;
+                } else {
+                    joinedEl.textContent = 'Mitglied seit: --.--.----';
+                }
+            }
 
             // Load progress stats
             try {
@@ -1062,10 +1093,167 @@ class MenuController {
             });
         };
 
+        // Submit Login with Enter key bindings
+        const loginRemember = document.getElementById('login-remember') as HTMLInputElement | null;
+
+        const handleLoginEnter = (e: KeyboardEvent) => {
+            if (e.key === 'Enter') {
+                loginBtn?.click();
+            }
+        };
+        loginUser?.addEventListener('keydown', handleLoginEnter);
+        loginPass?.addEventListener('keydown', handleLoginEnter);
+
+        // Profile Avatar custom upload binding
+        const avatarContainer = document.getElementById('profile-avatar-container');
+        const avatarInput = document.getElementById('profile-avatar-input') as HTMLInputElement | null;
+
+        avatarContainer?.addEventListener('click', () => {
+            avatarInput?.click();
+        });
+
+        avatarInput?.addEventListener('change', () => {
+            if (!avatarInput.files || avatarInput.files.length === 0) return;
+            const file = avatarInput.files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Das ausgewählte Bild ist zu groß (maximal 2 MB).');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 128;
+                    canvas.height = 128;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.drawImage(img, 0, 0, 128, 128);
+                        const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        try {
+                            const response = await fetch(`${getBaseUrl()}/api/user/profile`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ avatar: resizedBase64 })
+                            });
+                            const result = await response.json();
+                            if (response.ok && result.success) {
+                                const avatarDisplay = document.getElementById('profile-avatar-display');
+                                if (avatarDisplay) {
+                                    avatarDisplay.replaceChildren();
+                                    const newImg = document.createElement('img');
+                                    newImg.src = resizedBase64;
+                                    newImg.alt = 'Profile Picture';
+                                    avatarDisplay.appendChild(newImg);
+                                }
+                            } else {
+                                alert(result.error || 'Fehler beim Hochladen des Profilbildes.');
+                            }
+                        } catch (err) {
+                            console.error('Error uploading avatar:', err);
+                            alert('Verbindungsfehler beim Hochladen.');
+                        }
+                    }
+                };
+                img.src = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Inline Username edit bindings
+        const editUsernameBtn = document.getElementById('edit-username-btn');
+        const usernameWrapper = document.getElementById('profile-username-wrapper');
+        const usernameEditContainer = document.getElementById('username-edit-container');
+        const usernameEditInput = document.getElementById('username-edit-input') as HTMLInputElement | null;
+        const saveUsernameBtn = document.getElementById('save-username-btn');
+        const cancelUsernameBtn = document.getElementById('cancel-username-btn');
+        const usernameEditError = document.getElementById('username-edit-error');
+
+        editUsernameBtn?.addEventListener('click', () => {
+            const currentUsername = document.getElementById('dashboard-username')?.textContent || '';
+            if (usernameEditInput) {
+                usernameEditInput.value = currentUsername;
+            }
+            if (usernameWrapper) {
+                usernameWrapper.style.display = 'none';
+                usernameWrapper.classList.add('hidden');
+            }
+            if (usernameEditContainer) {
+                usernameEditContainer.style.display = 'flex';
+                usernameEditContainer.classList.remove('hidden');
+            }
+            if (usernameEditError) {
+                usernameEditError.style.display = 'none';
+                usernameEditError.classList.add('hidden');
+            }
+        });
+
+        const closeUsernameEdit = () => {
+            if (usernameWrapper) {
+                usernameWrapper.style.display = 'flex';
+                usernameWrapper.classList.remove('hidden');
+            }
+            if (usernameEditContainer) {
+                usernameEditContainer.style.display = 'none';
+                usernameEditContainer.classList.add('hidden');
+            }
+        };
+
+        cancelUsernameBtn?.addEventListener('click', closeUsernameEdit);
+
+        saveUsernameBtn?.addEventListener('click', async () => {
+            const newUsername = usernameEditInput?.value.trim();
+            if (!newUsername) {
+                if (usernameEditError) {
+                    usernameEditError.textContent = 'Name darf nicht leer sein.';
+                    usernameEditError.style.display = 'block';
+                    usernameEditError.classList.remove('hidden');
+                }
+                return;
+            }
+            if (newUsername.length < 4 || newUsername.length > 20 || !/^[a-zA-Z0-9_-]+$/.test(newUsername)) {
+                if (usernameEditError) {
+                    usernameEditError.textContent = 'Name muss zwischen 4 und 20 Zeichen lang sein und darf nur Buchstaben, Zahlen, _ und - enthalten.';
+                    usernameEditError.style.display = 'block';
+                    usernameEditError.classList.remove('hidden');
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/user/profile`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: newUsername })
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    const userEl = document.getElementById('dashboard-username');
+                    if (userEl) userEl.textContent = newUsername;
+                    closeUsernameEdit();
+                } else {
+                    if (usernameEditError) {
+                        usernameEditError.textContent = result.error || 'Fehler beim Ändern des Namens.';
+                        usernameEditError.style.display = 'block';
+                        usernameEditError.classList.remove('hidden');
+                    }
+                }
+            } catch (err) {
+                if (usernameEditError) {
+                    usernameEditError.textContent = 'Verbindungsfehler zum Server.';
+                    usernameEditError.style.display = 'block';
+                    usernameEditError.classList.remove('hidden');
+                }
+            }
+        });
+
         // Submit Login
         loginBtn?.addEventListener('click', async () => {
             const username = loginUser?.value.trim();
             const password = loginPass?.value;
+            const remember = loginRemember?.checked || false;
 
             if (!username || !password) {
                 if (loginError) {
@@ -1079,7 +1267,7 @@ class MenuController {
                 const response = await fetch(`${getBaseUrl()}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, remember })
                 });
 
                 const data = await response.json();
@@ -1087,7 +1275,7 @@ class MenuController {
                     if (loginUser) loginUser.value = '';
                     if (loginPass) loginPass.value = '';
                     if (loginError) loginError.style.display = 'none';
-                    showDashboard(data.user.username);
+                    showDashboard(data.user);
                 } else {
                     if (loginError) {
                         loginError.textContent = data.error || 'Fehler beim Einloggen.';

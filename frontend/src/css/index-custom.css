@@ -1369,7 +1369,6 @@
             color: #fff;
             letter-spacing: 2px;
             margin-bottom: 5px;
-            text-transform: uppercase;
         }
 
         .profile-joined {
@@ -1579,13 +1578,213 @@
             font-weight: 700;
         }
 
-        .skin-locked {
-            filter: grayscale(100%);
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .skin-locked:hover {
             border-color: rgba(255, 255, 255, 0.05);
             background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* ── Profile Customization & Login Checkbox Styles ── */
+        .profile-avatar-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .profile-avatar-container:hover .avatar-edit-overlay {
+            opacity: 1;
+        }
+        
+        .avatar-edit-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            color: var(--tesla-cyan);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            pointer-events: none;
+            border: 2px solid var(--tesla-cyan);
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(76, 201, 240, 0.4);
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .profile-username-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .edit-username-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            opacity: 0.5;
+            transition: opacity 0.2s, transform 0.2s;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .edit-username-btn:hover {
+            opacity: 1;
+            transform: scale(1.15);
+            background: transparent;
+            box-shadow: none;
+        }
+        
+        .username-edit-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
+        .username-edit-container input {
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 1px;
+            width: 80%;
+        }
+        
+        .username-edit-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .username-action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .username-action-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .username-action-btn.save:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+        
+        .username-action-btn.cancel:hover {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: var(--bomb-red);
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+        }
+        
+        .username-error-msg {
+            color: var(--bomb-red);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 4px;
+        }
+        
+        /* ── Remember Me Checkbox Styles ── */
+        .auth-form-remember {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .remember-checkbox-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-left: 30px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            user-select: none;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .remember-checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        
+        .checkbox-checkmark {
+            position: absolute;
+            top: -1px;
+            left: 0;
+            height: 18px;
+            width: 18px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .remember-checkbox-container:hover input ~ .checkbox-checkmark {
+            border-color: var(--tesla-cyan);
+            box-shadow: 0 0 8px rgba(76, 201, 240, 0.25);
+        }
+        
+        .remember-checkbox-container input:checked ~ .checkbox-checkmark {
+            background-color: rgba(76, 201, 240, 0.2);
+            border-color: var(--tesla-cyan);
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.4);
+        }
+        
+        .checkbox-checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        
+        .remember-checkbox-container input:checked ~ .checkbox-checkmark:after {
+            display: block;
+        }
+        
+        .remember-checkbox-container .checkbox-checkmark:after {
+            left: 5px;
+            top: 2px;
+            width: 5px;
+            height: 9px;
+            border: solid var(--tesla-cyan);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .remember-checkbox-container span {
+            margin-top: 1px;
         }

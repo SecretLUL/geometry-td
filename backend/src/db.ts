@@ -35,6 +35,12 @@ export async function initDatabaseSchema() {
     `);
     console.log('[DATABASE] Tabelle "users" verifiziert.');
 
+    // Avatar-Spalte hinzufügen falls nicht vorhanden
+    await db.none(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT;
+    `);
+    console.log('[DATABASE] Spalte "avatar" in Tabelle "users" verifiziert.');
+
     // 2. Tabelle progress erstellen
     await db.none(`
       CREATE TABLE IF NOT EXISTS progress (

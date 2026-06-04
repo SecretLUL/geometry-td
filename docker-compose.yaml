@@ -69,6 +69,7 @@ services:
       - DB_USER=gtd_user
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
+      - CHOKIDAR_USEPOLLING=true
     volumes:
       - /volume1/docker/geometry-td/backend:/home/node/app
       - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount

@@ -331,6 +331,13 @@
                                     <label for="login-password">Passwort</label>
                                     <input type="password" id="login-password" class="auth-input" placeholder="••••••••" autocomplete="current-password">
                                 </div>
+                                <div class="auth-form-remember">
+                                    <label class="remember-checkbox-container">
+                                        <input type="checkbox" id="login-remember">
+                                        <span class="checkbox-checkmark"></span>
+                                        <span>Login merken</span>
+                                    </label>
+                                </div>
                                 <button id="login-submit-btn" class="auth-btn glitch-hover">Einloggen</button>
                                 
                                 <div class="auth-toggle-link" id="goto-register">
@@ -364,10 +371,27 @@
 
                         <!-- 2. Profile Dashboard (shows if logged in) -->
                         <div id="profile-dashboard-section" class="profile-dashboard hidden" style="display: none;">
-                            <div class="profile-sidebar">
-                                <div class="profile-avatar">👤</div>
-                                <div class="profile-username" id="dashboard-username">SPIELER</div>
-                                <div class="profile-joined" id="dashboard-joined">Mitglied seit: --.--.----</div>
+                             <div class="profile-sidebar">
+                                 <div class="profile-avatar-container" id="profile-avatar-container" title="Profilbild ändern">
+                                     <div class="profile-avatar" id="profile-avatar-display">👤</div>
+                                     <div class="avatar-edit-overlay">
+                                         <span>EDIT</span>
+                                     </div>
+                                     <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
+                                 </div>
+                                 <div class="profile-username-wrapper" id="profile-username-wrapper">
+                                     <div class="profile-username" id="dashboard-username">SPIELER</div>
+                                     <button id="edit-username-btn" class="edit-username-btn" title="Benutzername ändern">✏️</button>
+                                 </div>
+                                 <div id="username-edit-container" class="username-edit-container hidden" style="display: none;">
+                                     <input type="text" id="username-edit-input" class="auth-input" maxlength="20" placeholder="Neuer Name">
+                                     <div class="username-edit-actions">
+                                         <button id="save-username-btn" class="username-action-btn save" title="Speichern">💾</button>
+                                         <button id="cancel-username-btn" class="username-action-btn cancel" title="Abbrechen">❌</button>
+                                     </div>
+                                     <div class="username-error-msg" id="username-edit-error" style="display: none;"></div>
+                                 </div>
+                                 <div class="profile-joined" id="dashboard-joined">Mitglied seit: --.--.----</div>
                                 
                                 <div class="profile-stat-box">
                                     <div class="profile-stat-val" id="dashboard-highest-wave">0</div>
