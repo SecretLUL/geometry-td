@@ -1,0 +1,150 @@
+:root {
+    --tesla-cyan: #4cc9f0;
+    --sniper-blue: #1a1a2e;
+    --bomb-red: #ff3366;
+    --gold: #fca311;
+    --bg-dark: #050510;
+}
+
+body {
+    background-color: var(--bg-dark);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+#bgCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.6;
+}
+
+.portal-main-column {
+    flex: 1;
+    max-width: 1150px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+}
+
+.portal-title-outer-wrapper {
+    padding: 0;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    top: 20vh;
+    z-index: 100000;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    transition: top 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: top, transform;
+}
+
+.portal-container {
+    width: 100%;
+    background: rgba(13, 13, 31, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(76, 201, 240, 0.2);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.5), inset 0 0 50px rgba(76, 201, 240, 0.05);
+    animation: container-entry 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+    flex: 1;
+    height: 0;
+}
+
+@keyframes container-entry {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.portal-header {
+    padding: 20px 60px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.portal-body {
+    flex: 1;
+    padding: 40px 60px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Custom Scrollbar */
+/* Custom Scrollbar - Consistent with style.css but using menu theme */
+.portal-body *::-webkit-scrollbar {
+    width: 6px;
+}
+
+.portal-body *::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.portal-body *::-webkit-scrollbar-thumb {
+    background: rgba(76, 201, 240, 0.2);
+    border-radius: 3px;
+}
+
+.portal-body *::-webkit-scrollbar-thumb:hover {
+    background: rgba(76, 201, 240, 0.4);
+}
+
+/* ── Menu Layout Wrapper Transition state ── */
+.menu-layout-wrapper {
+    position: relative;
+    z-index: 10; /* Rendered on top of the splash overlay so descendants can be seen */
+    pointer-events: none; /* Ignore clicks in splash mode to allow button click */
+    transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: filter, opacity, transform;
+}
+
+body:not(.splash-active) .menu-layout-wrapper {
+    pointer-events: auto; /* Restore normal mouse interactions */
+}
+
+.portal-container.blur-hidden {
+    opacity: 0 !important;
+    filter: blur(20px);
+    transform: scale(0.96);
+    pointer-events: none;
+}
+
+.portal-container {
+    transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: filter, opacity, transform;
+}
+
+.portal-footer.blur-hidden {
+    opacity: 0 !important;
+    transform: translateY(15px);
+    pointer-events: none;
+}
+
+.portal-footer {
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}

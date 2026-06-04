@@ -1,0 +1,21 @@
+/* ── Responsive Styling overrides for floating header on mobile landscape ── */
+@media screen and (max-width: 950px) and (orientation: landscape) {
+    .portal-title-outer-wrapper {
+        top: 18vh;
+    }
+    body:not(.splash-active) .portal-title-outer-wrapper {
+        top: 0;
+        transform: translate(-50%, 0) scale(0.85);
+    }
+    .portal-title-placeholder {
+        height: 60px;
+    }
+    .splash-content {
+        margin-top: 15vh;
+        gap: 20px;
+    }
+    .splash-enter-btn {
+        padding: 10px 25px;
+        font-size: 0.95rem;
+    }
+}

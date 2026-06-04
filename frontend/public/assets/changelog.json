@@ -4,6 +4,39 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.16.2",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Monolithischen Backend-Server (server.ts) in modularisierte TS-Dateien aufgeteilt."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.1",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Monolithisches index-custom.css in modulare CSS-Dateien unter src/css/portal/ aufgeteilt."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.0",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Monolithische Hauptmenü-Steuerung (menu.ts) in modulare Teil-Dateien aufgeteilt."
+      }
+    ]
+  },
+  {
     "version": "v2.15.7",
     "date": "4. Juni 2026",
     "status": "active",

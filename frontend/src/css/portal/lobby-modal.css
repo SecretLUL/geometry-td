@@ -1,0 +1,284 @@
+/* ── Custom Mode Selection Modal Styles ── */
+.custom-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 16, 0.92);
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.custom-overlay:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.custom-modal-content {
+    background: linear-gradient(135deg, rgba(16, 21, 46, 0.85) 0%, rgba(13, 13, 31, 0.95) 100%);
+    border: 2px solid rgba(76, 201, 240, 0.4);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(76, 201, 240, 0.25);
+    border-radius: 24px;
+    padding: 45px 55px;
+    max-width: 1180px;
+    /* Greatly enlarged modal from 950px */
+    width: 94%;
+    position: relative;
+    text-align: center;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.custom-overlay:not(.hidden) .custom-modal-content {
+    transform: scale(1);
+}
+
+.custom-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: none;
+    padding: 0;
+}
+
+.custom-modal-close:hover {
+    color: var(--bomb-red);
+    transform: scale(1.1);
+    background: transparent;
+    box-shadow: none;
+}
+
+.custom-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.custom-modal-header-icon {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 10px var(--tesla-cyan));
+}
+
+.custom-modal-content h2 {
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin: 0;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.custom-modal-subtitle {
+    color: var(--tesla-cyan);
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 0;
+    margin-bottom: 35px;
+    opacity: 0.8;
+}
+
+.modes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    /* Increased gap from 25px */
+}
+
+.mode-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 35px 25px;
+    /* Increased padding from 30px 20px for more internal breathing room */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    box-sizing: border-box;
+    /* Guarantee content fits without horizontal/vertical overflow */
+}
+
+.mode-card:hover {
+    background: rgba(76, 201, 240, 0.03);
+    border-color: rgba(76, 201, 240, 0.4);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(76, 201, 240, 0.15);
+    transform: translateY(-5px);
+}
+
+.mode-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.mode-card:hover .mode-icon {
+    transform: scale(1.1);
+}
+
+.mode-card h3 {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.mode-desc {
+    color: #a8a8b3;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+    flex-grow: 1;
+}
+
+.mode-action-btn {
+    width: 100%;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: auto;
+}
+
+.solo-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.solo-btn:hover {
+    background: #fff;
+    color: var(--bg-dark);
+    box-shadow: 0 0 20px #fff;
+}
+
+.public-btn {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid #00ff88;
+    color: #00ff88;
+}
+
+.public-btn:hover {
+    background: #00ff88;
+    color: var(--bg-dark);
+    box-shadow: 0 0 20px #00ff88;
+}
+
+.private-create-btn {
+    background: rgba(252, 163, 17, 0.1);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    margin-bottom: 15px;
+}
+
+.private-create-btn:hover {
+    background: var(--gold);
+    color: var(--bg-dark);
+    box-shadow: 0 0 20px var(--gold);
+}
+
+.private-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: auto;
+}
+
+.private-divider {
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.private-divider::before,
+.private-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0 10px;
+}
+
+.private-join-box {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
+
+.private-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.private-input:focus {
+    border-color: var(--tesla-cyan);
+    box-shadow: 0 0 12px rgba(76, 201, 240, 0.3);
+}
+
+.private-join-btn {
+    background: linear-gradient(135deg, rgba(76, 201, 240, 0.2) 0%, rgba(76, 201, 240, 0.05) 100%);
+    border: 1px solid var(--tesla-cyan);
+    color: var(--tesla-cyan);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.private-join-btn:hover {
+    background: var(--tesla-cyan);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--tesla-cyan);
+}
