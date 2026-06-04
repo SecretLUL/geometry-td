@@ -58,7 +58,7 @@ async function updateRoomHighscores(roomId: string, io: Server) {
           [s.user.id, currentWave]
         );
       } catch (err) {
-        console.error(`[DATABASE] Fehler beim Speichern des Highscores für User ${s.user.username}:`, err);
+        console.error(`[DATABASE] Error saving highscore for user ${s.user.username}:`, err);
       }
     }
   }
@@ -81,9 +81,9 @@ export function setupSockets(io: Server) {
         try {
           const decoded = jwt.verify(token, JWT_SECRET) as { id: number; username: string };
           socket.user = decoded;
-          console.log(`[SOCKET] Benutzer authentifiziert: ${decoded.username} (${socket.id})`);
+          console.log(`[SOCKET] User authenticated: ${decoded.username} (${socket.id})`);
         } catch (err) {
-          console.warn(`[SOCKET] Ungültiges Token bei Verbindung ${socket.id}`);
+          console.warn(`[SOCKET] Invalid token from connection ${socket.id}`);
         }
       }
     }
@@ -92,14 +92,14 @@ export function setupSockets(io: Server) {
 
   io.on("connection", (socket: CustomSocket) => {
     socket.isHeadless = socket.handshake.query.headless === 'true';
-    console.log(`Spieler verbunden: ${socket.id}`);
+    console.log(`Player connected: ${socket.id}`);
     socket.emit("mission_stats_update", getMissionStats());
     io.emit("online_players_update", getTotalOnlinePlayers(io));
 
     socket.on("join_mission", async (rawPayload: unknown) => {
       const parsed = JoinMissionSchema.safeParse(rawPayload);
       if (!parsed.success) {
-        console.warn(`[VALIDATION FAILED] join_mission mit ungültigem Wert:`, rawPayload);
+        console.warn(`[VALIDATION FAILED] join_mission with invalid payload:`, rawPayload);
         return;
       }
 
@@ -157,11 +157,11 @@ export function setupSockets(io: Server) {
           finalRoomId = finalRoomId.toUpperCase();
           const targetRoom = roomStates[finalRoomId];
           if (!targetRoom) {
-            socket.emit('room_error', 'Der angeforderte private Raum existiert nicht oder ist abgelaufen.');
+            socket.emit('room_error', 'The requested private room does not exist or has expired.');
             return;
           }
           if (targetRoom.playerCount >= 4) {
-            socket.emit('room_error', 'Der private Raum ist bereits voll (maximal 4 Spieler).');
+            socket.emit('room_error', 'The private room is already full (maximum 4 players).');
             return;
           }
           mapName = targetRoom.mapName;
@@ -169,7 +169,7 @@ export function setupSockets(io: Server) {
       }
 
       if (!finalRoomId) {
-        socket.emit('room_error', 'Fehler beim Bestimmen der Raum-ID.');
+        socket.emit('room_error', 'Failed to determine room ID.');
         return;
       }
 
@@ -190,15 +190,15 @@ export function setupSockets(io: Server) {
 
         if (shouldBeHost) {
           if (isHeadless) {
-            console.log(`[HEADLESS] Headless-Host Socket verbunden für Room ${finalRoomId} (${mapName}): ${socket.id}`);
+            console.log(`[HEADLESS] Headless host socket connected for room ${finalRoomId} (${mapName}): ${socket.id}`);
             state.headlessSocketId = socket.id;
           } else {
-            console.log(`[DEV-HOST] Human Player ${socket.id} joined Room ${finalRoomId} (${mapName}) as HOST!`);
+            console.log(`[DEV-HOST] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as HOST.`);
           }
           state.hostId = socket.id;
           socket.emit("role_assigned", { isHost: true, iceServers: ICE_SERVERS });
         } else {
-          console.log(`[NETZWERK] Human Player ${socket.id} joined Room ${finalRoomId} (${mapName}) as CLIENT`);
+          console.log(`[NETWORK] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as CLIENT.`);
 
           if (mode !== 'singleplayer' && !state.hostId && (!activeBrowsers[finalRoomId] || activeBrowsers[finalRoomId].status === 'failed')) {
             spawnHeadlessHost(finalRoomId, mapName).catch(err => {
@@ -227,7 +227,7 @@ export function setupSockets(io: Server) {
 
         const stateToSend = { ...state, sockets: Array.from(state.sockets) };
         socket.emit("full_game_state", stateToSend);
-        console.log(`Spieler ${socket.id} ist Raum ${finalRoomId} beigetreten. (Größe: ${state.playerCount})`);
+        console.log(`Player ${socket.id} joined room ${finalRoomId}. (Size: ${state.playerCount})`);
       } finally {
         roomJoinLocks.delete(finalRoomId);
       }
@@ -381,10 +381,10 @@ export function setupSockets(io: Server) {
       data.timestamp = Date.now();
       
       updateRoomHighscores(socket.mission, io).catch(err => {
-        console.error("[DATABASE] Fehler beim asynchronen Update der Highscores im Raum:", err);
+        console.error("[DATABASE] Error during async highscore update for room:", err);
       });
       
-      console.log(`Welle ${state.wave} in ${socket.mission} gestartet (angefordert von ${socket.id})`);
+      console.log(`Wave ${state.wave} started in ${socket.mission} (requested by ${socket.id})`);
       io.to(socket.mission).emit("start_wave_sync", data);
     });
 
@@ -548,7 +548,7 @@ export function setupSockets(io: Server) {
     });
 
     socket.on("disconnect", () => {
-      console.log(`Spieler getrennt: ${socket.id}`);
+      console.log(`Player disconnected: ${socket.id}`);
       if (socket.mission && roomStates[socket.mission]) {
         const state = roomStates[socket.mission];
 
@@ -560,7 +560,7 @@ export function setupSockets(io: Server) {
         }
 
         if (socket.isHeadless) {
-          console.log(`[HEADLESS] Headless-Host getrennt für Sektor ${socket.mission}`);
+          console.log(`[HEADLESS] Headless host disconnected for room ${socket.mission}`);
           state.headlessSocketId = null;
         } else {
           let humanCount = 0;
@@ -574,7 +574,7 @@ export function setupSockets(io: Server) {
           io.to(socket.mission).emit("player_count_update", state.playerCount);
 
           if (state.playerCount === 0) {
-            console.log(`[NETZWERK] Keine Spieler mehr in ${socket.mission}. Beende Headless-Host.`);
+            console.log(`[NETWORK] No players remaining in ${socket.mission}. Stopping headless host.`);
             stopHeadlessHost(socket.mission).catch(err => {
               console.error("Async stopHeadlessHost failed:", err);
             });

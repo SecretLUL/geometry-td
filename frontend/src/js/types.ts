@@ -1,22 +1,9 @@
 /*
- * @file: frontend\src\js\types.ts
- * @purpose: Core TypeScript interface and type definitions for state, vectors, entities (Enemy, Tower, Projectile), and socket messages.
+ * @file: frontend/src/js/types.ts
+ * @purpose: Core TypeScript interface and type definitions for game state, vectors, entities
+ *           (Enemy, Tower, Projectile), and multiplayer socket message payloads.
  * @dependencies: None
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v2.2.0 - Added isGuest and unlockedAchievements to GameState.
- */
-/**
- * Geometry Tower Defense - Core TypeScript Definitions
- * Phase 1 Infrastructure Types
  */
 
 // ─── GAME STATE TYPES ─────────────────────────────────────────────────────────

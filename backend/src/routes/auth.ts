@@ -11,25 +11,25 @@ authRouter.post('/auth/register', async (req: Request, res: Response) => {
   const { username, password } = req.body;
   
   if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
-    res.status(400).json({ error: 'Ungültige Eingabedaten' });
+    res.status(400).json({ error: 'Invalid input data' });
     return;
   }
   
   const trimmedUser = username.trim();
   if (trimmedUser.length < 4 || trimmedUser.length > 20 || !/^[a-zA-Z0-9_-]+$/.test(trimmedUser)) {
-    res.status(400).json({ error: 'Benutzername muss zwischen 4 und 20 Zeichen lang sein und darf nur Buchstaben, Zahlen, _ und - enthalten.' });
+    res.status(400).json({ error: 'Username must be between 4 and 20 characters and may only contain letters, numbers, underscores, and hyphens.' });
     return;
   }
   
   if (password.length < 8) {
-    res.status(400).json({ error: 'Passwort muss mindestens 8 Zeichen lang sein.' });
+    res.status(400).json({ error: 'Password must be at least 8 characters long.' });
     return;
   }
   
   try {
     const existing = await db.oneOrNone('SELECT id FROM users WHERE username = $1', [trimmedUser]);
     if (existing) {
-      res.status(400).json({ error: 'Benutzername ist bereits vergeben.' });
+      res.status(400).json({ error: 'Username is already taken.' });
       return;
     }
     
@@ -47,10 +47,10 @@ authRouter.post('/auth/register', async (req: Request, res: Response) => {
       );
     });
     
-    res.status(201).json({ success: true, message: 'Registrierung erfolgreich.' });
+    res.status(201).json({ success: true, message: 'Registration successful.' });
   } catch (error) {
-    console.error('[AUTH] Fehler bei Registrierung:', error);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[AUTH] Error during registration:', error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -58,20 +58,20 @@ authRouter.post('/auth/login', async (req: Request, res: Response) => {
   const { username, password, remember } = req.body;
   
   if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
-    res.status(400).json({ error: 'Ungültige Eingabedaten' });
+    res.status(400).json({ error: 'Invalid input data' });
     return;
   }
   
   try {
     const user = await db.oneOrNone('SELECT id, username, password_hash, avatar, created_at FROM users WHERE username = $1', [username.trim()]);
     if (!user) {
-      res.status(400).json({ error: 'Ungültiger Benutzername oder Passwort.' });
+      res.status(400).json({ error: 'Invalid username or password.' });
       return;
     }
     
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
-      res.status(400).json({ error: 'Ungültiger Benutzername oder Passwort.' });
+      res.status(400).json({ error: 'Invalid username or password.' });
       return;
     }
     
@@ -94,8 +94,8 @@ authRouter.post('/auth/login', async (req: Request, res: Response) => {
     
     res.json({ success: true, user: { id: user.id, username: user.username, avatar: user.avatar, created_at: user.created_at } });
   } catch (error) {
-    console.error('[AUTH] Fehler bei Login:', error);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[AUTH] Error during login:', error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -111,13 +111,13 @@ authRouter.get('/auth/me', authenticateUser, async (req: Request, res: Response)
   try {
     const user = await db.oneOrNone('SELECT id, username, avatar, created_at FROM users WHERE id = $1', [authReq.user!.id]);
     if (!user) {
-      res.status(401).json({ error: 'Benutzer nicht gefunden' });
+      res.status(401).json({ error: 'User not found' });
       return;
     }
     res.json({ user: { id: user.id, username: user.username, avatar: user.avatar, created_at: user.created_at } });
   } catch (err) {
-    console.error('[AUTH] Fehler bei /api/auth/me:', err);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[AUTH] Error in /api/auth/me:', err);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -129,13 +129,13 @@ authRouter.get('/user/progress', authenticateUser, async (req: Request, res: Res
       [authReq.user!.id]
     );
     if (!progress) {
-      res.status(404).json({ error: 'Fortschritt nicht gefunden.' });
+      res.status(404).json({ error: 'Progress not found.' });
       return;
     }
     res.json({ progress });
   } catch (error) {
-    console.error('[PROGRESS] Fehler beim Laden:', error);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[PROGRESS] Error during load:', error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -144,7 +144,7 @@ authRouter.post('/user/progress', authenticateUser, async (req: Request, res: Re
   const { selected_skin } = req.body;
   
   if (selected_skin && typeof selected_skin !== 'string') {
-    res.status(400).json({ error: 'Ungültiges Format für selected_skin' });
+    res.status(400).json({ error: 'Invalid format for selected_skin' });
     return;
   }
   
@@ -153,7 +153,7 @@ authRouter.post('/user/progress', authenticateUser, async (req: Request, res: Re
       const progress = await db.one('SELECT unlocked_skins FROM progress WHERE user_id = $1', [authReq.user!.id]);
       const unlocked = progress.unlocked_skins || [];
       if (!unlocked.includes(selected_skin)) {
-        res.status(400).json({ error: 'Dieser Skin ist noch nicht freigeschaltet.' });
+        res.status(400).json({ error: 'This skin is not yet unlocked.' });
         return;
       }
       
@@ -162,8 +162,8 @@ authRouter.post('/user/progress', authenticateUser, async (req: Request, res: Re
     
     res.json({ success: true });
   } catch (error) {
-    console.error('[PROGRESS] Fehler beim Speichern:', error);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[PROGRESS] Error during save:', error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -172,14 +172,14 @@ authRouter.post('/user/unlock-achievement', authenticateUser, async (req: Reques
   const { achievementId } = req.body;
   
   if (!achievementId || typeof achievementId !== 'string') {
-    res.status(400).json({ error: 'Ungültige Errungenschafts-ID.' });
+    res.status(400).json({ error: 'Invalid achievement ID.' });
     return;
   }
 
   try {
     const progress = await db.oneOrNone('SELECT unlocked_achievements FROM progress WHERE user_id = $1', [authReq.user!.id]);
     if (!progress) {
-      res.status(404).json({ error: 'Fortschritt nicht gefunden.' });
+      res.status(404).json({ error: 'Progress not found.' });
       return;
     }
 
@@ -199,8 +199,8 @@ authRouter.post('/user/unlock-achievement', authenticateUser, async (req: Reques
 
     res.json({ success: true, newlyUnlocked: true });
   } catch (error) {
-    console.error('[ACHIEVEMENT] Fehler beim Freischalten:', error);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[ACHIEVEMENT] Error during unlock:', error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -214,18 +214,18 @@ authRouter.post('/user/profile', authenticateUser, async (req: Request, res: Res
     
     if (username !== undefined) {
       if (typeof username !== 'string') {
-        res.status(400).json({ error: 'Ungültiger Benutzernamens-Typ.' });
+        res.status(400).json({ error: 'Invalid username type.' });
         return;
       }
       const trimmedUser = username.trim();
       if (trimmedUser.length < 4 || trimmedUser.length > 20 || !/^[a-zA-Z0-9_-]+$/.test(trimmedUser)) {
-        res.status(400).json({ error: 'Benutzername muss zwischen 4 und 20 Zeichen lang sein und darf nur Buchstaben, Zahlen, _ und - enthalten.' });
+        res.status(400).json({ error: 'Username must be between 4 and 20 characters and may only contain letters, numbers, underscores, and hyphens.' });
         return;
       }
       
       const existing = await db.oneOrNone('SELECT id FROM users WHERE username = $1 AND id != $2', [trimmedUser, userId]);
       if (existing) {
-        res.status(400).json({ error: 'Benutzername ist bereits vergeben.' });
+        res.status(400).json({ error: 'Username is already taken.' });
         return;
       }
       newUsername = trimmedUser;
@@ -233,16 +233,16 @@ authRouter.post('/user/profile', authenticateUser, async (req: Request, res: Res
     
     if (avatar !== undefined) {
       if (avatar !== null && typeof avatar !== 'string') {
-        res.status(400).json({ error: 'Ungültiger Avatar-Typ.' });
+        res.status(400).json({ error: 'Invalid avatar type.' });
         return;
       }
       if (avatar !== null) {
         if (avatar.length > 700000) {
-          res.status(400).json({ error: 'Profilbild darf nicht größer als 500 KB sein.' });
+          res.status(400).json({ error: 'Profile picture may not exceed 500 KB.' });
           return;
         }
         if (!/^data:image\/(png|jpeg|jpg|gif|webp);base64,/.test(avatar)) {
-          res.status(400).json({ error: 'Ungültiges Bildformat. Nur PNG, JPEG, GIF und WEBP sind erlaubt.' });
+          res.status(400).json({ error: 'Invalid image format. Only PNG, JPEG, GIF, and WebP are supported.' });
           return;
         }
       }
@@ -274,8 +274,8 @@ authRouter.post('/user/profile', authenticateUser, async (req: Request, res: Res
     const user = await db.one('SELECT created_at FROM users WHERE id = $1', [userId]);
     res.json({ success: true, user: { id: userId, username: newUsername, avatar: avatar !== undefined ? avatar : undefined, created_at: user.created_at } });
   } catch (error) {
-    console.error('[PROFILE] Fehler beim Aktualisieren des Profils:', error);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[PROFILE] Error updating profile:', error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });
 
@@ -291,7 +291,7 @@ authRouter.get('/leaderboard', async (_req: Request, res: Response) => {
     );
     res.json({ leaderboard });
   } catch (error) {
-    console.error('[LEADERBOARD] Fehler beim Laden:', error);
-    res.status(500).json({ error: 'Interner Serverfehler.' });
+    console.error('[LEADERBOARD] Error during load:', error);
+    res.status(500).json({ error: 'Internal server error.' });
   }
 });

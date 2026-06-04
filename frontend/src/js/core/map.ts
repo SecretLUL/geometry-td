@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\map.ts
- * @purpose: Defines standard/mission map grid matrices (e.g. Spiral, ZigZag, Quantum Bypass) and translates fractional waypoint paths to pixel coordinates.
+ * @file: frontend/src/js/core/map.ts
+ * @purpose: Defines mission map grid matrices (Spiral, ZigZag, Quantum Bypass) and
+ *           converts fractional waypoint coordinates to absolute pixel positions.
  * @dependencies: config, state, types
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-21 / v1.1.0 - Added grid cell highlight drawing for mobile context shop selection.
  */
 import { Config } from './config';

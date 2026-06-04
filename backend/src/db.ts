@@ -17,14 +17,14 @@ const cn = {
   max: 10, // maximum number of clients in the pool
 };
 
-console.log(`[DATABASE] Verbindungsdaten: Host=${dbHost}, Port=${dbPort}, Database=${dbName}, User=${dbUser}`);
+console.log(`[DATABASE] Connection config: Host=${dbHost}, Port=${dbPort}, Database=${dbName}, User=${dbUser}`);
 
 export const db = pgp(cn);
 
-// Hilfsfunktion zur Initialisierung des Schemas
+// Initializes all required database tables and schema columns on startup.
 export async function initDatabaseSchema() {
   try {
-    // 1. Tabelle users erstellen
+    // 1. Create the users table
     await db.none(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -33,15 +33,15 @@ export async function initDatabaseSchema() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log('[DATABASE] Tabelle "users" verifiziert.');
+    console.log('[DATABASE] Table "users" verified.');
 
-    // Avatar-Spalte hinzufügen falls nicht vorhanden
+    // Add the avatar column if it does not yet exist (idempotent migration)
     await db.none(`
       ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT;
     `);
-    console.log('[DATABASE] Spalte "avatar" in Tabelle "users" verifiziert.');
+    console.log('[DATABASE] Column "avatar" in table "users" verified.');
 
-    // 2. Tabelle progress erstellen
+    // 2. Create the progress table
     await db.none(`
       CREATE TABLE IF NOT EXISTS progress (
         user_id INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -52,11 +52,11 @@ export async function initDatabaseSchema() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log('[DATABASE] Tabelle "progress" verifiziert.');
+    console.log('[DATABASE] Table "progress" verified.');
     
-    console.log('[DATABASE] Schema-Initialisierung erfolgreich abgeschlossen.');
+    console.log('[DATABASE] Schema initialization completed successfully.');
   } catch (error) {
-    console.error('[DATABASE] Fehler bei der Schema-Initialisierung:', error);
+    console.error('[DATABASE] Error during schema initialization:', error);
     throw error;
   }
 }

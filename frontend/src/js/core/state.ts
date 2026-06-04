@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\state.ts
- * @purpose: Holds the reactive in-memory GameState instance for local tracking of lives, gold, cameras, and arrays of active entities.
+ * @file: frontend/src/js/core/state.ts
+ * @purpose: Holds the reactive in-memory GameState instance for local tracking of lives, gold,
+ *           camera position, and arrays of all active game entities.
  * @dependencies: types, pool, config
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v1.4.5 - Initialized isGuest and unlockedAchievements in state.
  */
 import { GameState } from '../types';

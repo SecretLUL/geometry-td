@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\config.ts
- * @purpose: Static configuration settings for game grid, starting resources, cost/damage of basic/specialized towers, and enemy attributes.
+ * @file: frontend/src/js/core/config.ts
+ * @purpose: Static configuration for the game grid, starting resources, tower costs/damage
+ *           (base and specialized), and enemy attributes.
  * @dependencies: ./utils
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v2.5.0 - Added Accelerator enemy config data.
  */
 import { roundUpgradeCost } from './utils';
@@ -83,8 +74,8 @@ export interface EnemyConfig {
     weakness: string;
 }
 
-// NOTE FOR DEVELOPERS & AI AGENTS: Keep stats (hp, speed, reward) inside EnemyData capped at 100 max!
-// They are mapped 1:1 as percentages to fill bars in the Lexicon UI (menu.js).
+// NOTE FOR DEVELOPERS & AI AGENTS: Keep hp, speed, and reward values inside EnemyData capped at 100.
+// These values are mapped 1:1 as percentages to fill stat bars in the Lexicon UI.
 export const EnemyData: Record<string, EnemyConfig> = {
     'Normal': {
         category: 'Minions',
@@ -570,7 +561,7 @@ export const TowerData: Record<string, TowerStatsConfig> = {
 };
 
 export const TowerBalancer = {
-    /** Berechnet die Upgrade-Kosten für einen bestimmten Turmtyp und ein bestimmtes Level */
+    /** Computes the upgrade cost for a given tower type and level. */
     getUpgradeCost(type: string, level: number, currentCost: number): number {
         const stats = TowerData[type];
         if (!stats) return currentCost * 2;
@@ -585,7 +576,7 @@ export const TowerBalancer = {
         return roundUpgradeCost(newCost);
     },
 
-    /** Berechnet den Schaden für ein bestimmtes Level */
+    /** Computes the damage value for a given level. */
     getDamageForLevel(type: string, level: number, baseDamage: number): number {
         const stats = TowerData[type];
         if (!stats) return baseDamage;
@@ -603,14 +594,14 @@ export const TowerBalancer = {
         return dmg;
     },
 
-    /** Berechnet die Reichweite für ein bestimmtes Level */
+    /** Computes the range value for a given level. */
     getRangeForLevel(type: string, baseRange: number): number {
         const stats = TowerData[type];
         if (!stats) return baseRange;
         return baseRange + stats.rangePerLevel;
     },
 
-    /** Berechnet die Feuerrate für ein bestimmtes Level */
+    /** Computes the fire rate value for a given level. */
     getFireRateForLevel(type: string, level: number, currentFireRate: number): number {
         const stats = TowerData[type];
         if (!stats) return currentFireRate;

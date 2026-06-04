@@ -1,17 +1,9 @@
 /*
- * @file: frontend\src\js\core\multiplayer\inbound.ts
- * @purpose: Handles the reception and parsing of inbound server socket messages (role assignments, game state updates, tower confirmations, pauses). Also fixes initial state sync and delta updates.
+ * @file: frontend/src/js/core/multiplayer/inbound.ts
+ * @purpose: Handles reception and parsing of inbound server socket messages (role assignments,
+ *           game state updates, tower confirmations, pause commands). Applies full state sync
+ *           and delta updates from the host.
  * @dependencies: state, towers, enemies, config, fx, projectiles, ui, types, pool, context, webrtc
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v1.10.3 - Synchronize shieldHp and maxShieldHp in processIncomingGameState.
  */
 import { state } from '../state';
@@ -388,7 +380,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
 
             socket.on('room_error', (msg: string) => {
                 console.error("Room error:", msg);
-                alert("Sektor-Verbindungsfehler: " + msg);
+                alert("Sector connection error: " + msg);
                 window.location.href = 'index.html?error=' + encodeURIComponent(msg);
             });
 
@@ -411,14 +403,14 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
             });
 
             socket.on('connect_error', () => {
-                console.warn("Verbindung zum Server fehlgeschlagen. Wechsel zu lokalem Host.");
+                console.warn("Connection to server failed. Switching to local host mode.");
                 state.isHost = true;
             });
 
             // Register WebRTC message handler to receive UDP-like packets
             registerWebRTCMessageHandler(processIncomingGameState);
 
-            // Initial State für Late-Joiner
+            // Initial state for late-joining clients
             socket.on('full_game_state', (data: SocketEventMap['full_game_state']) => {
                 if (!state.isHost) {
                     if (data.wave) state.wave = data.wave;
@@ -521,7 +513,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                 if (enemiesToSpawn !== undefined) state.enemiesToSpawn = enemiesToSpawn;
                 if (spawnCooldown !== undefined) state.spawnCooldown = spawnCooldown;
 
-                // UI anpassen
+                // Update UI controls to reflect received state
                 const pauseBtn = document.getElementById('pauseBtn');
                 if (pauseBtn) {
                     pauseBtn.innerText = state.isPaused ? 'Weiter' : 'Pause';
@@ -555,7 +547,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                     Multiplayer.updatePlayerCountUI(playerCount);
                 }
 
-                // Initialisieren von lastReceivedState für zukünftige delta-Updates
+                // Initialize lastReceivedState for future delta updates
                 Multiplayer.lastReceivedState = {
                     tick: wave || 0,
                     timestamp: performance.now(),
@@ -564,13 +556,13 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                         id: eData.id,
                         typeName: eData.typeName,
                         wave: eData.wave || wave || state.wave,
-                        x: eData.x, // In Host-Koordinaten belassen!
-                        y: eData.y, // In Host-Koordinaten belassen!
+                        x: eData.x, // Keep in host coordinates
+                        y: eData.y, // Keep in host coordinates
                         hp: eData.hp,
                         maxHp: eData.maxHp || eData.hp,
-                        distanceTravelled: eData.distanceTravelled, // In Host-Koordinaten belassen!
+                        distanceTravelled: eData.distanceTravelled, // Keep in host coordinates
                         targetWaypointIndex: eData.targetWaypointIndex !== undefined ? eData.targetWaypointIndex : 0,
-                        speed: eData.speed !== undefined ? eData.speed : 1, // In Host-Koordinaten belassen!
+                        speed: eData.speed !== undefined ? eData.speed : 1, // Keep in host coordinates
                         shieldActive: eData.shieldActive || false,
                         swarmGroupId: eData.swarmGroupId,
                         shieldHp: eData.shieldHp,
@@ -654,8 +646,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                             '👥 MITGLIED BEIGETRETEN',
                             'Ein neuer Spieler ist der Mission beigetreten. Willkommen im Trupp!'
                         );
-                        // Wenn wir der Host sind, setzen wir lastSyncState zurück,
-                        // um ein vollständiges Update an den neuen Spieler zu erzwingen!
+                        // Reset lastSyncState to force a full state update for the new player
                         if (state.isHost) {
                             Multiplayer.lastSyncState = null;
                             Multiplayer.syncNow();
@@ -786,7 +777,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                         const centerX = col * TS + TS / 2;
                         const centerY = row * TS + TS / 2;
                         createExplosion(centerX, centerY, '#ff3366', 8);
-                        PoolManager.getFloatingText(centerX, centerY, 'Fehlgeschlagen!', '#ff3366');
+                        PoolManager.getFloatingText(centerX, centerY, 'Failed!', '#ff3366');
                         
                         Multiplayer.updateUI();
                     }
@@ -830,14 +821,14 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                 }
             });
 
-            // Wellen-Start Synchronisation
+            // Wave start synchronization
             socket.on('start_wave_sync', (data: SocketEventMap['start_wave_sync']) => {
                 if (!state.isWaveActive) {
                     startWaveCallback(data);
                 }
             });
 
-            // Leben Synchronisation
+            // Lives synchronization
             socket.on('sync_lives', (lives: number) => {
                 if (lives < state.lives && !state.godMode) {
                     state.screenDamageEffect = 30; // Start pulse
@@ -846,7 +837,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                 Multiplayer.updateUI();
             });
 
-            // Gold Synchronisation (Optional, falls gewünscht)
+            // Gold synchronization (optional, if needed)
             socket.on('sync_gold', (gold: number) => {
                 state.gold = gold;
                 Multiplayer.updateUI();
@@ -861,8 +852,8 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                 );
             });
         } catch (err) {
-            console.error("Fehler beim Binden der Socket-Events. Multiplayer deaktiviert.", err);
-            setSocket(null); // Multiplayer deaktivieren, wenn Events nicht gebunden werden können
+            console.error("Error binding socket events. Multiplayer disabled.", err);
+            setSocket(null); // Disable multiplayer if events cannot be bound
             cleanupAllWebRTC();
         }
 }

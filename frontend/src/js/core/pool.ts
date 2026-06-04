@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\pool.ts
- * @purpose: Highly optimized object pooling system to reuse visual elements (particles, projectiles, floating text, shockwaves). Includes logic to merge nearby gold pop-ups.
+ * @file: frontend/src/js/core/pool.ts
+ * @purpose: Highly optimized object pooling system for reusing visual elements (particles,
+ *           projectiles, floating text, shockwaves). Includes logic to merge nearby gold pop-ups.
  * @dependencies: fx, projectiles, types, config
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v2.5.0 - Passed gravity parameter inside getParticle for confetti and physics effects.
  */
 import { Particle, FloatingText, StunRay, MuzzleFlash, SniperBeam, RadiationArea, Shockwave, TeslaArc } from '../fx/fx';

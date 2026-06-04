@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\game\wave.ts
- * @purpose: Coordinates wave progression, enemy pool generation, wave execution hooks, multiplayer synchronization emit requests, and wave rewards calculation.
+ * @file: frontend/src/js/core/game/wave.ts
+ * @purpose: Coordinates wave progression, enemy pool generation, wave execution, multiplayer
+ *           synchronization emit requests, and end-of-wave reward calculation.
  * @dependencies: state, config, enemies, fx, ui, multiplayer, logger, viewport
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v1.4.0 - Added Accelerator to new geometry unlock warning descriptions.
  */
 import { state } from '../state';
@@ -99,13 +90,13 @@ export function generateEnemyPool(wave: number): string[] {
             if (index !== -1) {
                 pool.splice(index, 1);
             } else {
-                // Wenn er durch Zufall/niedriges Gewicht gar nicht im Pool gelandet ist, erzwingen wir es:
+                // If the enemy type missed the pool due to low weight, force it in
                 const normalIdx = pool.indexOf('Normal');
                 if (normalIdx !== -1) {
-                    pool.splice(normalIdx, 1); // Ein Normalen entfernen, um Platz zu machen
+                    pool.splice(normalIdx, 1); // Remove a Normal to make room
                 }
             }
-            // An das Ende anhängen, da beim Spawnen mit pop() vom Ende genommen wird
+            // Append to end: since spawning pops from the end, this guarantees it spawns first
             pool.push(newType);
         }
         if (pool.includes('Collector')) {
@@ -118,7 +109,7 @@ export function generateEnemyPool(wave: number): string[] {
 export function startWave(): void {
     if (state.isWaveActive || state.gameOver) return;
 
-    // Multiplayer: Host generiert den Pool und schickt ihn an alle
+    // Multiplayer: host generates the pool and broadcasts it to all players
     if (state.isHost) {
         const pool = generateEnemyPool(state.wave);
         Multiplayer.emitRequestWaveStart({ wave: state.wave, pool: pool });
@@ -127,7 +118,7 @@ export function startWave(): void {
     }
 }
 
-// Diese Funktion wird vom Multiplayer-System oder lokal aufgerufen
+// Called by the multiplayer system or locally to start a wave
 export function executeStartWave(data: any): void {
     if (state.isWaveActive || state.gameOver) return;
 
@@ -233,7 +224,7 @@ export function handleWaveLogic(): void {
 
         const waveBonus = Config.WAVE_BONUS_BASE + (state.wave * Config.WAVE_BONUS_PER_WAVE);
 
-        // Interest (Zinsen)
+        // Interest earned on current gold
         const interest = Math.floor(state.gold * Config.INTEREST_RATE);
 
         state.gold += waveBonus + interest;

@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\game\renderer.ts
- * @purpose: Handles coordinate translations, screen shake math, rendering passive/active canvas layers, range circles, ghost towers, screen damage vignettes, and drawing canvas FPS text.
+ * @file: frontend/src/js/core/game/renderer.ts
+ * @purpose: Handles coordinate translations, screen shake, rendering passive/active canvas layers,
+ *           range circles, ghost towers, screen damage vignettes, and the canvas FPS overlay.
  * @dependencies: state, config, towers, map, modals, viewport
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v2.2.0 - Fully overhauled spawners and base with counter-rotating geometric portals (triangles for spawners, diamonds for base) and breathing fluid cores.
  */
 import { state } from '../state';

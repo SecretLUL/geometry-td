@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\game\loop.ts
- * @purpose: Coordinates game loop execution ticks, CPU throttling Web Worker, client interpolation, client prediction safety timeout, and boss health bar updates.
+ * @file: frontend/src/js/core/game/loop.ts
+ * @purpose: Coordinates game loop execution ticks, CPU throttling via Web Worker, client-side
+ *           entity interpolation, client prediction safety timeouts, and boss health bar updates.
  * @dependencies: state, multiplayer, config, enemies, fx, pool, ui, logger, utils, types, viewport, wave, renderer
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v1.10.0 - Added Boss shield health bar rendering updates and integrated achievements check.
  */
 import { state } from '../state';
@@ -41,7 +32,7 @@ function measureTrueFps(timestamp: number) {
     if (!timestamp) timestamp = performance.now();
     
     if (timestamp - lastFpsUpdate > 1000) {
-        // Reset after long inactive periods (z.B. Hintergrund-Tab)
+        // Reset after long inactive periods (e.g. background tab)
         framesSinceLastFps = 0;
         lastFpsUpdate = timestamp;
     } else {
@@ -54,7 +45,8 @@ function measureTrueFps(timestamp: number) {
     }
     requestAnimationFrame(measureTrueFps);
 }
-// Unabhängig vom Fokus und der Game-Loop starten wir eine reine Render-FPS-Messung
+// Start a standalone FPS measurement loop independent of the main game loop,
+// so it continues tracking render rate even when the tab is unfocused.
 requestAnimationFrame(measureTrueFps);
 
 // Persistent Map objects to avoid garbage collection thrashing in game loop interpolation
@@ -201,7 +193,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                     }
 
                     for (let eData1 of state1.activeEnemies) {
-                        // Schutz: Ungültige Einträge ohne ID überspringen
+                        // Guard: skip entries without a valid ID
                         if (!eData1 || eData1.id === undefined || eData1.id === null) {
                             continue;
                         }
@@ -210,7 +202,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
 
                         let existing = currentEnemyMap.get(eData1.id);
                         if (!existing) {
-                            // Schutz: Ohne typeName können wir keinen gültigen Gegner erzeugen!
+                            // Guard: without a typeName we cannot construct a valid enemy
                             if (!eData1.typeName) {
                                 console.warn(`[Client Sync] Skipped spawning enemy ID ${eData1.id} due to missing typeName.`);
                                 continue;
@@ -224,7 +216,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         const endX = eData1.x * scale;
                         const endY = eData1.y * scale;
 
-                        // Schutz vor NaN-Koordinaten
+                        // Guard against NaN coordinates
                         if (isNaN(startX) || isNaN(startY) || isNaN(endX) || isNaN(endY)) {
                             console.warn(`[Client Sync] Invalid coordinates for enemy ID ${eData1.id}. start: (${startX}, ${startY}), end: (${endX}, ${endY}).`);
                             continue;
@@ -233,7 +225,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         existing.x = startX + (endX - startX) * t;
                         existing.y = startY + (endY - startY) * t;
 
-                        // Sicherstellen, dass wir keine NaN-Werte zuweisen
+                        // Guard: only assign values if defined and not NaN
                         if (eData1.hp !== undefined && !isNaN(eData1.hp)) {
                             existing.hp = eData1.hp;
                         }
@@ -298,17 +290,17 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         state.enemies.push(newEnemiesBuffer[i]);
                     }
 
-                    // Client-side: Host ruft enemy.update() auf, welches intern updatePixi() triggert.
-                    // Clients überspringen enemy.update() komplett → Sprites werden nie neu positioniert → unsichtbar.
-                    // Fix: updatePixi() nach jeder Interpolationsrunde explizit aufrufen.
+                    // On the host, enemy.update() calls updatePixi() internally.
+                    // Clients skip enemy.update() entirely, so sprites are never repositioned and become invisible.
+                    // Fix: call updatePixi() explicitly after each interpolation round.
                     for (let i = 0; i < state.enemies.length; i++) {
                         (state.enemies[i] as any).updatePixi?.();
                     }
                 }
             }
 
-            // Entkopplung der Spielgeschwindigkeit von der Framerate (Fixed Timestep)
-            // Basis-Logik-Rate: 60 Ticks pro Sekunde (entspricht 16.666 ms pro Tick)
+            // Decouple game speed from frame rate using a fixed timestep accumulator.
+            // Base logic rate: 60 ticks per second (16.666 ms per tick).
             const baseTickInterval = 1000 / 60;
             speedAccumulator += state.gameSpeed * (consumedTime / baseTickInterval);
             
@@ -393,14 +385,14 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                                 const color = tower.currentColor || '#4cc9f0';
                                 PoolManager.getParticle(px, py, color, Math.random() * 1.5 + 0.5, Math.random() * 2 + 1);
                             }
-                            // PIXI: auch während Bau-Phase Position/Skalierung updaten
+                            // PIXI: update position/scale during construction animation
                             tower.updatePixi();
                             continue;
                         }
 
                         if (tower.stunTimer > 0) {
                             tower.stunTimer--;
-                            // PIXI: Stun-Icon aktualisieren
+                            // PIXI: update stun icon state
                             tower.updatePixi();
                             continue;
                         }
@@ -455,7 +447,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                             }
                         }
 
-                        // PIXI: Turret-Sprite Rotation und Recoil aktualisieren
+                        // PIXI: update turret sprite rotation and recoil
                         tower.updatePixi();
                     }
                 }
@@ -485,7 +477,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                             enemy.deadMarked = true;
                             state.enemies[i] = state.enemies[state.enemies.length - 1];
                             state.enemies.pop();
-                            // Pixi-Sprite verstecken, damit der Gegner sofort aus der Ansicht verschwindet
+                            // Hide the PixiJS sprite immediately so the enemy vanishes from view
                             if ((enemy as any).pixiSprite) (enemy as any).pixiSprite.visible = false;
                             createExplosion(enemy.x, enemy.y, enemy.color, 10);
                             updateUI();
@@ -592,7 +584,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                             enemy.deadMarked = true;
                             state.enemies[i] = state.enemies[state.enemies.length - 1];
                             state.enemies.pop();
-                            // Pixi-Sprite verstecken, damit der Gegner sofort aus der Ansicht verschwindet
+                            // Hide the PixiJS sprite immediately so the enemy vanishes from view
                             if ((enemy as any).pixiSprite) (enemy as any).pixiSprite.visible = false;
                             updateUI();
 
@@ -627,7 +619,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
             }
 
             // Centralized Boss Bar Coordinator
-            // Optimiert: Keine Array-Allokation (.filter) pro Frame.
+            // Optimized: avoids per-frame array allocation (.filter).
             let defragPartsCount = 0;
             let currentHpSum = 0;
             let defragWaveNumber = state.wave;
@@ -751,7 +743,7 @@ export function triggerAssetsLoaded(): void {
     assetsLoaded = true;
     if (!syncCompleted) {
         const loaderStatus = document.getElementById('loader-status');
-        if (loaderStatus) loaderStatus.innerText = "Warte auf Synchronisation mit dem Server...";
+        if (loaderStatus) loaderStatus.innerText = "Waiting for server synchronization...";
     }
     tryStartGame();
 }
@@ -802,7 +794,7 @@ export function tryStartGame(): void {
         cachedBossShieldBar = document.getElementById('bossShieldBar');
 
         const loaderStatus = document.getElementById('loader-status');
-        if (loaderStatus) loaderStatus.innerText = "Synchronisation abgeschlossen!";
+        if (loaderStatus) loaderStatus.innerText = "Synchronization complete!";
 
         // Tab-Throttling Hack: Use Web Worker to keep JS thread and Socket.IO alive when tab is hidden
         if (window.Worker) {

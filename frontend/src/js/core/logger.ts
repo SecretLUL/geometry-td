@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\logger.ts
- * @purpose: Standardized game logger capturing metrics like ticks, waves, lives, and gold to simplify local and remote debug logging.
+ * @file: frontend/src/js/core/logger.ts
+ * @purpose: Standardized game logger that captures state snapshots (ticks, waves, lives, gold)
+ *           with every log entry to simplify local and remote debugging.
  * @dependencies: state
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v1.1.1 - Ignored manual log sync keydown event when input fields are active.
  */
 import { state } from './state';
@@ -180,8 +171,7 @@ class Logger {
             }
         };
 
-        // Bei Fehlern packen wir die Details in das Message-Feld, 
-        // da das State-Objekt im Debug-Protokoll fix definiert ist.
+        // For errors, append detail fields to the message since the state schema is fixed.
         if (entry.level === 'ERROR' || entry.level === 'E') {
             if (entry.message === 'RUNTIME_ERR' || s.m) {
                 compact.m = `ERR: ${s.m || entry.message || 'Unknown'} @ ${s.s || '?'}:${s.l || '?'}`;

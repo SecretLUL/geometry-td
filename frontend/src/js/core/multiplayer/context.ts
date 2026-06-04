@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\multiplayer\context.ts
- * @purpose: Coordinates the shared context, socket.io client reference, sync intervals, tick states, and basic lobby sync logic.
+ * @file: frontend/src/js/core/multiplayer/context.ts
+ * @purpose: Provides the shared multiplayer context — socket.io client reference, sync intervals,
+ *           tick state, and basic lobby synchronization logic.
  * @dependencies: types
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v1.1.1 - Added emitHostEndedWave to IMultiplayer.
  */
 import { TowerSpecialization, SyncFullGameStatePayload, SyncTowerState, TowerType } from '../../types';

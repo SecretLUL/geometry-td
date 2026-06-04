@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\achievements.ts
- * @purpose: Defines achievement structures, checks unlock conditions during gameplay, triggers animations, and persists unlocks to the database.
+ * @file: frontend/src/js/core/achievements.ts
+ * @purpose: Defines achievement structures, checks unlock conditions during gameplay, triggers
+ *           unlock animations, and persists unlocked achievements to the database.
  * @dependencies: state, ui, fx
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v1.1.0 - Guest mode: initAchievements sets state.isGuest, checkAchievements exits early for guests.
  */
 import { state } from './state';
@@ -90,7 +81,7 @@ const getBaseUrl = () => {
            ? 'http://localhost:3000' : '';
 };
 
-// Laden bereits freigeschalteter Errungenschaften aus der DB
+// Loads already-unlocked achievements from the database on session start
 export async function initAchievements(): Promise<void> {
     try {
         const response = await fetch(`${getBaseUrl()}/api/user/progress`);
@@ -99,27 +90,27 @@ export async function initAchievements(): Promise<void> {
             state.isGuest = false;
             if (data.progress && data.progress.unlocked_achievements) {
                 state.unlockedAchievements = data.progress.unlocked_achievements;
-                console.log('[ACHIEVEMENTS] Bereits freigeschaltet:', state.unlockedAchievements);
+                console.log('[ACHIEVEMENTS] Already unlocked:', state.unlockedAchievements);
             }
         } else {
             // 401 or other non-ok response means the user is not logged in
             state.isGuest = true;
-            console.log('[ACHIEVEMENTS] Gast-Modus aktiv – keine Errungenschaften.');
+            console.log('[ACHIEVEMENTS] Guest mode active — achievements disabled.');
         }
     } catch (err) {
         state.isGuest = true;
-        console.warn('[ACHIEVEMENTS] Fehler beim Laden der Errungenschaften:', err);
+        console.warn('[ACHIEVEMENTS] Error loading achievements:', err);
     }
 }
 
-// Überprüfung und Freischaltung von Errungenschaften im Spiel
+// Checks and unlocks eligible achievements during gameplay
 export async function checkAchievements(): Promise<void> {
-    // Errungenschaften sind für Gäste komplett deaktiviert
+    // Achievements are fully disabled for guests
     if (state.isGuest) {
         return;
     }
 
-    // Errungenschaften sind gesperrt bei aktiven Cheats/Mods
+    // Achievements are locked when cheats or mods are active
     if (state.godMode || state.infiniteGold || state.waveModified) {
         return;
     }
@@ -137,10 +128,10 @@ export async function checkAchievements(): Promise<void> {
             state.unlockedAchievements.push(ach.id);
             console.log(`[ACHIEVEMENT UNLOCKED] ${ach.title} (${ach.id})`);
 
-            // In-Game Notification
+            // Show in-game notification
             showGameNotification(
                 'wave',
-                `🏆 ERRUNGENSCHAFT FREIGESCHALTET: ${ach.title}`,
+                `🏆 ACHIEVEMENT UNLOCKED: ${ach.title}`,
                 ach.description
             );
 
@@ -157,7 +148,7 @@ export async function checkAchievements(): Promise<void> {
                     body: JSON.stringify({ achievementId: ach.id })
                 });
             } catch (err) {
-                console.error(`[ACHIEVEMENT] Fehler beim Speichern von ${ach.id}:`, err);
+                console.error(`[ACHIEVEMENT] Error saving achievement ${ach.id}:`, err);
             }
         }
     }

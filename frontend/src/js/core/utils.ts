@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\utils.ts
- * @purpose: Performance-optimized utility functions for distance calculations, collision checks, array management, and custom DOM element querying.
+ * @file: frontend/src/js/core/utils.ts
+ * @purpose: Performance-optimized utility functions for distance calculations, collision checks,
+ *           array management, and cached DOM element querying.
  * @dependencies: state, types
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v1.3.1 - Removed direct state import and introduced setGameStateRef to resolve circular dependency with Config.
  */
 import { Enemy, GameState } from '../types';

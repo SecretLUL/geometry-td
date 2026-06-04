@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\game\viewport.ts
- * @purpose: Coordinates canvas viewport sizing, aspect ratio constraints, smooth camera translation coordinates, clamping, and pointer dragging logic.
+ * @file: frontend/src/js/core/game/viewport.ts
+ * @purpose: Manages canvas sizing, aspect ratio constraints, smooth camera translation and
+ *           clamping, and pointer-drag camera panning.
  * @dependencies: state, config, map, modals
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-30 / v1.3.0 - Added staticPathGraphics export and added it to pathAnimContainer.
  */
 import { state } from '../state';
@@ -34,8 +25,8 @@ export async function initPixi() {
     const pixiContainer = document.getElementById('pixi-container');
     if (!pixiContainer) return;
 
-    // Berechne die korrekte Canvas-Größe vor dem Initialisieren,
-    // damit PixiJS nie mit einem 0x0 WebGL-Kontext startet (verhindert Context Lost)
+    // Calculate the correct canvas size before initializing PixiJS
+    // to ensure it never starts with a 0x0 WebGL context (prevents context loss).
     const dpr = window.devicePixelRatio || 1;
     const uiPanelWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ui-panel-width')) || 240;
     const isMobile = window.innerWidth <= 950;
@@ -59,8 +50,8 @@ export async function initPixi() {
     });
     pixiContainer.appendChild(app.canvas);
 
-    // WebGL Context Restoration: Falls der Kontext verloren geht,
-    // wird die Stage neu aufgebaut sobald der Browser ihn wiederherstellt
+    // WebGL Context Restoration: rebuild the stage when the browser restores
+    // a lost WebGL context (e.g. after GPU memory pressure or background throttling).
     app.canvas.addEventListener('webglcontextlost', (e: Event) => {
         e.preventDefault();
         console.warn('[PixiJS] WebGL context lost. Waiting for restoration...');

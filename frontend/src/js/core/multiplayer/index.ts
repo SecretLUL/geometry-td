@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\multiplayer\index.ts
- * @purpose: Entry point for multiplayer setup, wrapping host and client logic into a unified API with Headless-Host connection support.
+ * @file: frontend/src/js/core/multiplayer/index.ts
+ * @purpose: Entry point for multiplayer setup, unifying host and client logic into a single API
+ *           with headless-host connection support.
  * @dependencies: state, config, context, host, inbound, outbound
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v1.4.1 - Bound emitHostEndedWave to Multiplayer API.
  */
 import { state } from '../state';

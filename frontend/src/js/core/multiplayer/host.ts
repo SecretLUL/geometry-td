@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\multiplayer\host.ts
- * @purpose: Manages host-authoritative validations for tower placement, selling, and upgrading in co-op rooms.
+ * @file: frontend/src/js/core/multiplayer/host.ts
+ * @purpose: Implements host-authoritative validation for tower placement, selling, and upgrading
+ *           in co-op rooms.
  * @dependencies: state, config, towers, fx, types, context
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-27 / v1.2.0 - Added max level validation check in processUpgradeTower to prevent gold loss when upgrading past max level.
  */
 import { state } from '../state';

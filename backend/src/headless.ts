@@ -20,7 +20,7 @@ export async function spawnHeadlessHost(roomId: string, mapName: string) {
   if (activeBrowsers[roomId] && activeBrowsers[roomId].status !== 'failed') return;
 
   const instanceId = Math.random().toString(36).substring(2, 15);
-  console.log(`[HEADLESS] Starte Headless-Host für Room: ${roomId} (Map: ${mapName}, ID: ${instanceId})`);
+  console.log(`[HEADLESS] Launching headless host for room: ${roomId} (Map: ${mapName}, ID: ${instanceId})`);
   activeBrowsers[roomId] = {
     browser: null,
     page: null,
@@ -45,11 +45,11 @@ export async function spawnHeadlessHost(roomId: string, mapName: string) {
         ]
       }) as unknown as Promise<Browser>,
       30000,
-      "Timeout beim Starten des Puppeteer-Browsers"
+      "Timeout while launching Puppeteer browser"
     );
 
     if (!activeBrowsers[roomId] || activeBrowsers[roomId].instanceId !== instanceId) {
-      console.log(`[HEADLESS] Spawn für Room ${roomId} abgebrochen (Race-Condition erkannt nach Launch).`);
+      console.log(`[HEADLESS] Spawn for room ${roomId} cancelled (race condition detected after launch).`);
       if (browser) await browser.close();
       return;
     }
@@ -57,11 +57,11 @@ export async function spawnHeadlessHost(roomId: string, mapName: string) {
     const page: Page = await withTimeout(
       browser.newPage(),
       15000,
-      "Timeout beim Öffnen eines neuen Tabs"
+      "Timeout while opening a new browser tab"
     );
 
     if (!activeBrowsers[roomId] || activeBrowsers[roomId].instanceId !== instanceId) {
-      console.log(`[HEADLESS] Spawn für Room ${roomId} abgebrochen (Race-Condition erkannt nach newPage).`);
+      console.log(`[HEADLESS] Spawn for room ${roomId} cancelled (race condition detected after newPage).`);
       if (browser) await browser.close();
       return;
     }
@@ -90,16 +90,16 @@ export async function spawnHeadlessHost(roomId: string, mapName: string) {
     page.on('pageerror', (err: Error) => console.error(`[BROWSER PAGE-ERROR][Room ${roomId}]:`, err));
 
     const url = `${FRONTEND_URL}/game.html?map=${encodeURIComponent(mapName)}&headless=true&roomId=${encodeURIComponent(roomId)}`;
-    console.log(`[HEADLESS] Lade URL: ${url}`);
+    console.log(`[HEADLESS] Loading URL: ${url}`);
 
     await withTimeout(
       page.goto(url, { waitUntil: 'networkidle2' }),
       30000,
-      "Timeout beim Laden der Frontend-URL"
+      "Timeout while loading the frontend URL"
     );
 
     if (!activeBrowsers[roomId] || activeBrowsers[roomId].instanceId !== instanceId) {
-      console.log(`[HEADLESS] Spawn für Room ${roomId} abgebrochen (Race-Condition erkannt nach goto).`);
+      console.log(`[HEADLESS] Spawn for room ${roomId} cancelled (race condition detected after goto).`);
       if (browser) await browser.close();
       return;
     }
@@ -111,9 +111,9 @@ export async function spawnHeadlessHost(roomId: string, mapName: string) {
       instanceId,
       launchStartedAt: activeBrowsers[roomId].launchStartedAt
     };
-    console.log(`[HEADLESS] Headless-Host für Room ${roomId} erfolgreich gestartet.`);
+    console.log(`[HEADLESS] Headless host for room ${roomId} started successfully.`);
   } catch (err) {
-    console.error(`[HEADLESS] Fehler beim Starten des Headless-Hosts für Room ${roomId}:`, err);
+    console.error(`[HEADLESS] Error starting headless host for room ${roomId}:`, err);
     if (activeBrowsers[roomId] && activeBrowsers[roomId].instanceId === instanceId) {
       delete activeBrowsers[roomId];
     }
@@ -121,7 +121,7 @@ export async function spawnHeadlessHost(roomId: string, mapName: string) {
       try {
         await browser.close();
       } catch (closeErr) {
-        console.error(`[HEADLESS] Fehler beim Schließen des Browsers im Catch-Block für Room ${roomId}:`, closeErr);
+            console.error(`[HEADLESS] Error closing browser in catch block for room ${roomId}:`, closeErr);
       }
     }
   }
@@ -131,7 +131,7 @@ export async function stopHeadlessHost(roomId: string) {
   const instance = activeBrowsers[roomId];
   if (!instance) return;
 
-  console.log(`[HEADLESS] Beende Headless-Host für Room: ${roomId}`);
+  console.log(`[HEADLESS] Stopping headless host for room: ${roomId}`);
   delete activeBrowsers[roomId];
 
   try {
@@ -139,7 +139,7 @@ export async function stopHeadlessHost(roomId: string) {
       await instance.browser.close();
     }
   } catch (err) {
-    console.error(`[HEADLESS] Fehler beim Beenden des Headless-Hosts für Room ${roomId}:`, err);
+    console.error(`[HEADLESS] Error stopping headless host for room ${roomId}:`, err);
   }
 }
 
@@ -152,13 +152,13 @@ export async function runHeadlessHealthCheck() {
     if (instance.status === 'launching') {
       const duration = now - instance.launchStartedAt;
       if (duration > 45000) {
-        console.warn(`[HEALTH-CHECK] Headless-Host für Room ${roomId} hängt im 'launching' Status seit ${Math.round(duration / 1000)}s. Bereinige...`);
+        console.warn(`[HEALTH-CHECK] Headless host for room ${roomId} has been stuck in 'launching' state for ${Math.round(duration / 1000)}s. Cleaning up...`);
         delete activeBrowsers[roomId];
         if (instance.browser) {
           try {
             await instance.browser.close();
           } catch (err) {
-            console.error(`[HEALTH-CHECK] Fehler beim Schließen des hängenden Browsers für Room ${roomId}:`, err);
+            console.error(`[HEALTH-CHECK] Error closing stuck browser for room ${roomId}:`, err);
           }
         }
       }
@@ -168,7 +168,7 @@ export async function runHeadlessHealthCheck() {
     const room = roomStates[roomId];
     const hasHumanPlayers = room && room.playerCount > 0;
     if (!hasHumanPlayers) {
-      console.log(`[HEALTH-CHECK] Keine aktiven menschlichen Spieler mehr für Room ${roomId}. Beende verwaisten Headless-Browser.`);
+      console.log(`[HEALTH-CHECK] No active human players remaining for room ${roomId}. Stopping orphaned headless browser.`);
       await stopHeadlessHost(roomId);
       continue;
     }
@@ -178,10 +178,10 @@ export async function runHeadlessHealthCheck() {
         await withTimeout(
           instance.browser.version(),
           5000,
-          "Browser reagiert nicht auf Anfragen"
+          "Browser is not responding"
         );
       } catch (err) {
-        console.error(`[HEALTH-CHECK] Headless-Host für Room ${roomId} reagiert nicht oder ist abgestürzt:`, err);
+        console.error(`[HEALTH-CHECK] Headless host for room ${roomId} is unresponsive or has crashed:`, err);
         await stopHeadlessHost(roomId);
         activeBrowsers[roomId] = {
           browser: null,

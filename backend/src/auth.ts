@@ -10,7 +10,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
   const token = req.cookies[cName];
   
   if (!token) {
-    res.status(401).json({ error: 'Nicht authentifiziert' });
+    res.status(401).json({ error: 'Not authenticated' });
     return;
   }
 
@@ -19,6 +19,6 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
     (req as AuthenticatedRequest).user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ error: 'Ungültige Sitzung' });
+    res.status(401).json({ error: 'Invalid session' });
   }
 }

@@ -1,17 +1,9 @@
 /*
- * @file: frontend\src\js\core\game.ts
- * @purpose: High-level bootstrapping entry point. Parses parameters, loads map configurations, binds global events, coordinates loader state progress, and initializes secondary controller systems.
+ * @file: frontend/src/js/core/game.ts
+ * @purpose: High-level bootstrapping entry point. Parses URL parameters, loads the map,
+ *           binds global events, tracks asset loading progress, and initializes all
+ *           subsystems (UI, multiplayer, viewport, wave controller, achievements).
  * @dependencies: state, config, map, ui, background, loader, logger, viewport, wave, loop
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v2.1.0 - Modularized and refactored game.ts; initialized achievements logic in bootstrap.
  */
 import { state } from './state';
@@ -30,7 +22,7 @@ import { initAchievements } from './achievements';
 // ─── Global Error Handling ───────────────────────────────────────────────────
 window.addEventListener('error', (event) => {
     console.error('[GLOBAL ERROR]', event.message, event.filename, event.lineno, event.error);
-    // Optional: Hier könnte man einen Fatal-UI-Screen triggern
+    // Optional: trigger a fatal error UI screen here
 });
 
 window.addEventListener('unhandledrejection', (event) => {
@@ -50,27 +42,27 @@ if (!mapName) {
 // Initial map load from URL
 loadMap(mapName);
 
-// ─── Viewport scaling (first pass, vor PixiJS) ────────────────────────────
-// Notwendig, damit initPixi() korrekte Canvas-Dimensionen erhält.
+// ─── Viewport scaling (first pass, before PixiJS) ────────────────────────────
+// Required so that initPixi() receives the correct canvas dimensions.
 resizeCanvas();
 
 // ─── Initialize PixiJS ────────────────────────────────────────────────────────
 await initPixi();
 
-// ─── Initialize Object Pools (NACH PixiJS!) ─────────────────────────────────
-// KRITISCH: Pool-Objekte (Particle, Projectile, etc.) erstellen PIXI.Sprite /
-// PIXI.Graphics in ihren Konstruktoren. Das MUSS nach app.renderer laufen,
-// sonst fehlen alle GPU-Sprites und Entities sind unsichtbar.
+// ─── Initialize Object Pools (AFTER PixiJS!) ─────────────────────────────────
+// CRITICAL: Pool objects (Particle, Projectile, etc.) create PIXI.Sprite /
+// PIXI.Graphics in their constructors. This MUST run after app.renderer is ready,
+// otherwise all GPU sprites are missing and entities will be invisible.
 PoolManager.init();
 
-// Verknüpfe State-Arrays mit den jetzt befüllten Pool-Arrays
+// Link state arrays to the now-populated pool arrays
 state.projectiles   = PoolManager.projectiles.getArray();
 state.particles     = PoolManager.particles.getArray();
 state.floatingTexts = PoolManager.floatingTexts.getArray();
 state.stunEffects   = PoolManager.stunEffectsList;
 state.groundEffects = PoolManager.groundEffectsList;
 
-// ─── Viewport scaling (zweiter Pass, PixiJS kann jetzt korrekt resizen) ─────
+// ─── Viewport scaling (second pass, PixiJS can now resize correctly) ─────────
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 

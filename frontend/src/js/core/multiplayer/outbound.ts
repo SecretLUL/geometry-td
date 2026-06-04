@@ -1,17 +1,8 @@
 /*
- * @file: frontend\src\js\core\multiplayer\outbound.ts
- * @purpose: Transmits local client and host actions (state deltas, tower build/sell requests, speed toggles, wave starts) to the server.
+ * @file: frontend/src/js/core/multiplayer/outbound.ts
+ * @purpose: Transmits local client and host actions (state deltas, tower build/sell/upgrade
+ *           requests, speed toggles, wave starts) to the server.
  * @dependencies: state, config, context, types, webrtc
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v1.2.2 - Include shieldHp and maxShieldHp in activeEnemies sync mapping.
  */
 import { state } from '../state';
