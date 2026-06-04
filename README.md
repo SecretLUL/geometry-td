@@ -6,91 +6,91 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://www.docker.com/)
 
-**Geometry TD** ist ein hochperformantes, Co-op-fähiges Tower-Defense-Spiel im Webbrowser. Es kombiniert intensive Echtzeit-Schlachten, modernste Web-Grafiktechnologien (WebGL) und eine robuste Multiplayer-Architektur mit einer server-seitig autoritativen Spielsimulation.
+**Geometry TD** is a high-performance, co-op capable tower defense game played directly in the web browser. It combines intense real-time battles, state-of-the-art web graphics (WebGL), and a robust multiplayer architecture featuring a server-side authoritative game simulation.
 
-Das visuelle Design setzt auf ein neon-cybernetisches Cyber-Glassmorphismus-Thema, begleitet von flüssigen Partikeleffekten und reaktivem Sound-Design.
+The visual design is built around a neon-cybernetic cyber-glassmorphism theme, accompanied by smooth particle effects and a reactive soundtrack.
 
 ---
 
 ## 🚀 Key Features
 
-*   **GPU-beschleunigtes Rendering (PixiJS v8):** Komplette Migration von klassischem Canvas 2D auf reines WebGL-Rendering. Nutzt fortgeschrittene Techniken wie Sprite-Pooling (für Projektile und Partikel) und isolierte `RenderGroups`, um Stottern und CPU-Überlastungen zu verhindern.
-*   **Netzwerk-Synchronisation & Co-op (bis zu 4 Spieler):** Echtzeit-Multiplayer über eine Kombination aus WebSockets (Socket.io) für Zustandsübersichten und **WebRTC Peer-to-Peer** für die schnelle Übertragung von Positionsdaten und Projektilen mit minimaler Latenz.
-*   **Autoritatives Headless-Host System:** Um Cheaten vorzubeugen, wird die eigentliche Spielphysik und State-Berechnung bei Co-op-Partien auf einem server-seitigen, kopflosen Browser (**Puppeteer/Chromium**) ausgeführt. Die Clients empfangen die validierten Delta-Updates und interpolieren diese flüssig.
-*   **Persistentes Fortschrittssystem:** Sicheres Registrierungs- und Login-System über JWT-basierte Authentifizierung (HttpOnly-Cookies). Fortschritte, freigeschaltete Skins, Achievements (mit Konfetti-Animationen) und Highscores werden in einer PostgreSQL-Datenbank gespeichert.
-*   **In-Game Enzyklopädie (Lexikon):** Integrierte Übersicht über alle Turmklassen und Gegnertypen inklusive detaillierter Attribut-Fortschrittsbalken und Hintergrundgeschichten.
-*   **Reaktive Musikvisualisierung:** Die Frequenzen der Hintergrundmusik werden zur Laufzeit über die Web Audio API (`AnalyserNode`) ausgelesen, um einen animierten Equalizer im Hauptmenü anzuzeigen.
+*   **GPU-Accelerated Rendering (PixiJS v8):** Complete migration from classical Canvas 2D to pure WebGL rendering. Utilizes advanced techniques such as sprite pooling (for projectiles and particles) and isolated `RenderGroups` to prevent stuttering and CPU overhead.
+*   **Network Synchronization & Co-op (Up to 4 Players):** Real-time multiplayer combining WebSockets (Socket.io) for state coordination and **WebRTC Peer-to-Peer** for low-latency transmission of position data and projectiles.
+*   **Authoritative Headless Host System:** To prevent cheating, the core game physics and state calculations in co-op matches run on a server-side headless browser (**Puppeteer/Chromium**). Clients receive the validated delta updates and interpolate them smoothly.
+*   **Persistent Progress System:** Secure registration and login via JWT-based authentication (HttpOnly cookies). Progress, unlocked skins, achievements (with confetti animations), and high scores are saved in a PostgreSQL database.
+*   **In-Game Encyclopedia (Lexicon):** Integrated overview of all tower classes and enemy types, including detailed attribute progress bars and lore descriptions.
+*   **Reactive Music Visualization:** Background music frequencies are analyzed in real time via the Web Audio API (`AnalyserNode`) to render an animated equalizer in the main menu.
 
 ---
 
-## 🛠️ Technologie-Stack
+## 🛠️ Technology Stack
 
 *   **Frontend:** HTML5, CSS3 (Modular Vanilla CSS), TypeScript, PixiJS (v8), Vite
 *   **Backend:** Node.js, Express, Socket.io, Puppeteer-Core, tsx
-*   **Datenbank:** PostgreSQL (via `pg-promise`)
-*   **Infrastruktur:** Docker, Docker Compose, Nginx (für statische Web-Auslieferung)
+*   **Database:** PostgreSQL (via `pg-promise`)
+*   **Infrastructure:** Docker, Docker Compose, Nginx (for static web serving)
 
 ---
 
-## 📂 Projektstruktur
+## 📂 Project Structure
 
 ```text
 geometry-td/
-├── backend/                  # Server-Anwendung (Express, WebSockets, Headless Puppeteer)
+├── backend/                  # Server application (Express, WebSockets, Headless Puppeteer)
 │   ├── src/
-│   │   ├── routes/           # Rest-Endpunkte (Auth, Game-Stats)
-│   │   ├── db.ts             # Datenbankanbindung & Tabellenschemata
-│   │   ├── headless.ts       # Puppeteer-Steuerung (kopfloser Chromium-Host)
-│   │   ├── socket.ts         # Socket-Handler mit Zod-Validierung
-│   │   └── server.ts         # Server-Haupteinstiegspunkt
+│   │   ├── routes/           # REST endpoints (Auth, Game Stats)
+│   │   ├── db.ts             # Database connection & table schemas
+│   │   ├── headless.ts       # Puppeteer control (headless Chromium host)
+│   │   ├── socket.ts         # Socket handler with Zod validation
+│   │   └── server.ts         # Main server entry point
 │   └── tsconfig.json
-├── frontend/                 # Client-Anwendung (Spiel & Hauptmenü)
-│   ├── public/               # Statische Ressourcen (Audio, Changelog, Web-Fonts)
+├── frontend/                 # Client application (Game & Main Menu)
+│   ├── public/               # Static assets (Audio, Changelog, Web Fonts)
 │   ├── src/
-│   │   ├── css/              # Modulare Stylesheets (Portal, Mobile, Variables)
-│   │   └── js/               # Game-Engine, WebRTC-P2P, Entities, UI-Controller
+│   │   ├── css/              # Modular stylesheets (Portal, Mobile, Variables)
+│   │   └── js/               # Game engine, WebRTC P2P, Entities, UI controller
 │   └── vite.config.js
-├── docker-compose.yaml       # Container-Konfiguration für Entwicklung & Produktion
-└── deploy.sh                 # Automatisches Shell-Deploy-Skript
+├── docker-compose.yaml       # Container configuration for Dev & Production
+└── deploy.sh                 # Automatic shell deployment script
 ```
 
 ---
 
 ## ⚙️ Setup & Installation
 
-Das Projekt wird vollständig über Docker Compose orchestriert.
+The project is fully orchestrated using Docker Compose.
 
-### 1. Voraussetzungen
-*   Docker & Docker Compose installiert
-*   Eine `.env`-Datei im Stammverzeichnis mit folgendem Inhalt:
+### 1. Prerequisites
+*   Docker & Docker Compose installed
+*   A `.env` file in the root directory with the following contents:
     ```env
-    DB_PASSWORD=dein_sicheres_db_passwort
-    JWT_SECRET=dein_sicheres_jwt_geheimnis
+    DB_PASSWORD=your_secure_db_password
+    JWT_SECRET=your_secure_jwt_secret
     ```
 
-### 2. Entwicklungsumgebung (Local Dev)
-Startet die Entwicklungs-Container mit Live-Reloading für Frontend (Vite) und Backend (tsx watch).
+### 2. Development Environment (Local Dev)
+Starts the development containers with live-reloading for the frontend (Vite) and backend (tsx watch).
 
 ```bash
 docker compose up -d db-dev backend-dev frontend-dev
 ```
 
-*   **Frontend:** Erreichbar unter `http://localhost:7777`
+*   **Frontend:** Available at `http://localhost:7777`
 *   **Backend API:** Port `7676`
-*   **Datenbank:** PostgreSQL läuft auf Port `5432` (Daten verbleiben lokal in `./postgres_data_dev/`)
+*   **Database:** PostgreSQL runs on port `5432` (data persists locally in `./postgres_data_dev/`)
 
 ---
 
-## 🛡️ Code-Qualität & Validierung
+## 🛡️ Code Quality & Validation
 
-Vor Commits sollten die automatischen Prüfungen ausgeführt werden, um sicherzustellen, dass keine TypeScript-, HTML- oder CSS-Fehler vorliegen:
+Before committing, automated checks should be executed to ensure there are no TypeScript, HTML, or CSS errors:
 
-*   **Frontend-Validierung (TypeScript, HTML & CSS Lints):**
+*   **Frontend Validation (TypeScript, HTML & CSS Lints):**
     ```bash
     cd frontend
     npm run check-all
     ```
-*   **Backend-Validierung (TypeScript):**
+*   **Backend Validation (TypeScript):**
     ```bash
     cd backend
     npm run type-check
@@ -98,13 +98,20 @@ Vor Commits sollten die automatischen Prüfungen ausgeführt werden, um sicherzu
 
 ---
 
-## 🎮 Gameplay & Balancierung
+## 🎮 Gameplay & Balancing
 
-Das Spiel verwendet ein **SSOT-Balancing-System** (Single Source of Truth) in `frontend/src/js/core/config.ts`. Turmwerte und Kosten werden dynamisch berechnet.
+The game uses a **SSOT balancing system** (Single Source of Truth) in `frontend/src/js/core/config.ts`. Tower values and costs are calculated dynamically.
 
-### Die Türme
-1.  **Base (Standard):** Günstiger Allrounder. Kann in *Homing Missiles* (Raketen) oder *Heavy Ammo* (höherer Schaden) spezialisiert werden.
-2.  **Sniper:** Unbegrenzte Reichweite. Spezialisiert sich in *Ricochet* (Abpraller) oder *Bounty Hunter* (Extra Gold pro Abschuss).
-3.  **Bomb:** Massiver Flächenschaden. Spezialisiert sich in *Nuke* (radioaktive Bodenaura) oder *Cluster* (Mini-Bomben).
-4.  **Tesla:** Kettenblitze. Spezialisiert sich in *High Voltage* (hoher Direktschaden) oder *Shock Stun* (Betäubungseffekt).
-5.  **Prisma:** Kontinuierlicher Laserstrahl. Spezialisiert sich in *Meltdown Overdrive* (Explosion bei max. Strahlungsaufladung) oder *Refraction Split* (multiplizierter Laser).
+### The Towers
+1.  **Base (Standard):** Low-cost all-rounder. Can be specialized into *Homing Missiles* (missiles) or *Heavy Ammo* (higher damage).
+2.  **Sniper:** Unlimited range. Specializes in *Ricochet* (ricochets) or *Bounty Hunter* (extra gold per kill).
+3.  **Bomb:** Massive area-of-effect (AoE) damage. Specializes in *Nuke* (radioaktive ground aura) or *Cluster* (mini-bombs).
+4.  **Tesla:** Chain lightning. Specializes in *High Voltage* (high direct damage) or *Shock Stun* (stun effect).
+5.  **Prisma:** Continuous laser beam. Specializes in *Meltdown Overdrive* (explosion at max beam charge) or *Refraction Split* (split laser beam).
+
+---
+
+## 📄 License
+
+Copyright © 2026. All rights reserved.  
+The source code is provided solely for demonstration and portfolio purposes. Reproduction, modification, or commercial use of the code (in particular hosting the game on your own platforms) is not permitted without explicit permission.
