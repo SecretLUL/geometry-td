@@ -1,22 +1,23 @@
 # Node Dependencies
-node_modules/
+**/node_modules/
 .npm/
 
 # Build-Ausgaben
-dist/
-build/
+**/dist/
+**/build/
 
 # Docker & Umgebungsvariablen
 .env
 .env.local
+.env.*
 
 # Betriebssystem-Müll
 .DS_Store
 Thumbs.db
 
 # Datenbanken
-postgres_data_dev/
-postgres_data_prod/
+**/postgres_data_dev/
+**/postgres_data_prod/
 
 # KI Gedöns
 .agents/
