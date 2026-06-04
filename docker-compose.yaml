@@ -52,7 +52,7 @@ services:
     ports:
       - "7777:5173" # Dein Reverse Proxy leitet die Dev-Domain hierher
     volumes:
-      - /volume1/docker/geometry-td/frontend:/home/node/app
+      - ${PROJECT_ROOT}/frontend:/home/node/app
       - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
     command: >
       sh -c "npm install && npm run dev -- --host"
@@ -81,7 +81,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - /volume1/docker/geometry-td/backend:/home/node/app
+      - ${PROJECT_ROOT}/backend:/home/node/app
       - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
     command: >
       sh -c "npm install && npm run dev"
@@ -104,7 +104,7 @@ services:
       - POSTGRES_USER=gtd_user
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - /volume1/docker/geometry-td/postgres_data_dev:/var/lib/postgresql/data
+      - ${PROJECT_ROOT}/postgres_data_dev:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -122,7 +122,7 @@ services:
       - POSTGRES_USER=gtd_user
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - /volume1/docker/geometry-td/postgres_data_prod:/var/lib/postgresql/data
+      - ${PROJECT_ROOT}/postgres_data_prod:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
