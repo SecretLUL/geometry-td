@@ -22,3 +22,6 @@ Thumbs.db
 # KI Gedöns
 .agents/
 project_tree.txt
+
+# Lokale Dokumentation
+README.local.md
