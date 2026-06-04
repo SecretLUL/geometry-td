@@ -4,6 +4,17 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.16.3",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Monolithisches mobile.css in modulare CSS-Dateien unter src/css/mobile/ aufgeteilt."
+      }
+    ]
+  },
+  {
     "version": "v2.16.2",
     "date": "5. Juni 2026",
     "status": "active",

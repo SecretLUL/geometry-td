@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /home/node/app
 
+# Ensure node_modules exists and is owned by node (UID 1000) for volume permissions
+RUN mkdir -p node_modules && chown -R node:node /home/node/app/node_modules
+
 # The node user has UID/GID 1000, aligning with default host environments
 USER node
 

@@ -1,0 +1,106 @@
+/* ── Contextual Mobile Shop ── */
+#context-shop {
+    position: fixed;
+    z-index: 2000;
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(76, 201, 240, 0.3);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
+    min-width: 120px;
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
+    animation: context-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#context-shop.hidden {
+    display: none;
+}
+
+#context-shop.closing {
+    animation: context-pop-out 0.15s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+    pointer-events: none;
+    /* Disable interaction while fading out */
+}
+
+@keyframes context-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes context-pop-out {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.8) translateY(10px);
+    }
+}
+
+
+.context-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.context-btn:active {
+    background: var(--tesla-cyan);
+    color: #000;
+    transform: scale(0.95);
+}
+
+.context-btn .cost {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fca311;
+}
+
+.context-btn.too-expensive {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.context-btn.cancel-btn {
+    background: rgba(255, 51, 102, 0.1) !important;
+    border-color: rgba(255, 51, 102, 0.3) !important;
+    color: #ff3366 !important;
+    justify-content: center !important;
+    margin-top: 5px !important;
+}
+
+.context-btn.cancel-btn:active {
+    background: #ff3366 !important;
+    color: #fff !important;
+    transform: scale(0.95) !important;
+}

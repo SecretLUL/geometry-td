@@ -15,4 +15,9 @@ build/
 Thumbs.db
 
 # Datenbanken
-postgres_data/
+postgres_data_dev/
+postgres_data_prod/
+
+# KI Gedöns
+.agents/
+project_tree.txt

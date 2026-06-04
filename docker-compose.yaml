@@ -42,10 +42,12 @@ services:
   # 2. ENTWICKLUNGS-UMGEBUNG (DEV) -> gtd-dev.ammar-nas.duckdns.org
   # =========================================================================
   frontend-dev:
-    image: node:24-bookworm-slim
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     container_name: gtd-frontend-dev
     restart: unless-stopped
-    user: root
+    user: node
     working_dir: /home/node/app
     ports:
       - "7777:5173" # Dein Reverse Proxy leitet die Dev-Domain hierher
@@ -63,7 +65,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: gtd-backend-dev
     restart: unless-stopped
-    user: root
+    user: node
     working_dir: /home/node/app
     ports:
       - "7676:3000" # Separates Dev-Backend auf Port 7676!
@@ -82,7 +84,7 @@ services:
       - /volume1/docker/geometry-td/backend:/home/node/app
       - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
     command: >
-      sh -c "chown -R node:node /home/node/app/node_modules && runuser -u node -- sh -c 'npm install && npm run dev'"
+      sh -c "npm install && npm run dev"
     cap_add:
       - SYS_ADMIN
     deploy:

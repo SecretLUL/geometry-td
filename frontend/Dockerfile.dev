@@ -1,0 +1,9 @@
+FROM node:24-bookworm-slim
+
+WORKDIR /home/node/app
+
+# Create node_modules and set ownership to node user (UID 1000) to ensure
+# anonymous volumes are initialized with correct permissions.
+RUN mkdir -p node_modules && chown -R node:node node_modules
+
+USER node

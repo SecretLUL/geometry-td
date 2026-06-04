@@ -1,0 +1,158 @@
+/* ── Mobile HUD Optimization (Landscape) ── */
+@media screen and (max-width: 950px) and (orientation: landscape) {
+    #game-hud {
+        top: 10px;
+        padding: 0 15px;
+        pointer-events: none;
+    }
+
+    #game-hud::before,
+    #game-hud::after {
+        display: none;
+        /* Hide decorative lines to save space */
+    }
+
+    .hud-group {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .hud-item {
+        min-height: auto;
+        height: 44px;
+        width: auto !important;
+        padding: 0 12px;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        background: rgba(22, 22, 50, 0.85);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .hud-item::before {
+        display: none;
+    }
+
+    .hud-item .hud-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hud-item .hud-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .hud-content {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 4px;
+    }
+
+    .hud-label {
+        display: none;
+        /* Space saver */
+    }
+
+    .hud-value {
+        font-size: 1.1rem;
+    }
+
+    #interestPreview {
+        font-size: 0.8rem;
+        margin-left: 4px;
+    }
+
+    /* Wave Display specific tweak */
+    .hud-item.wave {
+        padding: 0 15px;
+    }
+
+    .hud-item.wave::before {
+        content: 'W:';
+        font-weight: 800;
+        color: var(--tesla-cyan);
+        font-size: 0.8rem;
+        margin-right: 2px;
+    }
+
+    /* UI Panel Toggle */
+    #mobile-ui-toggle {
+        display: flex !important;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        background: var(--tesla-cyan);
+        border-radius: 50%;
+        z-index: 1001;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
+        border: none;
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #mobile-ui-toggle.active {
+        transform: rotate(45deg);
+        background: #ff3366;
+        box-shadow: 0 0 20px rgba(255, 51, 102, 0.4);
+    }
+
+    #ui-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding-bottom: 100px;
+        /* Space for toggle */
+    }
+
+    #ui-panel.mobile-open {
+        transform: translateX(0);
+    }
+
+    .bottom-controls {
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    /* Tower Buttons more compact */
+    .tower-btn {
+        padding: 6px;
+        gap: 6px;
+        font-size: 0.8rem;
+    }
+
+    .btn-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* Smaller Game Over Screen */
+    .game-over-content {
+        padding: 20px;
+        max-width: 90vw;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .stats-grid-container {
+        gap: 10px;
+    }
+}
+
+/* Hide toggle on desktop */
+#mobile-ui-toggle {
+    display: none;
+}

@@ -1,0 +1,555 @@
+/* ── Main Menu Scaling (index.html) ── */
+@media screen and (max-width: 950px) and (orientation: landscape) {
+    /* Title collapsed when in active menu state to reclaim huge vertical space */
+    body:not(.splash-active) .portal-title-outer-wrapper {
+        display: none !important;
+    }
+    .portal-title-placeholder {
+        display: none !important;
+    }
+
+    .portal-main-column {
+        height: 98vh !important;
+        max-width: 98vw !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+
+    .portal-title-outer-wrapper {
+        padding: 5px 0 0 0 !important;
+    }
+
+    .portal-container {
+        height: 0 !important; /* Force strict flex layout to prevent stretching off-screen */
+        flex: 1 !important;
+        width: 100% !important;
+        border-radius: 12px !important;
+    }
+
+    .portal-header {
+        padding: 6px 16px !important;
+    }
+
+    .portal-title {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        margin-bottom: 2px !important;
+    }
+
+    .portal-title .word-1 {
+        font-size: 1.05rem !important;
+        letter-spacing: 6px !important;
+        padding-left: 6px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .portal-title .main-title-row {
+        gap: 8px !important;
+        justify-content: center !important;
+    }
+
+    .portal-title .word-2,
+    .portal-title .word-3 {
+        font-size: 2.8rem !important;
+        letter-spacing: 2px !important;
+    }
+
+    .portal-tabs {
+        gap: 10px !important;
+    }
+
+    .portal-tab {
+        font-size: 0.7rem !important;
+        padding: 4px 0 !important;
+        letter-spacing: 1px !important;
+    }
+
+    .portal-tab-indicator {
+        bottom: -7px !important;
+    }
+
+    .portal-body {
+        padding: 6px 12px !important;
+    }
+
+    .portal-footer {
+        padding: 4px 0 !important;
+        background: rgba(10, 10, 26, 0.4) !important;
+    }
+
+    .live-ticker-container {
+        font-size: 0.7rem !important;
+    }
+
+    /* Maps Tab layout optimization */
+    .direct-join-bar {
+        margin-bottom: 6px !important;
+        padding: 4px 8px !important;
+        gap: 8px !important;
+    }
+
+    .direct-join-label {
+        font-size: 0.7rem !important;
+    }
+
+    .direct-input {
+        padding: 4px 8px !important;
+        font-size: 0.8rem !important;
+        width: 70px !important;
+    }
+
+    .direct-btn {
+        padding: 4px 10px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .mission-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+        gap: 8px !important;
+        margin-top: 5px !important;
+    }
+
+    /* Horizontal mission cards to drastically reduce vertical size */
+    .mission-card {
+        flex-direction: row !important;
+        align-items: stretch !important;
+        height: auto !important;
+    }
+
+    .mission-header {
+        width: 60px !important;
+        height: auto !important;
+        min-height: 100% !important;
+        font-size: 1.5rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    .mission-header::after {
+        display: none !important;
+    }
+
+    .mission-content {
+        flex: 1 !important;
+        padding: 8px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+    }
+
+    .mission-name {
+        font-size: 0.85rem !important;
+        margin-bottom: 2px !important;
+        letter-spacing: 1px !important;
+    }
+
+    .difficulty-dots .dot {
+        width: 5px !important;
+        height: 5px !important;
+    }
+
+    .mission-stats {
+        gap: 4px !important;
+    }
+
+    .mission-stat-item {
+        font-size: 0.7rem !important;
+    }
+
+    .mission-btn {
+        margin-top: 4px !important;
+        padding: 4px !important;
+        font-size: 0.68rem !important;
+    }
+
+    /* Stats tab scaling */
+    .stats-hero {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 15px !important;
+    }
+
+    .stats-large-card {
+        padding: 15px !important;
+    }
+
+    .stats-large-card .value {
+        font-size: 2.5rem !important;
+    }
+
+    /* Lexicon scaling and space reclamation */
+    #tab-lexicon>div {
+        flex-direction: row !important;
+        gap: 10px !important;
+        height: 100% !important;
+    }
+
+    #lexiconList {
+        flex: 0 0 140px !important;
+        padding-right: 8px !important;
+    }
+
+    .lexicon-category-header {
+        margin: 10px 0 6px 5px !important;
+        padding-bottom: 4px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .lexicon-item {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+        margin-bottom: 4px !important;
+    }
+
+    #lexiconDetails {
+        padding-left: 5px !important;
+        gap: 6px !important;
+    }
+
+    #lexTitle {
+        font-size: 1.05rem !important;
+        margin-bottom: 4px !important;
+    }
+
+    /* flex details icon and stats container */
+    #lexiconDetails > div:first-of-type {
+        gap: 12px !important;
+        margin-bottom: 4px !important;
+    }
+
+    #lexIcon {
+        width: 50px !important;
+        height: 50px !important;
+        border-radius: 8px !important;
+    }
+
+    #lexiconCanvas {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .stat-grid {
+        gap: 4px !important;
+    }
+
+    .stat-row {
+        gap: 6px !important;
+    }
+
+    .stat-row strong {
+        width: 50px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .stat-bar-container {
+        height: 6px !important;
+        border-radius: 3px !important;
+    }
+
+    .stat-row:last-child {
+        margin-top: 2px !important;
+    }
+
+    /* Abilities/Weakness block */
+    #lexiconDetails > div:nth-of-type(2) {
+        gap: 8px !important;
+        padding: 6px 10px !important;
+        border-radius: 6px !important;
+    }
+
+    #lexiconDetails > div:nth-of-type(2) > div {
+        font-size: 0.65rem !important;
+    }
+
+    #lexiconDetails > div:nth-of-type(2) div[id^="lex"] {
+        font-size: 0.7rem !important;
+    }
+
+    #lexFlavor {
+        margin-top: 6px !important;
+        padding-left: 10px !important;
+        padding-bottom: 10px !important;
+        font-size: 0.68rem !important;
+        line-height: 1.3 !important;
+    }
+
+    #lexiconPlaceholder {
+        font-size: 0.9rem !important;
+    }
+
+    /* Leaderboard scaling - Fixes "mini slit" by allocating full height scrolling wrapper */
+    .leaderboard-header {
+        margin-bottom: 8px !important;
+        padding-bottom: 4px !important;
+    }
+
+    .leaderboard-title {
+        font-size: 1.05rem !important;
+        margin-bottom: 2px !important;
+    }
+
+    .leaderboard-subtitle {
+        font-size: 0.7rem !important;
+    }
+
+    .leaderboard-refresh-btn {
+        padding: 4px 10px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .leaderboard-table th {
+        padding: 6px 10px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .leaderboard-table td {
+        padding: 5px 10px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .leaderboard-avatar {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .rank-badge {
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .leaderboard-wave-val {
+        font-size: 0.85rem !important;
+    }
+
+    /* Reorganize settings cards into a 2-column grid and hide descriptions */
+    .settings-list {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        max-width: 100% !important;
+    }
+
+    .settings-card {
+        padding: 6px 10px !important;
+        gap: 8px !important;
+        border-radius: 10px !important;
+    }
+
+    .settings-desc {
+        display: none !important;
+    }
+
+    .settings-card label {
+        font-size: 0.78rem !important;
+    }
+
+    .settings-control {
+        min-width: 80px !important;
+    }
+
+    .ig-select {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .ig-switch {
+        width: 44px !important;
+        height: 22px !important;
+    }
+
+    .ig-switch-slider:before {
+        height: 14px !important;
+        width: 14px !important;
+        left: 3px !important;
+        bottom: 3px !important;
+    }
+
+    .ig-switch input:checked + .ig-switch-slider:before {
+        transform: translateX(22px) !important;
+    }
+
+    .ig-range-slider {
+        height: 4px !important;
+    }
+
+    /* Compact Profile Form & Profile Dashboard */
+    .profile-container {
+        align-items: flex-start !important;
+        padding-top: 4px !important;
+    }
+
+    .auth-card {
+        padding: 5px 0 !important;
+        max-width: 280px !important;
+    }
+
+    .auth-card h2 {
+        font-size: 1.15rem !important;
+        margin-bottom: 2px !important;
+    }
+
+    .auth-subtitle {
+        font-size: 0.7rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    .auth-form-group {
+        gap: 2px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .auth-form-group label {
+        font-size: 0.6rem !important;
+    }
+
+    .auth-input {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .auth-form-remember {
+        margin-bottom: 6px !important;
+    }
+
+    .auth-btn {
+        padding: 6px 12px !important;
+        font-size: 0.8rem !important;
+        margin-top: 2px !important;
+    }
+
+    .auth-toggle-link {
+        margin-top: 8px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .profile-dashboard {
+        grid-template-columns: 160px 1fr !important;
+        gap: 12px !important;
+    }
+
+    .profile-sidebar {
+        padding: 8px !important;
+        border-radius: 12px !important;
+    }
+
+    .profile-avatar-container {
+        width: 40px !important;
+        height: 40px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .avatar-edit-overlay {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 0.6rem !important;
+    }
+
+    .profile-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1.2rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    .profile-username {
+        font-size: 0.95rem !important;
+    }
+
+    .edit-username-btn {
+        font-size: 0.85rem !important;
+    }
+
+    .profile-joined {
+        font-size: 0.65rem !important;
+        margin-bottom: 6px !important;
+    }
+
+    .profile-stat-box {
+        padding: 6px !important;
+        margin-bottom: 6px !important;
+        border-radius: 8px !important;
+    }
+
+    .profile-stat-val {
+        font-size: 1.4rem !important;
+    }
+
+    .profile-stat-lbl {
+        font-size: 0.6rem !important;
+    }
+
+    .profile-logout-btn {
+        padding: 4px 8px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .profile-main-content {
+        gap: 12px !important;
+        padding-right: 4px !important;
+    }
+
+    .profile-section-card {
+        padding: 10px !important;
+        border-radius: 12px !important;
+    }
+
+    .profile-section-card h3 {
+        font-size: 0.78rem !important;
+        margin: 0 0 10px 0 !important;
+        padding-left: 8px !important;
+    }
+
+    .skins-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    .skin-card {
+        padding: 6px !important;
+        border-radius: 8px !important;
+    }
+
+    .skin-preview-dot {
+        width: 14px !important;
+        height: 14px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .skin-name {
+        font-size: 0.75rem !important;
+    }
+
+    .skin-status {
+        font-size: 0.6rem !important;
+    }
+
+    .profile-achievements-list {
+        gap: 6px !important;
+    }
+
+    .achievement-item {
+        padding: 4px 8px !important;
+        border-radius: 8px !important;
+        gap: 8px !important;
+    }
+
+    .achievement-icon {
+        font-size: 0.95rem !important;
+    }
+
+    .achievement-title {
+        font-size: 0.75rem !important;
+    }
+
+    .achievement-desc {
+        font-size: 0.65rem !important;
+    }
+
+    .achievement-status {
+        font-size: 0.65rem !important;
+        padding: 2px 8px !important;
+    }
+}
