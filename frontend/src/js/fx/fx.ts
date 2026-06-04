@@ -25,6 +25,8 @@ export class Particle {
     public active: boolean = false;
     public sprite?: PIXI.Sprite;
 
+    public gravity: number = 0;
+
     constructor(x = 0, y = 0, color = '', speed = 0, size = 0) {
         if (x !== 0 || y !== 0 || color !== '') {
             this.init(x, y, color, speed, size);
@@ -37,11 +39,12 @@ export class Particle {
             this.decay = 0;
             this.color = '';
             this.size = 0;
+            this.gravity = 0;
             this.active = false;
         }
     }
 
-    public init(x: number, y: number, color: string, speed: number, size: number): this {
+    public init(x: number, y: number, color: string, speed: number, size: number, gravity = 0): this {
         this.x = x;
         this.y = y;
         this.vx = (Math.random() - 0.5) * speed;
@@ -50,6 +53,7 @@ export class Particle {
         this.decay = Math.random() * 0.05 + 0.02;
         this.color = color;
         this.size = size;
+        this.gravity = gravity;
         this.active = true;
 
         if (typeof window !== 'undefined' && app.renderer) {
@@ -72,6 +76,7 @@ export class Particle {
     public update(): void {
         if (!this.active) return;
         this.x += this.vx;
+        this.vy += this.gravity;
         this.y += this.vy;
         this.life -= this.decay;
 
@@ -752,3 +757,26 @@ export class Shockwave {
 
     public draw(): void {}
 }
+
+export function createConfettiBurst(x: number, y: number): void {
+    const colors = ['#ff007f', '#00f5d4', '#ffd700', '#ff00ff', '#0077ff', '#ccff00', '#ffb703', '#00ff88'];
+    const count = 120; // nice dense confetti
+    for (let i = 0; i < count; i++) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const speed = Math.random() * 8 + 4;
+        const size = Math.random() * 3 + 2;
+        const p = PoolManager.getParticle(
+            x + (Math.random() - 0.5) * 80,
+            y + (Math.random() - 0.5) * 80,
+            color,
+            speed,
+            size,
+            0.15 // gravity pulling downwards
+        );
+        // Shoot upwards (negative vy)
+        p.vy = -Math.abs(p.vy) - Math.random() * 4;
+        // Float longer
+        p.decay = Math.random() * 0.015 + 0.008;
+    }
+}
+

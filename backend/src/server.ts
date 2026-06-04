@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-04 / v1.10.0 - Added Leaderboard endpoint.
+ * @last_update: 2026-06-04 / v1.11.0 - Added /api/user/unlock-achievement endpoint.
  */
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
@@ -239,6 +239,44 @@ app.post('/api/user/progress', authenticateUser, async (req: Request, res: Respo
     res.status(500).json({ error: 'Interner Serverfehler.' });
   }
 });
+
+app.post('/api/user/unlock-achievement', authenticateUser, async (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  const { achievementId } = req.body;
+  
+  if (!achievementId || typeof achievementId !== 'string') {
+    res.status(400).json({ error: 'Ungültige Errungenschafts-ID.' });
+    return;
+  }
+
+  try {
+    const progress = await db.oneOrNone('SELECT unlocked_achievements FROM progress WHERE user_id = $1', [authReq.user!.id]);
+    if (!progress) {
+      res.status(404).json({ error: 'Fortschritt nicht gefunden.' });
+      return;
+    }
+
+    const achievements: string[] = progress.unlocked_achievements || [];
+    
+    if (achievements.includes(achievementId)) {
+      res.json({ success: true, alreadyUnlocked: true });
+      return;
+    }
+
+    achievements.push(achievementId);
+
+    await db.none(
+      'UPDATE progress SET unlocked_achievements = $1, updated_at = NOW() WHERE user_id = $2',
+      [JSON.stringify(achievements), authReq.user!.id]
+    );
+
+    res.json({ success: true, newlyUnlocked: true });
+  } catch (error) {
+    console.error('[ACHIEVEMENT] Fehler beim Freischalten:', error);
+    res.status(500).json({ error: 'Interner Serverfehler.' });
+  }
+});
+
 
 app.post('/api/user/profile', authenticateUser, async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;

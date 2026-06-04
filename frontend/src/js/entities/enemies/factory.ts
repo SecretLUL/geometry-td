@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-01 / v1.3.0 - Registered AcceleratorEnemy.
+ * @last_update: 2026-06-04 / v1.4.0 - Selected sessionStorage for guest discovered enemies storage.
  */
 import { Enemy, EnemyType } from '../../types';
 import { NormalEnemy, ScoutEnemy, BruiserEnemy } from './types/basic';
@@ -81,10 +81,12 @@ export class EnemyFactory {
         // Unlock in Lexicon
         if (!isPreview) {
             try {
-                const discovered = JSON.parse(localStorage.getItem('td_discovered_enemies') || '{}');
+                const isLoggedIn = sessionStorage.getItem('td_logged_in') === 'true';
+                const storage = isLoggedIn ? localStorage : sessionStorage;
+                const discovered = JSON.parse(storage.getItem('td_discovered_enemies') || '{}');
                 if (!discovered[type]) {
                     discovered[type] = true;
-                    localStorage.setItem('td_discovered_enemies', JSON.stringify(discovered));
+                    storage.setItem('td_discovered_enemies', JSON.stringify(discovered));
                 }
             } catch (e) { }
         }

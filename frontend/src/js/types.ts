@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-01 / v2.0.2 - Added shieldHp and maxShieldHp optional fields to SyncEnemyState interface.
+ * @last_update: 2026-06-04 / v2.2.0 - Added isGuest and unlockedAchievements to GameState.
  */
 /**
  * Geometry Tower Defense - Core TypeScript Definitions
@@ -76,6 +76,8 @@ export interface GameState {
     webRTCStatus?: 'connected' | 'connecting' | 'failed' | 'idle';
     mapNeedsRedraw?: boolean;
     lastCollectorWave?: number;
+    unlockedAchievements?: string[];
+    isGuest?: boolean;
 }
 
 export interface Vector2D {

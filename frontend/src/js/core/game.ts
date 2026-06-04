@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-22 / v2.0.0 - Modularized and refactored game.ts into dedicated sub-modules (viewport.ts, wave.ts, renderer.ts, loop.ts) under the core/game/ folder.
+ * @last_update: 2026-06-04 / v2.1.0 - Modularized and refactored game.ts; initialized achievements logic in bootstrap.
  */
 import { state } from './state';
 import { Multiplayer } from './multiplayer/index';
@@ -25,6 +25,7 @@ import { PoolManager } from './pool';
 import { app, resizeCanvas, centerCameraOnCell, setupViewportEvents, initPixi } from './game/viewport';
 import { startWave, executeStartWave } from './game/wave';
 import { triggerAssetsLoaded, triggerSyncCompleted } from './game/loop';
+import { initAchievements } from './achievements';
 
 // ─── Global Error Handling ───────────────────────────────────────────────────
 window.addEventListener('error', (event) => {
@@ -88,6 +89,7 @@ updateUI();
 
 if (!isHeadlessMode) {
     new BackgroundController('bgCanvas');
+    initAchievements();
 }
 
 // ─── Asset Loading & Start ───────────────────────────────────────────────────

@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.4.3 - Initialized originalWave to null in state.
+ * @last_update: 2026-06-04 / v1.4.5 - Initialized isGuest and unlockedAchievements in state.
  */
 import { GameState } from '../types';
 import { Config } from './config';
@@ -72,7 +72,9 @@ export const state: GameState = {
     contextShopPos: null,
     targetCamera: null,
     mapNeedsRedraw: true,
-    lastCollectorWave: 0
+    lastCollectorWave: 0,
+    unlockedAchievements: [],
+    isGuest: true
 };
 
 // Register game state reference in utils to break circular import dependency

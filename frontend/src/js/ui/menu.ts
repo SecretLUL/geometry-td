@@ -12,12 +12,13 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-04 / v1.9.0 - Added Leaderboard tab, refresh handler, styling integration and profile picture rendering in lists.
+ * @last_update: 2026-06-04 / v2.4.0 - Added background menu music with volume-slider integration.
  */
 import { EnemyData } from '../core/config';
 import { EnemyFactory } from '../entities/enemies';
 import { BackgroundController } from './background';
 import { EnemyType } from '../types';
+import { state } from '../core/state';
 import * as PIXI from 'pixi.js';
 
 class MenuController {
@@ -26,7 +27,7 @@ class MenuController {
     private lexiconApp: PIXI.Application | null = null;
     private currentLexiconTickFn: (() => void) | null = null;
     private currentLexiconEnemyType: string | null;
-    
+
     // Changelog state
     private changelogData: any[];
 
@@ -36,16 +37,21 @@ class MenuController {
     // User Session state
     private currentUsername: string | null = null;
 
+    // Background Music
+    private menuMusic: HTMLAudioElement | null = null;
+    private musicFadeInterval: any = null;
+
     constructor() {
         this.tabs = document.querySelectorAll('.portal-tab');
         this.contents = document.querySelectorAll('.tab-content-wrapper');
         new BackgroundController('bgCanvas');
-        
+
         this.lexiconApp = null;
         this.currentLexiconEnemyType = null;
-        
+
         this.changelogData = [];
-        
+
+        this.initMenuMusic();
         this.init();
     }
 
@@ -60,7 +66,7 @@ class MenuController {
         this.initModeModal();
         this.initProfile();
         this.initLeaderboard();
-        
+
         // Listen to real-time updates from server
         try {
             const socket = (window as any).io ? (window as any).io() : null;
@@ -72,7 +78,7 @@ class MenuController {
                     this.updateOnlinePlayersUI(count);
                 });
             }
-        } catch(e) {
+        } catch (e) {
             console.warn("Socket.io not available in menu", e);
         }
     }
@@ -80,8 +86,8 @@ class MenuController {
     private async fetchMissionStats(): Promise<void> {
         try {
             // Using absolute URL or relative if served from same host
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                            ? 'http://localhost:3000' : '';
+            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000' : '';
             const response = await fetch(`${baseUrl}/api/mission_stats`, { cache: 'no-store' });
             if (response.ok) {
                 const stats = await response.json();
@@ -94,8 +100,8 @@ class MenuController {
 
     private async fetchOnlinePlayers(): Promise<void> {
         try {
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                            ? 'http://localhost:3000' : '';
+            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000' : '';
             const response = await fetch(`${baseUrl}/api/online_players`, { cache: 'no-store' });
             if (response.ok) {
                 const data = await response.json();
@@ -168,9 +174,9 @@ class MenuController {
     private switchTab(tabId: string): void {
         const currentActive = Array.from(this.contents).find(c => !c.classList.contains('hidden')) as HTMLElement;
         const targetActive = document.getElementById(`tab-${tabId}`) as HTMLElement;
-        
+
         if (!targetActive || currentActive === targetActive) return;
-        
+
         // 1. Update tab button states immediately for instant UI feedback
         this.tabs.forEach(t => t.classList.remove('active'));
         const activeTab = document.querySelector(`[data-tab="${tabId}"]`) as HTMLElement | null;
@@ -179,24 +185,24 @@ class MenuController {
             // Animate the physical tab slider indicator smoothly
             this.positionTabIndicator();
         }
-        
+
         if (currentActive) {
             // 2. Fade out current content
             currentActive.classList.remove('active-tab-content');
-            
+
             // 3. Wait for fade-out transition to complete (250ms)
             setTimeout(() => {
                 currentActive.classList.add('hidden');
-                
+
                 // 4. Unhide new content (set display, but keeping opacity: 0 and transform: translateY)
                 targetActive.classList.remove('hidden');
-                
+
                 // 5. Force reflow to register the display change before animating
                 void targetActive.offsetWidth;
-                
+
                 // 6. Fade in new content smoothly
                 targetActive.classList.add('active-tab-content');
-                
+
                 if (tabId === 'lexicon') {
                     this.initLexicon(); // Refresh Lexicon
                 } else if (tabId === 'leaderboard') {
@@ -224,7 +230,7 @@ class MenuController {
             htmlCard.addEventListener('click', () => {
                 const mapName = htmlCard.dataset.map;
                 if (!mapName) return;
-                
+
                 this.selectedMapName = mapName;
 
                 // Update Modal Header Map Title
@@ -348,8 +354,8 @@ class MenuController {
 
     private async verifyAndJoinRoom(code: string): Promise<void> {
         try {
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                            ? 'http://localhost:3000' : '';
+            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000' : '';
             const response = await fetch(`${baseUrl}/api/room/${encodeURIComponent(code)}`);
             if (response.ok) {
                 const data = await response.json();
@@ -391,7 +397,7 @@ class MenuController {
 
         const content = document.createElement('div');
         content.className = 'error-banner-content';
-        
+
         const strong = document.createElement('strong');
         strong.textContent = 'SYSTEM-WARNHINWEIS: ';
         content.appendChild(strong);
@@ -399,7 +405,7 @@ class MenuController {
         const textSpan = document.createElement('span');
         textSpan.textContent = msg;
         content.appendChild(textSpan);
-        
+
         banner.appendChild(content);
 
         const closeBtn = document.createElement('button');
@@ -412,7 +418,7 @@ class MenuController {
             banner.style.transform = 'translateY(-10px)';
             banner.style.transition = '0.3s ease';
             setTimeout(() => banner.remove(), 300);
-            
+
             // Clear parameter from history securely without refresh
             const newUrl = window.location.pathname;
             window.history.replaceState({}, document.title, newUrl);
@@ -420,6 +426,143 @@ class MenuController {
 
         portalBody.insertBefore(banner, portalBody.firstChild);
     }
+
+    // --- Background Music ---
+    private initMenuMusic(): void {
+        const savedVol = parseInt(localStorage.getItem('td_music_vol') || '50', 10);
+        const volume = savedVol / 100;
+
+        // Reference the native <audio> element in the HTML.
+        this.menuMusic = document.getElementById('menu-music-audio') as HTMLAudioElement | null;
+        if (!this.menuMusic) return;
+
+        this.menuMusic.volume = volume;
+        // Required so AudioContext can access the stream cross-origin
+        if (this.menuMusic.crossOrigin !== 'anonymous') {
+            this.menuMusic.crossOrigin = 'anonymous';
+        }
+
+        const creditWidget = document.getElementById('music-credit');
+        const portalTitle = document.querySelector('.portal-title') as HTMLElement | null;
+
+        // Reflect initial muted state
+        if (creditWidget && volume === 0) creditWidget.classList.add('muted');
+
+        // Precise beat detection based on song play time (150 BPM = 400ms interval)
+        const startBeatDetection = () => {
+            if (!this.menuMusic || !portalTitle) return;
+
+            let lastBeatIndex = -1;
+            const BEAT_INTERVAL = 0.4;
+
+            // Adjust this offset (in seconds) to perfectly align the visual beat pulse with the audio.
+            // Positive values delay the visual pulse (e.g., 0.15 for 150ms delay).
+            // Negative values make the visual pulse trigger earlier.
+            const BEAT_OFFSET_SEC = 0.0;
+
+            const tick = () => {
+                requestAnimationFrame(tick);
+                if (!this.menuMusic || this.menuMusic.paused) return;
+
+                // Apply manual offset to current time for sync calibration
+                const currentTime = Math.max(0, this.menuMusic.currentTime - BEAT_OFFSET_SEC);
+                // Calculate current beat number based on elapsed playing time
+                const currentBeatIndex = Math.floor(currentTime / BEAT_INTERVAL);
+
+                if (currentBeatIndex !== lastBeatIndex) {
+                    lastBeatIndex = currentBeatIndex;
+                    // Trigger pulse on the portal title header
+                    portalTitle.classList.remove('beat');
+                    void portalTitle.offsetWidth; // Force reflow
+                    portalTitle.classList.add('beat');
+                    // Remove after 150ms to snap back
+                    setTimeout(() => portalTitle.classList.remove('beat'), 150);
+                }
+            };
+            tick();
+        };
+
+        // Splash screen and Transition Handling
+        const splashScreen = document.getElementById('splash-screen');
+        const enterBtn = document.getElementById('splash-enter-btn');
+
+        const enterSystem = () => {
+            const music = this.menuMusic;
+            if (!music) return;
+
+            // Start at 0 volume for smooth fade-in
+            music.volume = 0;
+
+            // Start beat detection loop immediately to catch the first frames
+            startBeatDetection();
+
+            // Trigger an immediate initial pulse for instant tactile feedback
+            if (portalTitle) {
+                portalTitle.classList.remove('beat');
+                void portalTitle.offsetWidth; // Force reflow
+                portalTitle.classList.add('beat');
+                setTimeout(() => portalTitle.classList.remove('beat'), 150);
+            }
+
+            // Play music
+            music.play()
+                .then(() => {
+                    if (volume > 0) {
+                        // Smooth fade-in over 1.0 second (1000ms)
+                        const fadeDuration = 1000;
+                        const intervalTime = 40;
+                        const steps = fadeDuration / intervalTime;
+                        const volumeStep = volume / steps;
+                        let currentVol = 0;
+
+                        this.musicFadeInterval = setInterval(() => {
+                            currentVol += volumeStep;
+                            if (currentVol >= volume) {
+                                music.volume = volume;
+                                clearInterval(this.musicFadeInterval);
+                                this.musicFadeInterval = null;
+                            } else {
+                                music.volume = currentVol;
+                            }
+                        }, intervalTime);
+                    } else {
+                        music.volume = 0;
+                    }
+                })
+                .catch(err => {
+                    console.warn("Audio play failed on interaction:", err);
+                    music.volume = volume;
+                });
+
+            // Smooth transition animations
+            document.body.classList.remove('splash-active');
+            if (splashScreen) {
+                splashScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                }, 800);
+            }
+            // Remove blur-hidden from all elements (panels, footer, credits)
+            const blurElements = document.querySelectorAll('.blur-hidden');
+            blurElements.forEach(el => el.classList.remove('blur-hidden'));
+
+            // Cleanup keyboard listener
+            document.removeEventListener('keydown', handleKeyStart);
+        };
+
+        const handleKeyStart = (e: KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                enterSystem();
+            }
+        };
+
+        if (enterBtn) {
+            enterBtn.addEventListener('click', enterSystem);
+        }
+        document.addEventListener('keydown', handleKeyStart);
+    }
+
 
     // --- Einstellungen (Settings) ---
     private initSettings(): void {
@@ -443,7 +586,25 @@ class MenuController {
         });
         music?.addEventListener('input', (e) => {
             const target = e.target as HTMLInputElement;
+            const vol = parseInt(target.value, 10) / 100;
             localStorage.setItem('td_music_vol', target.value);
+            // Apply volume to the running menu music in real-time
+            if (this.musicFadeInterval) {
+                clearInterval(this.musicFadeInterval);
+                this.musicFadeInterval = null;
+            }
+            if (this.menuMusic) {
+                this.menuMusic.volume = vol;
+                // If slider was moved from 0, ensure music is playing
+                if (vol > 0 && this.menuMusic.paused) {
+                    this.menuMusic.play().catch(() => { });
+                }
+            }
+            // Toggle muted visual state on the credit widget
+            const creditWidget = document.getElementById('music-credit');
+            if (creditWidget) {
+                creditWidget.classList.toggle('muted', vol === 0);
+            }
         });
         perf?.addEventListener('change', (e) => {
             const target = e.target as HTMLInputElement;
@@ -464,15 +625,17 @@ class MenuController {
         const listContainer = document.getElementById('lexiconList');
         const detailsContainer = document.getElementById('lexiconDetails');
         const placeholder = document.getElementById('lexiconPlaceholder');
-        
+
         if (!listContainer) return;
         listContainer.innerHTML = '';
-        
-        const discovered = JSON.parse(localStorage.getItem('td_discovered_enemies') || '{}');
-        const recordWave = parseInt(localStorage.getItem('td_record_wave') || '0');
-        
+
+        const isLoggedIn = sessionStorage.getItem('td_logged_in') === 'true';
+        const storage = isLoggedIn ? localStorage : sessionStorage;
+        const discovered = JSON.parse(storage.getItem('td_discovered_enemies') || '{}');
+        const recordWave = parseInt(storage.getItem('td_record_wave') || '0');
+
         const categories = ['Bosse', 'Special Minions', 'Minions'];
-        
+
         categories.forEach(cat => {
             const catEnemies = Object.keys(EnemyData).filter(key => EnemyData[key].category === cat);
             if (catEnemies.length === 0) return;
@@ -489,7 +652,7 @@ class MenuController {
                 const data = EnemyData[key];
                 // If they reached the wave, it's discovered automatically in the database
                 const isDiscovered = !!discovered[key] || (!!data.unlockWave && recordWave >= data.unlockWave);
-                
+
                 const btn = document.createElement('button');
                 btn.className = 'lexicon-entry-btn';
                 btn.dataset.discovered = isDiscovered ? 'true' : 'false';
@@ -506,14 +669,14 @@ class MenuController {
                 btn.style.letterSpacing = '1px';
                 btn.style.cursor = 'pointer';
                 btn.style.transition = '0.3s';
-                
+
                 if (isDiscovered) {
                     btn.innerHTML = `<span style="margin-right: 15px; font-size: 1.4rem;">${data.icon}</span> ${data.name.toUpperCase()}`;
                 } else {
                     btn.innerHTML = `<span style="margin-right: 15px; font-size: 1.4rem; opacity: 0.3;">?</span> UNKNOWN ENTITY`;
                     btn.style.fontStyle = 'italic';
                 }
-                
+
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.lexicon-entry-btn').forEach(b => {
                         const htmlB = b as HTMLElement;
@@ -527,7 +690,7 @@ class MenuController {
 
                     if (placeholder) placeholder.style.display = 'none';
                     if (detailsContainer) detailsContainer.style.display = 'flex';
-                    
+
                     this.updateLexiconDetails(key, data, isDiscovered);
 
                     const fragContainer = document.getElementById('defragmenter-fragments-container');
@@ -546,12 +709,12 @@ class MenuController {
                     fragmentsContainer.id = 'defragmenter-fragments-container';
                     fragmentsContainer.style.display = 'none';
                     fragmentsContainer.style.paddingLeft = '35px';
-                    
+
                     const fragments = ['DefragmenterFragment', 'DefragmenterSubfragment'];
                     fragments.forEach(fragKey => {
                         const fragData = EnemyData[fragKey];
                         const fragDiscovered = !!discovered[fragKey] || (!!fragData.unlockWave && recordWave >= fragData.unlockWave);
-                        
+
                         const fragBtn = document.createElement('button');
                         fragBtn.className = 'lexicon-entry-btn';
                         fragBtn.dataset.discovered = fragDiscovered ? 'true' : 'false';
@@ -568,7 +731,7 @@ class MenuController {
                         fragBtn.style.letterSpacing = '1px';
                         fragBtn.style.cursor = 'pointer';
                         fragBtn.style.transition = '0.3s';
-                        
+
                         if (fragDiscovered) {
                             fragBtn.innerHTML = `<span style="margin-right: 15px; font-size: 1.2rem;">${fragData.icon}</span> ${fragData.name.toUpperCase()}`;
                         } else {
@@ -589,13 +752,13 @@ class MenuController {
 
                             if (placeholder) placeholder.style.display = 'none';
                             if (detailsContainer) detailsContainer.style.display = 'flex';
-                            
+
                             this.updateLexiconDetails(fragKey, fragData, fragDiscovered);
                         });
 
                         fragmentsContainer.appendChild(fragBtn);
                     });
-                    
+
                     listContainer.appendChild(fragmentsContainer);
                 }
             });
@@ -649,7 +812,7 @@ class MenuController {
             flavor.innerText = 'Simulation progress required.';
             iconContainer.style.boxShadow = 'none';
         }
-        
+
         this.renderLexiconEnemy(key, isDiscovered);
     }
 
@@ -663,7 +826,7 @@ class MenuController {
             if (!this.lexiconApp) {
                 const canvas = document.getElementById('lexiconCanvas') as HTMLCanvasElement | null;
                 if (!canvas) return;
-                
+
                 this.lexiconApp = new PIXI.Application();
                 await this.lexiconApp.init({
                     canvas: canvas,
@@ -685,18 +848,18 @@ class MenuController {
             enemy.x = 90;
             enemy.y = 90;
             enemy.hideHealthBar = true;
-            
+
             // Add to stage
             if (enemy.pixiSprite) {
                 this.lexiconApp.stage.addChild(enemy.pixiSprite);
                 enemy.pixiSprite.position.set(90, 90);
-                
+
                 let scaleFactor = 3.0;
                 if (enemyType === 'Boss' || enemyType === 'Defragmenter') scaleFactor = 0.8;
                 if (enemyType === 'DefragmenterFragment') scaleFactor = 1.5;
                 if (enemyType === 'Bruiser') scaleFactor = 2.2;
                 if (enemyType === 'Accelerator') scaleFactor = 2.0;
-                
+
                 enemy.pixiSprite.scale.set(scaleFactor);
             }
 
@@ -706,9 +869,9 @@ class MenuController {
                     enemy.rotation += 0.02 * Math.max(1, enemy.speed) * (enemy.rotationSpeedMultiplier ?? 1.0);
                 }
                 if (enemy.outerRotation !== undefined) enemy.outerRotation += 0.02 * Math.max(1, enemy.speed);
-                
+
                 if (enemy.updatePixi) enemy.updatePixi();
-                
+
                 if (enemy.pixiSprite) {
                     if (!isDiscovered) {
                         enemy.pixiSprite.tint = 0x111111;
@@ -717,11 +880,11 @@ class MenuController {
                     }
                 }
             };
-            
+
             this.currentLexiconTickFn = tickFn;
             this.lexiconApp.ticker.add(tickFn);
         };
-        
+
         initLexiconApp();
     }
 
@@ -847,7 +1010,7 @@ class MenuController {
             // Create Header Click Area
             const header = document.createElement('div');
             header.className = 'version-header-click';
-            
+
             header.innerHTML = `
                 <div class="version-meta">
                     <span class="version-num">${versionEntry.version}</span>
@@ -903,7 +1066,7 @@ class MenuController {
     private initProfile(): void {
         const authSection = document.getElementById('profile-auth-section');
         const dashboardSection = document.getElementById('profile-dashboard-section');
-        
+
         // Forms toggle
         const loginForm = document.getElementById('auth-login-form');
         const registerForm = document.getElementById('auth-register-form');
@@ -926,8 +1089,8 @@ class MenuController {
 
         // Base URL helper
         const getBaseUrl = () => {
-            return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                   ? 'http://localhost:3000' : '';
+            return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000' : '';
         };
 
         // Form switching
@@ -966,12 +1129,19 @@ class MenuController {
         };
 
         const showAuth = () => {
+            sessionStorage.setItem('td_logged_in', 'false');
+            state.isGuest = true;
+            state.recordWave = parseInt(sessionStorage.getItem('td_record_wave') || '0');
             this.currentUsername = null;
             if (authSection) { authSection.style.display = 'block'; authSection.classList.remove('hidden'); }
             if (dashboardSection) { dashboardSection.style.display = 'none'; dashboardSection.classList.add('hidden'); }
+            this.initLexicon(); // Refresh lexicon for guest
         };
 
         const showDashboard = async (user: { username: string, avatar?: string | null, created_at?: string | Date | null }) => {
+            sessionStorage.setItem('td_logged_in', 'true');
+            state.isGuest = false;
+            state.recordWave = parseInt(localStorage.getItem('td_record_wave') || '0');
             this.currentUsername = user.username;
             if (authSection) { authSection.style.display = 'none'; authSection.classList.add('hidden'); }
             if (dashboardSection) { dashboardSection.style.display = 'grid'; dashboardSection.classList.remove('hidden'); }
@@ -1009,6 +1179,8 @@ class MenuController {
                 }
             }
 
+            this.initLexicon(); // Initial lexicon load for user
+
             // Load progress stats
             try {
                 const response = await fetch(`${getBaseUrl()}/api/user/progress`);
@@ -1022,13 +1194,17 @@ class MenuController {
                         // Save high score to localStorage as fallback/sync
                         if (progress.highest_wave) {
                             localStorage.setItem('td_record_wave', String(progress.highest_wave));
+                            state.recordWave = progress.highest_wave;
                         }
 
                         // Unlock achievements in UI
-                        updateAchievementsUI(progress.highest_wave || 0);
-                        
+                        updateAchievementsUI(progress.unlocked_achievements || [], progress.highest_wave || 0);
+
                         // Select active skin in UI
                         updateSkinsUI(progress.unlocked_skins || ['default'], progress.selected_skin || 'default');
+
+                        // Refresh Lexicon after loading highest wave
+                        this.initLexicon();
                     }
                 }
             } catch (err) {
@@ -1036,20 +1212,37 @@ class MenuController {
             }
         };
 
-        const updateAchievementsUI = (highestWave: number) => {
+        const updateAchievementsUI = (unlockedAchievements: string[], highestWave: number) => {
             const achievements = [
                 { id: 'ach-first-wave', reqWave: 5 },
                 { id: 'ach-wave-20', reqWave: 20 },
-                { id: 'ach-wave-50', reqWave: 50 }
+                { id: 'ach-wave-50', reqWave: 50 },
+                { id: 'ach-gold-1000', reqWave: null },
+                { id: 'ach-towers-15', reqWave: null },
+                { id: 'ach-kill-boss', reqWave: 11 },
+                { id: 'ach-no-lives-lost', reqWave: null },
+                { id: 'ach-tesla-5', reqWave: null }
             ];
 
             achievements.forEach(ach => {
                 const item = document.getElementById(ach.id);
                 if (item) {
                     const statusEl = item.querySelector('.achievement-status');
-                    if (highestWave >= ach.reqWave) {
+                    const unlockedByDb = unlockedAchievements.includes(ach.id);
+                    const unlockedByWave = ach.reqWave !== null && highestWave >= ach.reqWave;
+
+                    if (unlockedByDb || unlockedByWave) {
                         item.classList.add('unlocked');
                         if (statusEl) statusEl.textContent = 'Freigeschaltet';
+
+                        // Proactively sync to database if it was unlocked by wave but not in DB list
+                        if (unlockedByWave && !unlockedByDb) {
+                            fetch(`${getBaseUrl()}/api/user/unlock-achievement`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ achievementId: ach.id })
+                            }).catch(() => { });
+                        }
                     } else {
                         item.classList.remove('unlocked');
                         if (statusEl) statusEl.textContent = 'Gesperrt';
@@ -1079,7 +1272,7 @@ class MenuController {
                     } else {
                         if (statusEl) statusEl.textContent = 'Auswählen';
                     }
-                    
+
                     // Add click event for unlocking selection
                     htmlCard.onclick = async () => {
                         try {
@@ -1141,7 +1334,7 @@ class MenuController {
                     if (ctx) {
                         ctx.drawImage(img, 0, 0, 128, 128);
                         const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                        
+
                         try {
                             const response = await fetch(`${getBaseUrl()}/api/user/profile`, {
                                 method: 'POST',
@@ -1323,6 +1516,12 @@ class MenuController {
 
                 const data = await response.json();
                 if (response.ok && data.success) {
+                    localStorage.removeItem('td_discovered_enemies');
+                    localStorage.removeItem('td_record_wave');
+                    sessionStorage.removeItem('td_discovered_enemies');
+                    sessionStorage.removeItem('td_record_wave');
+                    this.initLexicon();
+
                     if (regUser) regUser.value = '';
                     if (regPass) regPass.value = '';
                     if (regError) regError.style.display = 'none';
@@ -1352,10 +1551,14 @@ class MenuController {
             try {
                 const response = await fetch(`${getBaseUrl()}/api/auth/logout`, { method: 'POST' });
                 if (response.ok) {
+                    sessionStorage.removeItem('td_discovered_enemies');
+                    sessionStorage.removeItem('td_record_wave');
                     showAuth();
                 }
             } catch (err) {
                 console.error('Logout error:', err);
+                sessionStorage.removeItem('td_discovered_enemies');
+                sessionStorage.removeItem('td_record_wave');
                 showAuth();
             }
         });
@@ -1382,8 +1585,8 @@ class MenuController {
         `;
 
         try {
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                            ? 'http://localhost:3000' : '';
+            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3000' : '';
             const response = await fetch(`${baseUrl}/api/leaderboard`, { cache: 'no-store' });
             if (!response.ok) {
                 throw new Error('Server returned ' + response.status);
@@ -1406,14 +1609,14 @@ class MenuController {
             list.forEach((entry: any, index: number) => {
                 const rank = index + 1;
                 const tr = document.createElement('tr');
-                
+
                 if (this.currentUsername && entry.username === this.currentUsername) {
                     tr.classList.add('current-user-row');
                 }
 
                 const tdRank = document.createElement('td');
                 tdRank.className = 'col-rank';
-                
+
                 let badgeClass = '';
                 if (rank === 1) badgeClass = 'rank-1';
                 else if (rank === 2) badgeClass = 'rank-2';
@@ -1452,7 +1655,7 @@ class MenuController {
 
                 const tdWave = document.createElement('td');
                 tdWave.className = 'col-wave';
-                
+
                 const waveVal = document.createElement('span');
                 waveVal.className = 'leaderboard-wave-val';
                 waveVal.textContent = `Welle ${entry.highest_wave}`;
@@ -1461,7 +1664,7 @@ class MenuController {
 
                 const tdDate = document.createElement('td');
                 tdDate.className = 'col-date';
-                
+
                 let formattedDate = '--.--.----';
                 if (entry.updated_at) {
                     const date = new Date(entry.updated_at);

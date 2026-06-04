@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.4.2 - Added overlapping RadiationArea merging to prevent neon-green screen overlay stacking under heavy combat.
+ * @last_update: 2026-06-04 / v2.5.0 - Passed gravity parameter inside getParticle for confetti and physics effects.
  */
 import { Particle, FloatingText, StunRay, MuzzleFlash, SniperBeam, RadiationArea, Shockwave, TeslaArc } from '../fx/fx';
 import { Projectile } from '../entities/projectiles';
@@ -94,8 +94,8 @@ export const PoolManager = {
         ];
     },
 
-    getParticle(x: number, y: number, color: string, speed: number, size: number): Particle {
-        return this.particles.get().init(x, y, color, speed, size);
+    getParticle(x: number, y: number, color: string, speed: number, size: number, gravity = 0): Particle {
+        return this.particles.get().init(x, y, color, speed, size, gravity);
     },
 
     getProjectile(

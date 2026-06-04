@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-01 / v1.10.1 - Removed unused PoolManager import to satisfy strict TypeScript unused checks.
+ * @last_update: 2026-06-04 / v1.11.0 - Dynamically save record wave to sessionStorage or localStorage depending on isGuest state.
  */
 import { state } from '../core/state';
 import { Config, TowerData } from '../core/config';
@@ -27,7 +27,8 @@ export function showGameOverScreen(): void {
     const currentRecord = typeof state.recordWave === 'string' ? parseInt(state.recordWave) : state.recordWave;
     if (currentWave > currentRecord) {
         state.recordWave = currentWave;
-        localStorage.setItem('td_record_wave', String(state.recordWave));
+        const storage = state.isGuest ? sessionStorage : localStorage;
+        storage.setItem('td_record_wave', String(state.recordWave));
     }
     const goWave = getEl('go-wave');
     if (goWave) goWave.innerText = String(state.wave);

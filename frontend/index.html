@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geometry Tower Defense - Entry Portal</title>
     <link rel="icon" type="image/svg+xml" href="src/assets/favicon.svg">
-    <meta name="description" content="Kommandozentrale für TrueTowerDefense. Wähle deine Mission und starte die Simulation.">
+    <meta name="description"
+        content="Kommandozentrale für TrueTowerDefense. Wähle deine Mission und starte die Simulation.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="src/css/base.css">
@@ -14,10 +16,31 @@
     <link rel="stylesheet" href="src/css/mobile.css">
     <link rel="stylesheet" href="src/css/index-custom.css">
 </head>
-<body class="menu-page">
+
+<body class="menu-page splash-active">
 
     <canvas id="bgCanvas"></canvas>
-    <div id="fps-display" class="hidden" style="position: absolute; top: 20px; left: 20px; z-index: 9999; pointer-events: none; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: bold; color: #00ff88; text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);"></div>
+    <div id="fps-display" class="hidden"
+        style="position: absolute; top: 20px; left: 20px; z-index: 9999; pointer-events: none; font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: bold; color: #00ff88; text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);">
+    </div>
+
+    <!-- ── Menu Background Music (autoplay attribute for better browser compat) ── -->
+    <audio id="menu-music-audio" src="assets/554504_-Glorious-Morning-2-.mp3" loop autoplay crossorigin="anonymous" preload="auto"></audio>
+
+    <!-- ── Music Credit Widget ────────────────────────────────── -->
+    <div id="music-credit" class="music-credit-widget blur-hidden">
+        <div class="music-credit-bars">
+            <span class="mc-bar"></span>
+            <span class="mc-bar"></span>
+            <span class="mc-bar"></span>
+            <span class="mc-bar"></span>
+        </div>
+        <div class="music-credit-text">
+            <span class="mc-label">NOW PLAYING</span>
+            <span class="mc-title">Glorious Morning</span>
+            <span class="mc-artist">by <strong>Waterflame</strong></span>
+        </div>
+    </div>
 
     <!-- ── Orientation Lock ────────────────────────────────────── -->
     <div id="orientation-lock">
@@ -26,8 +49,31 @@
         <p>Bitte drehe dein Gerät ins Querformat (Landscape), um die Simulation zu betreten!</p>
     </div>
 
+    <!-- ── Start Screen / Splash Screen (Autoplay Bypass & Entry) ── -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-status-panel">
+                <div class="status-row-item"><span class="status-label">CORE SYSTEM</span><span
+                        class="status-val ok">ONLINE</span></div>
+                <div class="status-row-item"><span class="status-label">TACTICAL DATABASE</span><span
+                        class="status-val ok">GELADEN</span></div>
+                <div class="status-row-item"><span class="status-label">SYNTHWAVE AUDIO</span><span
+                        class="status-val ready">BEREIT</span></div>
+            </div>
+
+            <button id="splash-enter-btn" class="splash-enter-btn glitch-hover">
+                <span class="btn-text">SIMULATION INITIALISIEREN</span>
+            </button>
+        </div>
+        <div class="splash-footer">
+            <span>SECURE-CONNECTION // HOST: DEV-ENVIRONMENT</span>
+        </div>
+    </div>
+
     <div class="menu-layout-wrapper">
         <div class="portal-main-column">
+
+            <!-- ── Shared Floating Portal Header inside the Column ── -->
             <div class="portal-title-outer-wrapper">
                 <div class="title-block">
                     <h1 class="portal-title">
@@ -37,10 +83,14 @@
                             <span class="word-3" data-text="defense">defense</span>
                         </div>
                     </h1>
+                    <span class="splash-subtitle">Made by Ammar</span>
                 </div>
             </div>
-            
-            <div class="portal-container">
+
+            <!-- Space reserved for the transition of the floating title -->
+            <div class="portal-title-placeholder"></div>
+
+            <div class="portal-container blur-hidden">
                 <header class="portal-header">
                     <div class="header-nav-row">
                         <nav class="portal-tabs">
@@ -54,452 +104,576 @@
                     </div>
                 </header>
 
-            <main class="portal-body">
-                
-                <!-- Maps Tab -->
-                <div id="tab-maps" class="tab-content-wrapper">
-                    <!-- Direct Code Joiner Component (Cyberpunk Style) -->
-                    <div class="direct-join-bar">
-                        <div class="direct-join-label">
-                            <span class="direct-join-pulse"></span>
-                            <span>DIREKTBEITRITT PER RAUM-CODE:</span>
-                        </div>
-                        <div class="direct-join-controls">
-                            <input type="text" id="directCodeInput" maxlength="4" placeholder="CODE" autocomplete="off" class="direct-input">
-                            <button id="directJoinBtn" class="direct-btn glitch-hover">VERIFIZIEREN & BEITRETEN</button>
-                        </div>
-                    </div>
+                <main class="portal-body">
 
-                    <div class="mission-grid">
-                        <!-- Spiral Map -->
-                        <div class="mission-card" data-map="The Spiral">
-                            <div class="mission-header" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
-                                <span style="filter: drop-shadow(0 0 15px var(--tesla-cyan));">🌀</span>
+                    <!-- Maps Tab -->
+                    <div id="tab-maps" class="tab-content-wrapper">
+                        <!-- Direct Code Joiner Component (Cyberpunk Style) -->
+                        <div class="direct-join-bar">
+                            <div class="direct-join-label">
+                                <span class="direct-join-pulse"></span>
+                                <span>DIREKTBEITRITT PER RAUM-CODE:</span>
                             </div>
-                            <div class="mission-content">
-                                <div class="mission-name">
-                                    <span>THE SPIRAL</span>
-                                    <div class="difficulty-dots">
-                                        <div class="dot active easy"></div>
-                                        <div class="dot active med"></div>
-                                        <div class="dot"></div>
-                                        <div class="dot"></div>
-                                        <div class="dot"></div>
-                                    </div>
-                                </div>
-                                <div class="mission-stats">
-                                    <div class="mission-stat-item">
-                                        <span class="mission-stat-label">Pfad-Länge</span>
-                                        <span class="mission-stat-value">Extrem Lang</span>
-                                    </div>
-                                    <div class="mission-stat-item">
-                                        <span class="mission-stat-label">Schwierigkeit</span>
-                                        <span class="mission-stat-value" style="color: #ffcc00;">Medium</span>
-                                    </div>
-                                </div>
-                                <button class="mission-btn glitch-hover">START SIMULATION</button>
+                            <div class="direct-join-controls">
+                                <input type="text" id="directCodeInput" maxlength="4" placeholder="CODE"
+                                    autocomplete="off" class="direct-input">
+                                <button id="directJoinBtn" class="direct-btn glitch-hover">VERIFIZIEREN &
+                                    BEITRETEN</button>
                             </div>
                         </div>
 
-                        <!-- Quantum Bypass Map -->
-                        <div class="mission-card" data-map="Quantum Bypass">
-                            <div class="mission-header" style="background: linear-gradient(135deg, #0f0c29, #00f2fe, #24243e);">
-                                <span style="filter: drop-shadow(0 0 15px var(--tesla-cyan));">⚛️</span>
-                            </div>
-                            <div class="mission-content">
-                                <div class="mission-name">
-                                    <span>QUANTUM BYPASS</span>
-                                    <div class="difficulty-dots">
-                                        <div class="dot active easy"></div>
-                                        <div class="dot active med"></div>
-                                        <div class="dot active med"></div>
-                                        <div class="dot"></div>
-                                        <div class="dot"></div>
-                                    </div>
+                        <div class="mission-grid">
+                            <!-- Spiral Map -->
+                            <div class="mission-card" data-map="The Spiral">
+                                <div class="mission-header"
+                                    style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+                                    <span style="filter: drop-shadow(0 0 15px var(--tesla-cyan));">🌀</span>
                                 </div>
-                                <div class="mission-stats">
-                                    <div class="mission-stat-item">
-                                        <span class="mission-stat-label">Pfad-Länge</span>
-                                        <span class="mission-stat-value">Mittellang</span>
-                                    </div>
-                                    <div class="mission-stat-item">
-                                        <span class="mission-stat-label">Schwierigkeit</span>
-                                        <span class="mission-stat-value" style="color: #ffcc00;">Medium+</span>
-                                    </div>
-                                </div>
-                                <button class="mission-btn glitch-hover">START SIMULATION</button>
-                            </div>
-                        </div>
-
-                        <!-- ZigZag Map -->
-                        <div class="mission-card" data-map="The ZigZag">
-                            <div class="mission-header" style="background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);">
-                                <span style="filter: drop-shadow(0 0 15px var(--bomb-red));">⚡</span>
-                            </div>
-                            <div class="mission-content">
-                                <div class="mission-name">
-                                    <span>THE ZIGZAG</span>
-                                    <div class="difficulty-dots">
-                                        <div class="dot active easy"></div>
-                                        <div class="dot active med"></div>
-                                        <div class="dot active hard"></div>
-                                        <div class="dot active hard"></div>
-                                        <div class="dot"></div>
-                                    </div>
-                                </div>
-                                <div class="mission-stats">
-                                    <div class="mission-stat-item">
-                                        <span class="mission-stat-label">Pfad-Länge</span>
-                                        <span class="mission-stat-value">Kompakt</span>
-                                    </div>
-                                    <div class="mission-stat-item">
-                                        <span class="mission-stat-label">Schwierigkeit</span>
-                                        <span class="mission-stat-value" style="color: #ff3366;">Schwer</span>
-                                    </div>
-                                </div>
-                                <button class="mission-btn glitch-hover">START SIMULATION</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lexicon Tab (Reusing existing logic/structure) -->
-                <div id="tab-lexicon" class="tab-content-wrapper hidden">
-                    <div style="display: flex; gap: 30px; height: 100%; overflow: hidden;">
-                        <div style="flex: 0 0 350px; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 20px; overflow-y: auto; height: 100%;" id="lexiconList">
-                            <!-- Injected -->
-                        </div>
-                        <div style="flex: 1; padding-left: 10px; display: none; flex-direction: column; height: 100%; overflow-y: auto;" id="lexiconDetails">
-                            <h2 id="lexTitle" style="font-size: 2.2rem; margin: 0 0 10px 0; letter-spacing: 4px; text-transform: uppercase;"></h2>
-                            <div style="display: flex; gap: 40px; margin-bottom: 15px;">
-                                <div id="lexIcon" style="width: 180px; height: 180px; background: rgba(0,0,0,0.4); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.5); flex-shrink: 0;">
-                                    <canvas id="lexiconCanvas" width="180" height="180"></canvas>
-                                </div>
-                                <div style="flex: 1;">
-                                    <p id="lexDescription" style="font-size: 1rem; color: #a8a8b3; line-height: 1.5; margin-bottom: 15px;"></p>
-                                    <div class="stat-grid">
-                                        <div class="stat-row">
-                                            <strong>HP</strong>
-                                            <div class="stat-bar-container"><div class="stat-bar-fill" id="lexHpBar"></div></div>
-                                        </div>
-                                        <div class="stat-row">
-                                            <strong>Speed</strong>
-                                            <div class="stat-bar-container"><div class="stat-bar-fill" id="lexSpeedBar"></div></div>
-                                        </div>
-                                        <div class="stat-row">
-                                            <strong>Reward</strong>
-                                            <div class="stat-bar-container"><div class="stat-bar-fill" id="lexRewardBar"></div></div>
-                                        </div>
-                                        <div class="stat-row" style="margin-top: 10px;">
-                                            <strong>Danger</strong>
-                                            <span id="lexDifficultyStars" style="color: var(--gold); letter-spacing: 5px; font-size: 1.2rem;"></span>
+                                <div class="mission-content">
+                                    <div class="mission-name">
+                                        <span>THE SPIRAL</span>
+                                        <div class="difficulty-dots">
+                                            <div class="dot active easy"></div>
+                                            <div class="dot active med"></div>
+                                            <div class="dot"></div>
+                                            <div class="dot"></div>
+                                            <div class="dot"></div>
                                         </div>
                                     </div>
+                                    <div class="mission-stats">
+                                        <div class="mission-stat-item">
+                                            <span class="mission-stat-label">Pfad-Länge</span>
+                                            <span class="mission-stat-value">Extrem Lang</span>
+                                        </div>
+                                        <div class="mission-stat-item">
+                                            <span class="mission-stat-label">Schwierigkeit</span>
+                                            <span class="mission-stat-value" style="color: #ffcc00;">Medium</span>
+                                        </div>
+                                    </div>
+                                    <button class="mission-btn glitch-hover">START SIMULATION</button>
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 40px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                                <div style="flex: 1;">
-                                    <div style="color: var(--tesla-cyan); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">Abilities</div>
-                                    <div id="lexAbility" style="color: #fff; font-weight: 600;"></div>
+
+                            <!-- Quantum Bypass Map -->
+                            <div class="mission-card" data-map="Quantum Bypass">
+                                <div class="mission-header"
+                                    style="background: linear-gradient(135deg, #0f0c29, #00f2fe, #24243e);">
+                                    <span style="filter: drop-shadow(0 0 15px var(--tesla-cyan));">⚛️</span>
                                 </div>
-                                <div style="flex: 1;">
-                                    <div style="color: var(--bomb-red); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">Tactical Weakness</div>
-                                    <div id="lexWeakness" style="color: #fff; font-weight: 600;"></div>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="color: var(--gold); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">First Detection</div>
-                                    <div id="lexMinWave" style="color: #fff; font-weight: 600;"></div>
+                                <div class="mission-content">
+                                    <div class="mission-name">
+                                        <span>QUANTUM BYPASS</span>
+                                        <div class="difficulty-dots">
+                                            <div class="dot active easy"></div>
+                                            <div class="dot active med"></div>
+                                            <div class="dot active med"></div>
+                                            <div class="dot"></div>
+                                            <div class="dot"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mission-stats">
+                                        <div class="mission-stat-item">
+                                            <span class="mission-stat-label">Pfad-Länge</span>
+                                            <span class="mission-stat-value">Mittellang</span>
+                                        </div>
+                                        <div class="mission-stat-item">
+                                            <span class="mission-stat-label">Schwierigkeit</span>
+                                            <span class="mission-stat-value" style="color: #ffcc00;">Medium+</span>
+                                        </div>
+                                    </div>
+                                    <button class="mission-btn glitch-hover">START SIMULATION</button>
                                 </div>
                             </div>
-                            <p id="lexFlavor" style="margin-top: 25px; font-style: italic; color: #aaa; border-left: 3px solid rgba(76, 201, 240, 0.4); padding-left: 15px; padding-bottom: 25px; line-height: 1.6;"></p>
-                        </div>
-                        <div id="lexiconPlaceholder" style="flex: 1; display: flex; align-items: center; justify-content: center; color: #444; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 4px;">
-                            Select Entity to Analyze
+
+                            <!-- ZigZag Map -->
+                            <div class="mission-card" data-map="The ZigZag">
+                                <div class="mission-header"
+                                    style="background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);">
+                                    <span style="filter: drop-shadow(0 0 15px var(--bomb-red));">⚡</span>
+                                </div>
+                                <div class="mission-content">
+                                    <div class="mission-name">
+                                        <span>THE ZIGZAG</span>
+                                        <div class="difficulty-dots">
+                                            <div class="dot active easy"></div>
+                                            <div class="dot active med"></div>
+                                            <div class="dot active hard"></div>
+                                            <div class="dot active hard"></div>
+                                            <div class="dot"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mission-stats">
+                                        <div class="mission-stat-item">
+                                            <span class="mission-stat-label">Pfad-Länge</span>
+                                            <span class="mission-stat-value">Kompakt</span>
+                                        </div>
+                                        <div class="mission-stat-item">
+                                            <span class="mission-stat-label">Schwierigkeit</span>
+                                            <span class="mission-stat-value" style="color: #ff3366;">Schwer</span>
+                                        </div>
+                                    </div>
+                                    <button class="mission-btn glitch-hover">START SIMULATION</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Leaderboard Tab -->
-                <div id="tab-leaderboard" class="tab-content-wrapper hidden">
-                    <div class="leaderboard-container">
-                        <div class="leaderboard-header">
-                            <div class="leaderboard-title-block">
-                                <h2 class="leaderboard-title">SIMULATIONS-BESTENLISTE</h2>
-                                <p class="leaderboard-subtitle">Die ruhmreichsten Taktiker im Kampf gegen die Unendlichkeit</p>
+                    <!-- Lexicon Tab (Reusing existing logic/structure) -->
+                    <div id="tab-lexicon" class="tab-content-wrapper hidden">
+                        <div style="display: flex; gap: 30px; height: 100%; overflow: hidden;">
+                            <div style="flex: 0 0 350px; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 20px; overflow-y: auto; height: 100%;"
+                                id="lexiconList">
+                                <!-- Injected -->
                             </div>
-                            <button id="refresh-leaderboard-btn" class="leaderboard-refresh-btn glitch-hover">
-                                <span class="refresh-icon">🔄</span> AKTUALISIEREN
-                            </button>
-                        </div>
-                        <div class="leaderboard-table-wrapper">
-                            <table class="leaderboard-table">
-                                <thead>
-                                    <tr>
-                                        <th class="col-rank">Rang</th>
-                                        <th class="col-user">Kämpfer</th>
-                                        <th class="col-wave">Höchste Welle</th>
-                                        <th class="col-date">Erreicht am</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="leaderboard-list">
-                                    <tr class="leaderboard-loading-row">
-                                        <td colspan="4">Lade Bestenliste...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div style="flex: 1; padding-left: 10px; display: none; flex-direction: column; height: 100%; overflow-y: auto;"
+                                id="lexiconDetails">
+                                <h2 id="lexTitle"
+                                    style="font-size: 2.2rem; margin: 0 0 10px 0; letter-spacing: 4px; text-transform: uppercase;">
+                                </h2>
+                                <div style="display: flex; gap: 40px; margin-bottom: 15px;">
+                                    <div id="lexIcon"
+                                        style="width: 180px; height: 180px; background: rgba(0,0,0,0.4); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.5); flex-shrink: 0;">
+                                        <canvas id="lexiconCanvas" width="180" height="180"></canvas>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <p id="lexDescription"
+                                            style="font-size: 1rem; color: #a8a8b3; line-height: 1.5; margin-bottom: 15px;">
+                                        </p>
+                                        <div class="stat-grid">
+                                            <div class="stat-row">
+                                                <strong>HP</strong>
+                                                <div class="stat-bar-container">
+                                                    <div class="stat-bar-fill" id="lexHpBar"></div>
+                                                </div>
+                                            </div>
+                                            <div class="stat-row">
+                                                <strong>Speed</strong>
+                                                <div class="stat-bar-container">
+                                                    <div class="stat-bar-fill" id="lexSpeedBar"></div>
+                                                </div>
+                                            </div>
+                                            <div class="stat-row">
+                                                <strong>Reward</strong>
+                                                <div class="stat-bar-container">
+                                                    <div class="stat-bar-fill" id="lexRewardBar"></div>
+                                                </div>
+                                            </div>
+                                            <div class="stat-row" style="margin-top: 10px;">
+                                                <strong>Danger</strong>
+                                                <span id="lexDifficultyStars"
+                                                    style="color: var(--gold); letter-spacing: 5px; font-size: 1.2rem;"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    style="display: flex; gap: 40px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <div style="flex: 1;">
+                                        <div
+                                            style="color: var(--tesla-cyan); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">
+                                            Abilities</div>
+                                        <div id="lexAbility" style="color: #fff; font-weight: 600;"></div>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div
+                                            style="color: var(--bomb-red); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">
+                                            Tactical Weakness</div>
+                                        <div id="lexWeakness" style="color: #fff; font-weight: 600;"></div>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div
+                                            style="color: var(--gold); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">
+                                            First Detection</div>
+                                        <div id="lexMinWave" style="color: #fff; font-weight: 600;"></div>
+                                    </div>
+                                </div>
+                                <p id="lexFlavor"
+                                    style="margin-top: 25px; font-style: italic; color: #aaa; border-left: 3px solid rgba(76, 201, 240, 0.4); padding-left: 15px; padding-bottom: 25px; line-height: 1.6;">
+                                </p>
+                            </div>
+                            <div id="lexiconPlaceholder"
+                                style="flex: 1; display: flex; align-items: center; justify-content: center; color: #444; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 4px;">
+                                Select Entity to Analyze
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Settings Tab -->
-                <div id="tab-settings" class="tab-content-wrapper hidden">
-                    <div class="settings-list" style="max-width: 650px; margin: 0 auto;">
-
-                        <!-- Sound Volume -->
-                        <div class="settings-card">
-                            <div class="settings-info">
-                                <div class="settings-label-container">
-                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                                    <label for="soundVolume">Sound-Lautstärke</label>
+                    <!-- Leaderboard Tab -->
+                    <div id="tab-leaderboard" class="tab-content-wrapper hidden">
+                        <div class="leaderboard-container">
+                            <div class="leaderboard-header">
+                                <div class="leaderboard-title-block">
+                                    <h2 class="leaderboard-title">SIMULATIONS-BESTENLISTE</h2>
+                                    <p class="leaderboard-subtitle">Die ruhmreichsten Taktiker im Kampf gegen die
+                                        Unendlichkeit</p>
                                 </div>
-                                <span class="settings-desc">Effekte, Schüsse und Explosionen</span>
+                                <button id="refresh-leaderboard-btn" class="leaderboard-refresh-btn glitch-hover">
+                                    <span class="refresh-icon">🔄</span> AKTUALISIEREN
+                                </button>
                             </div>
-                            <div class="settings-control">
-                                <input type="range" id="soundVolume" class="ig-range-slider" min="0" max="100" value="50">
+                            <div class="leaderboard-table-wrapper">
+                                <table class="leaderboard-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-rank">Rang</th>
+                                            <th class="col-user">Kämpfer</th>
+                                            <th class="col-wave">Höchste Welle</th>
+                                            <th class="col-date">Erreicht am</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaderboard-list">
+                                        <tr class="leaderboard-loading-row">
+                                            <td colspan="4">Lade Bestenliste...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-
-                        <!-- Music Volume -->
-                        <div class="settings-card">
-                            <div class="settings-info">
-                                <div class="settings-label-container">
-                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-                                    <label for="musicVolume">Musik-Lautstärke</label>
-                                </div>
-                                <span class="settings-desc">Hintergrund-Synthwave-Tracks</span>
-                            </div>
-                            <div class="settings-control">
-                                <input type="range" id="musicVolume" class="ig-range-slider" min="0" max="100" value="50">
-                            </div>
-                        </div>
-
-                        <!-- Performance Mode -->
-                        <div class="settings-card">
-                            <div class="settings-info">
-                                <div class="settings-label-container">
-                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                                    <label for="perfModeToggle">Performance-Modus</label>
-                                </div>
-                                <span class="settings-desc">Reduziert auf 30 FPS für niedrigen Energieverbrauch</span>
-                            </div>
-                            <div class="settings-control">
-                                <label class="ig-switch">
-                                    <input type="checkbox" id="perfModeToggle">
-                                    <span class="ig-switch-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- FPS Display -->
-                        <div class="settings-card">
-                            <div class="settings-info">
-                                <div class="settings-label-container">
-                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
-                                    <label for="fpsToggle">FPS-Anzeige</label>
-                                </div>
-                                <span class="settings-desc">Blendet die FPS-Anzeige in der Menüecke ein</span>
-                            </div>
-                            <div class="settings-control">
-                                <label class="ig-switch">
-                                    <input type="checkbox" id="fpsToggle">
-                                    <span class="ig-switch-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Refresh Rate -->
-                        <div class="settings-card">
-                            <div class="settings-info">
-                                <div class="settings-label-container">
-                                    <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                                    <label for="refreshRateSelect">Bildwiederholrate</label>
-                                </div>
-                                <span class="settings-desc">Passt die Spielphysik an deinen Monitor an</span>
-                            </div>
-                            <div class="settings-control">
-                                <select id="refreshRateSelect" class="ig-select">
-                                    <option value="60">60 Hz (Standard)</option>
-                                    <option value="90">90 Hz</option>
-                                    <option value="120">120 Hz</option>
-                                    <option value="144">144 Hz</option>
-                                </select>
-                            </div>
-                        </div>
-
                     </div>
-                </div>
 
-                <!-- Profile Tab -->
-                <div id="tab-profile" class="tab-content-wrapper hidden">
-                    <div class="profile-container">
-                        <!-- 1. Authentication Card (shows if not logged in) -->
-                        <div id="profile-auth-section" class="auth-card">
-                            <!-- Login Form -->
-                            <div id="auth-login-form">
-                                <h2>Login</h2>
-                                <p class="auth-subtitle">Melde dich an, um deinen Spielfortschritt zu speichern</p>
-                                
-                                <div class="auth-error-msg" id="login-error-msg"></div>
-                                
-                                <div class="auth-form-group">
-                                    <label for="login-username">Benutzername</label>
-                                    <input type="text" id="login-username" class="auth-input" placeholder="Spielername" autocomplete="username">
+                    <!-- Settings Tab -->
+                    <div id="tab-settings" class="tab-content-wrapper hidden">
+                        <div class="settings-list" style="max-width: 650px; margin: 0 auto;">
+
+                            <!-- Sound Volume -->
+                            <div class="settings-card">
+                                <div class="settings-info">
+                                    <div class="settings-label-container">
+                                        <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24"
+                                            fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07">
+                                            </path>
+                                        </svg>
+                                        <label for="soundVolume">Sound-Lautstärke</label>
+                                    </div>
+                                    <span class="settings-desc">Effekte, Schüsse und Explosionen</span>
                                 </div>
-                                <div class="auth-form-group">
-                                    <label for="login-password">Passwort</label>
-                                    <input type="password" id="login-password" class="auth-input" placeholder="••••••••" autocomplete="current-password">
+                                <div class="settings-control">
+                                    <input type="range" id="soundVolume" class="ig-range-slider" min="0" max="100"
+                                        value="50">
                                 </div>
-                                <div class="auth-form-remember">
-                                    <label class="remember-checkbox-container">
-                                        <input type="checkbox" id="login-remember">
-                                        <span class="checkbox-checkmark"></span>
-                                        <span>Login merken</span>
+                            </div>
+
+                            <!-- Music Volume -->
+                            <div class="settings-card">
+                                <div class="settings-info">
+                                    <div class="settings-label-container">
+                                        <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24"
+                                            fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M9 18V5l12-2v13"></path>
+                                            <circle cx="6" cy="18" r="3"></circle>
+                                            <circle cx="18" cy="16" r="3"></circle>
+                                        </svg>
+                                        <label for="musicVolume">Musik-Lautstärke</label>
+                                    </div>
+                                    <span class="settings-desc">Hintergrund-Synthwave-Tracks</span>
+                                </div>
+                                <div class="settings-control">
+                                    <input type="range" id="musicVolume" class="ig-range-slider" min="0" max="100"
+                                        value="50">
+                                </div>
+                            </div>
+
+                            <!-- Performance Mode -->
+                            <div class="settings-card">
+                                <div class="settings-info">
+                                    <div class="settings-label-container">
+                                        <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24"
+                                            fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                                        </svg>
+                                        <label for="perfModeToggle">Performance-Modus</label>
+                                    </div>
+                                    <span class="settings-desc">Reduziert auf 30 FPS für niedrigen
+                                        Energieverbrauch</span>
+                                </div>
+                                <div class="settings-control">
+                                    <label class="ig-switch">
+                                        <input type="checkbox" id="perfModeToggle">
+                                        <span class="ig-switch-slider"></span>
                                     </label>
                                 </div>
-                                <button id="login-submit-btn" class="auth-btn glitch-hover">Einloggen</button>
-                                
-                                <div class="auth-toggle-link" id="goto-register">
-                                    Noch kein Konto? Jetzt <span>Registrieren</span>
-                                </div>
                             </div>
-                            
-                            <!-- Register Form (hidden by default) -->
-                            <div id="auth-register-form" class="hidden" style="display: none;">
-                                <h2>Registrieren</h2>
-                                <p class="auth-subtitle">Erstelle ein neues Konto für Geometry TD</p>
-                                
-                                <div class="auth-error-msg" id="register-error-msg"></div>
-                                <div class="auth-success-msg" id="register-success-msg"></div>
-                                
-                                <div class="auth-form-group">
-                                    <label for="register-username">Benutzername</label>
-                                    <input type="text" id="register-username" class="auth-input" placeholder="Spielername" autocomplete="username">
-                                </div>
-                                <div class="auth-form-group">
-                                    <label for="register-password">Passwort</label>
-                                    <input type="password" id="register-password" class="auth-input" placeholder="Min. 8 Zeichen" autocomplete="new-password">
-                                </div>
-                                <button id="register-submit-btn" class="auth-btn glitch-hover">Konto erstellen</button>
-                                
-                                <div class="auth-toggle-link" id="goto-login">
-                                    Bereits registriert? Jetzt <span>Einloggen</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- 2. Profile Dashboard (shows if logged in) -->
-                        <div id="profile-dashboard-section" class="profile-dashboard hidden" style="display: none;">
-                             <div class="profile-sidebar">
-                                 <div class="profile-avatar-container" id="profile-avatar-container" title="Profilbild ändern">
-                                     <div class="profile-avatar" id="profile-avatar-display">👤</div>
-                                     <div class="avatar-edit-overlay">
-                                         <span>EDIT</span>
-                                     </div>
-                                     <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
-                                 </div>
-                                 <div class="profile-username-wrapper" id="profile-username-wrapper">
-                                     <div class="profile-username" id="dashboard-username">SPIELER</div>
-                                     <button id="edit-username-btn" class="edit-username-btn" title="Benutzername ändern">✏️</button>
-                                 </div>
-                                 <div id="username-edit-container" class="username-edit-container hidden" style="display: none;">
-                                     <input type="text" id="username-edit-input" class="auth-input" maxlength="20" placeholder="Neuer Name">
-                                     <div class="username-edit-actions">
-                                         <button id="save-username-btn" class="username-action-btn save" title="Speichern">💾</button>
-                                         <button id="cancel-username-btn" class="username-action-btn cancel" title="Abbrechen">❌</button>
-                                     </div>
-                                     <div class="username-error-msg" id="username-edit-error" style="display: none;"></div>
-                                 </div>
-                                 <div class="profile-joined" id="dashboard-joined">Mitglied seit: --.--.----</div>
-                                
-                                <div class="profile-stat-box">
-                                    <div class="profile-stat-val" id="dashboard-highest-wave">0</div>
-                                    <div class="profile-stat-lbl">Höchste Welle</div>
+                            <!-- FPS Display -->
+                            <div class="settings-card">
+                                <div class="settings-info">
+                                    <div class="settings-label-container">
+                                        <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24"
+                                            fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M12 20v-6M6 20V10M18 20V4"></path>
+                                        </svg>
+                                        <label for="fpsToggle">FPS-Anzeige</label>
+                                    </div>
+                                    <span class="settings-desc">Blendet die FPS-Anzeige in der Menüecke ein</span>
                                 </div>
-                                
-                                <button class="profile-logout-btn" id="logout-btn">Abmelden</button>
+                                <div class="settings-control">
+                                    <label class="ig-switch">
+                                        <input type="checkbox" id="fpsToggle">
+                                        <span class="ig-switch-slider"></span>
+                                    </label>
+                                </div>
                             </div>
-                            
-                            <div class="profile-main-content">
-                                <!-- Skins Section -->
-                                <div class="profile-section-card">
-                                    <h3>Skins (Kosmetika)</h3>
-                                    <div class="skins-grid">
-                                        <div class="skin-card selected" data-skin="default">
-                                            <div class="skin-preview-dot" style="background-color: var(--tesla-cyan);"></div>
-                                            <div class="skin-name">Standard</div>
-                                            <div class="skin-status">Ausgerüstet</div>
-                                        </div>
-                                        <div class="skin-card skin-locked" data-skin="neon_blue">
-                                            <div class="skin-preview-dot" style="background-color: #0077ff;"></div>
-                                            <div class="skin-name">Neon Blau</div>
-                                            <div class="skin-status">Gesperrt</div>
-                                        </div>
-                                        <div class="skin-card skin-locked" data-skin="gold_tesla">
-                                            <div class="skin-preview-dot" style="background-color: var(--gold);"></div>
-                                            <div class="skin-name">Gold Tesla</div>
-                                            <div class="skin-status">Gesperrt</div>
-                                        </div>
+
+                            <!-- Refresh Rate -->
+                            <div class="settings-card">
+                                <div class="settings-info">
+                                    <div class="settings-label-container">
+                                        <svg class="settings-icon" width="20" height="20" viewBox="0 0 24 24"
+                                            fill="none" stroke="#4cc9f0" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                                        </svg>
+                                        <label for="refreshRateSelect">Bildwiederholrate</label>
+                                    </div>
+                                    <span class="settings-desc">Passt die Spielphysik an deinen Monitor an</span>
+                                </div>
+                                <div class="settings-control">
+                                    <select id="refreshRateSelect" class="ig-select">
+                                        <option value="60">60 Hz (Standard)</option>
+                                        <option value="90">90 Hz</option>
+                                        <option value="120">120 Hz</option>
+                                        <option value="144">144 Hz</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Profile Tab -->
+                    <div id="tab-profile" class="tab-content-wrapper hidden">
+                        <div class="profile-container">
+                            <!-- 1. Authentication Card (shows if not logged in) -->
+                            <div id="profile-auth-section" class="auth-card">
+                                <!-- Login Form -->
+                                <div id="auth-login-form">
+                                    <h2>Login</h2>
+                                    <p class="auth-subtitle">Melde dich an, um deinen Spielfortschritt zu speichern</p>
+
+                                    <div class="auth-error-msg" id="login-error-msg"></div>
+
+                                    <div class="auth-form-group">
+                                        <label for="login-username">Benutzername</label>
+                                        <input type="text" id="login-username" class="auth-input"
+                                            placeholder="Spielername" autocomplete="username">
+                                    </div>
+                                    <div class="auth-form-group">
+                                        <label for="login-password">Passwort</label>
+                                        <input type="password" id="login-password" class="auth-input"
+                                            placeholder="••••••••" autocomplete="current-password">
+                                    </div>
+                                    <div class="auth-form-remember">
+                                        <label class="remember-checkbox-container">
+                                            <input type="checkbox" id="login-remember">
+                                            <span class="checkbox-checkmark"></span>
+                                            <span>Login merken</span>
+                                        </label>
+                                    </div>
+                                    <button id="login-submit-btn" class="auth-btn glitch-hover">Einloggen</button>
+
+                                    <div class="auth-toggle-link" id="goto-register">
+                                        Noch kein Konto? Jetzt <span>Registrieren</span>
                                     </div>
                                 </div>
-                                
-                                <!-- Achievements Section -->
-                                <div class="profile-section-card">
-                                    <h3>Errungenschaften</h3>
-                                    <div class="profile-achievements-list">
-                                        <div class="achievement-item" id="ach-first-wave">
-                                            <div class="achievement-icon">👾</div>
-                                            <div class="achievement-info">
-                                                <div class="achievement-title">Erste Wellen</div>
-                                                <div class="achievement-desc">Überlebe Welle 5 in einer beliebigen Simulation.</div>
-                                            </div>
-                                            <div class="achievement-status">Gesperrt</div>
+
+                                <!-- Register Form (hidden by default) -->
+                                <div id="auth-register-form" class="hidden" style="display: none;">
+                                    <h2>Registrieren</h2>
+                                    <p class="auth-subtitle">Erstelle ein neues Konto für Geometry TD</p>
+
+                                    <div class="auth-error-msg" id="register-error-msg"></div>
+                                    <div class="auth-success-msg" id="register-success-msg"></div>
+
+                                    <div class="auth-form-group">
+                                        <label for="register-username">Benutzername</label>
+                                        <input type="text" id="register-username" class="auth-input"
+                                            placeholder="Spielername" autocomplete="username">
+                                    </div>
+                                    <div class="auth-form-group">
+                                        <label for="register-password">Passwort</label>
+                                        <input type="password" id="register-password" class="auth-input"
+                                            placeholder="Min. 8 Zeichen" autocomplete="new-password">
+                                    </div>
+                                    <button id="register-submit-btn" class="auth-btn glitch-hover">Konto
+                                        erstellen</button>
+
+                                    <div class="auth-toggle-link" id="goto-login">
+                                        Bereits registriert? Jetzt <span>Einloggen</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Profile Dashboard (shows if logged in) -->
+                            <div id="profile-dashboard-section" class="profile-dashboard hidden" style="display: none;">
+                                <div class="profile-sidebar">
+                                    <div class="profile-avatar-container" id="profile-avatar-container"
+                                        title="Profilbild ändern">
+                                        <div class="profile-avatar" id="profile-avatar-display">👤</div>
+                                        <div class="avatar-edit-overlay">
+                                            <span>EDIT</span>
                                         </div>
-                                        <div class="achievement-item" id="ach-wave-20">
-                                            <div class="achievement-icon">🛡️</div>
-                                            <div class="achievement-info">
-                                                <div class="achievement-title">Verteidiger-Veteran</div>
-                                                <div class="achievement-desc">Erreiche Welle 20 in einer beliebigen Simulation.</div>
-                                            </div>
-                                            <div class="achievement-status">Gesperrt</div>
+                                        <input type="file" id="profile-avatar-input" accept="image/*"
+                                            style="display: none;">
+                                    </div>
+                                    <div class="profile-username-wrapper" id="profile-username-wrapper">
+                                        <div class="profile-username" id="dashboard-username">SPIELER</div>
+                                        <button id="edit-username-btn" class="edit-username-btn"
+                                            title="Benutzername ändern">✏️</button>
+                                    </div>
+                                    <div id="username-edit-container" class="username-edit-container hidden"
+                                        style="display: none;">
+                                        <input type="text" id="username-edit-input" class="auth-input" maxlength="20"
+                                            placeholder="Neuer Name">
+                                        <div class="username-edit-actions">
+                                            <button id="save-username-btn" class="username-action-btn save"
+                                                title="Speichern">💾</button>
+                                            <button id="cancel-username-btn" class="username-action-btn cancel"
+                                                title="Abbrechen">❌</button>
                                         </div>
-                                        <div class="achievement-item" id="ach-wave-50">
-                                            <div class="achievement-icon">👑</div>
-                                            <div class="achievement-info">
-                                                <div class="achievement-title">Sektor-Beherrscher</div>
-                                                <div class="achievement-desc">Erreiche Welle 50 in einer beliebigen Simulation.</div>
+                                        <div class="username-error-msg" id="username-edit-error" style="display: none;">
+                                        </div>
+                                    </div>
+                                    <div class="profile-joined" id="dashboard-joined">Mitglied seit: --.--.----</div>
+
+                                    <div class="profile-stat-box">
+                                        <div class="profile-stat-val" id="dashboard-highest-wave">0</div>
+                                        <div class="profile-stat-lbl">Höchste Welle</div>
+                                    </div>
+
+                                    <button class="profile-logout-btn" id="logout-btn">Abmelden</button>
+                                </div>
+
+                                <div class="profile-main-content">
+                                    <!-- Skins Section -->
+                                    <div class="profile-section-card">
+                                        <h3>Skins (Kosmetika)</h3>
+                                        <div class="skins-grid">
+                                            <div class="skin-card selected" data-skin="default">
+                                                <div class="skin-preview-dot"
+                                                    style="background-color: var(--tesla-cyan);"></div>
+                                                <div class="skin-name">Standard</div>
+                                                <div class="skin-status">Ausgerüstet</div>
                                             </div>
-                                            <div class="achievement-status">Gesperrt</div>
+                                            <div class="skin-card skin-locked" data-skin="neon_blue">
+                                                <div class="skin-preview-dot" style="background-color: #0077ff;"></div>
+                                                <div class="skin-name">Neon Blau</div>
+                                                <div class="skin-status">Gesperrt</div>
+                                            </div>
+                                            <div class="skin-card skin-locked" data-skin="gold_tesla">
+                                                <div class="skin-preview-dot" style="background-color: var(--gold);">
+                                                </div>
+                                                <div class="skin-name">Gold Tesla</div>
+                                                <div class="skin-status">Gesperrt</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Achievements Section -->
+                                    <div class="profile-section-card">
+                                        <h3>Errungenschaften</h3>
+                                        <div class="profile-achievements-list">
+                                            <div class="achievement-item" id="ach-first-wave">
+                                                <div class="achievement-icon">👾</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Erste Wellen</div>
+                                                    <div class="achievement-desc">Überlebe Welle 5 in einer beliebigen
+                                                        Simulation.</div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
+                                            <div class="achievement-item" id="ach-wave-20">
+                                                <div class="achievement-icon">🛡️</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Verteidiger-Veteran</div>
+                                                    <div class="achievement-desc">Erreiche Welle 20 in einer beliebigen
+                                                        Simulation.</div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
+                                            <div class="achievement-item" id="ach-wave-50">
+                                                <div class="achievement-icon">👑</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Sektor-Beherrscher</div>
+                                                    <div class="achievement-desc">Erreiche Welle 50 in einer beliebigen
+                                                        Simulation.</div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
+                                            <div class="achievement-item" id="ach-gold-1000">
+                                                <div class="achievement-icon">💰</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Gold-Sammler</div>
+                                                    <div class="achievement-desc">Besitze 1.000 Gold in einer
+                                                        Simulation.</div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
+                                            <div class="achievement-item" id="ach-towers-15">
+                                                <div class="achievement-icon">🏗️</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Turm-Spezialist</div>
+                                                    <div class="achievement-desc">Baue 15 Türme gleichzeitig auf dem
+                                                        Spielfeld.</div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
+                                            <div class="achievement-item" id="ach-kill-boss">
+                                                <div class="achievement-icon">☠️</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Chef-Schredder</div>
+                                                    <div class="achievement-desc">Besiege das Mutterschiff (Welle 10).
+                                                    </div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
+                                            <div class="achievement-item" id="ach-no-lives-lost">
+                                                <div class="achievement-icon">💖</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Perfekte Verteidigung</div>
+                                                    <div class="achievement-desc">Erreiche Welle 15, ohne ein Leben zu
+                                                        verlieren.</div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
+                                            <div class="achievement-item" id="ach-tesla-5">
+                                                <div class="achievement-icon">⚡</div>
+                                                <div class="achievement-info">
+                                                    <div class="achievement-title">Tesla-Fan</div>
+                                                    <div class="achievement-desc">Besitze mindestens 5 Tesla-Türme
+                                                        gleichzeitig.</div>
+                                                </div>
+                                                <div class="achievement-status">Gesperrt</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-            </main>
-            <footer class="portal-footer">
-                <div class="live-ticker-container">
-                    <span class="ticker-pulse"></span>
-                    <span class="ticker-label">COMBATANTS ONLINE:</span>
-                    <span id="liveTickerValue" class="ticker-value">0</span>
-                </div>
-            </footer>
-        </div>
+                </main>
+                <footer class="portal-footer blur-hidden">
+                    <div class="live-ticker-container">
+                        <span class="ticker-pulse"></span>
+                        <span class="ticker-label">COMBATANTS ONLINE:</span>
+                        <span id="liveTickerValue" class="ticker-value">0</span>
+                    </div>
+                </footer>
+            </div>
         </div>
 
         <!-- Einklappbarer Changelog Container -->
-        <div id="changelog-panel" class="changelog-container collapsed">
+        <div id="changelog-panel" class="changelog-container collapsed blur-hidden">
             <!-- Angedockter Toggle Button für das Changelog -->
             <button id="changelog-toggle" class="changelog-toggle-btn" title="Changelog ein-/ausblenden">
                 <span id="changelog-pulse" class="pulse-dot hidden"></span>
@@ -511,9 +685,10 @@
                     <h3>SYSTEM LOG</h3>
                     <span class="changelog-status"><span class="pulse-green"></span> SEC-ONLINE</span>
                 </div>
-                <p class="changelog-desc">Chronologische Aufzeichnung aller Simulationstransfers aus der DEV-Umgebung.</p>
+                <p class="changelog-desc">Chronologische Aufzeichnung aller Simulationstransfers aus der DEV-Umgebung.
+                </p>
             </div>
-            
+
             <div id="changelog-list" class="changelog-list-content">
                 <div class="changelog-loading">Lade Simulationstransfers...</div>
             </div>
@@ -529,34 +704,39 @@
                 <h2 id="modalMapName">SEKTOR-ZUGRIFFS-PROTOKOLL</h2>
             </div>
             <p class="custom-modal-subtitle">Wähle deine Einsatzmethode für die Simulation in diesem Sektor</p>
-            
+
             <div class="modes-grid">
                 <!-- Solo Modus -->
                 <div class="mode-card" id="modeCardSolo">
                     <div class="mode-icon">👤</div>
                     <h3>Solo-Einsatz</h3>
-                    <p class="mode-desc">Starte eine isolierte Simulation nur für dich. Keine Störungen, reiner Fokus auf deine Taktik.</p>
+                    <p class="mode-desc">Starte eine isolierte Simulation nur für dich. Keine Störungen, reiner Fokus
+                        auf deine Taktik.</p>
                     <button class="mode-action-btn solo-btn glitch-hover" id="startSoloBtn">Solo Starten</button>
                 </div>
-                
+
                 <!-- Public Modus -->
                 <div class="mode-card" id="modeCardPublic">
                     <div class="mode-icon">🌐</div>
                     <h3>Öffentliches Match</h3>
-                    <p class="mode-desc">Tritt einem bestehenden Trupp bei oder öffne diesen Sektor für bis zu 4 Spieler. Teamplay erforderlich!</p>
+                    <p class="mode-desc">Tritt einem bestehenden Trupp bei oder öffne diesen Sektor für bis zu 4
+                        Spieler. Teamplay erforderlich!</p>
                     <button class="mode-action-btn public-btn glitch-hover" id="startPublicBtn">Match Suchen</button>
                 </div>
-                
+
                 <!-- Private Modus -->
                 <div class="mode-card" id="modeCardPrivate">
                     <div class="mode-icon">🔐</div>
                     <h3>Privates Match</h3>
-                    <p class="mode-desc">Generiere einen einzigartigen 4-stelligen Zugangscode oder gib einen Code ein, um mit Freunden zu spielen.</p>
+                    <p class="mode-desc">Generiere einen einzigartigen 4-stelligen Zugangscode oder gib einen Code ein,
+                        um mit Freunden zu spielen.</p>
                     <div class="private-controls">
-                        <button class="mode-action-btn private-create-btn glitch-hover" id="createPrivateBtn">Raum Erstellen</button>
+                        <button class="mode-action-btn private-create-btn glitch-hover" id="createPrivateBtn">Raum
+                            Erstellen</button>
                         <div class="private-divider">oder</div>
                         <div class="private-join-box">
-                            <input type="text" id="privateCodeInputModal" maxlength="4" placeholder="CODE" autocomplete="off" class="private-input">
+                            <input type="text" id="privateCodeInputModal" maxlength="4" placeholder="CODE"
+                                autocomplete="off" class="private-input">
                             <button class="private-join-btn" id="joinPrivateBtnModal">Beitreten</button>
                         </div>
                     </div>
@@ -568,4 +748,5 @@
     <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="src/js/ui/menu.ts"></script>
 </body>
+
 </html>

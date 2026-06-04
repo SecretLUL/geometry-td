@@ -4,6 +4,119 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.15.4",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Titel-Schwebungsanimation gleichmäßiger in alle Richtungen gestaltet."
+      }
+    ]
+  },
+  {
+    "version": "v2.15.3",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Verzögerter Start der Hintergrundmusik im Hauptmenü durch Preloading behoben."
+      },
+      {
+        "type": "perf",
+        "desc": "Stille am Anfang der Musik entfernt und Datei um 60% komprimiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.15.2",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Cyber-glassmorphic Startbildschirm (Splash Screen) als Autoplay-Bypass hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "Flüssiger Zoom- und Blur-Übergang vom Startbildschirm ins Hauptmenü implementiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.15.1",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Musik-Credits-Widget mit animierten Equalizer-Balken unten links im Hauptmenü hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "Die Equalizer-Balken pulsen per Web Audio API AnalyserNode synchron zum Beat der Musik."
+      }
+    ]
+  },
+  {
+    "version": "v2.15.0",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Hintergrundmusik 'Glorious Morning' spielt im Hauptmenü in einer Dauerschleife ab."
+      },
+      {
+        "type": "feature",
+        "desc": "Musik-Lautstärke-Regler in den Einstellungen steuert die Hintergrundmusik in Echtzeit."
+      }
+    ]
+  },
+  {
+    "version": "v2.14.0",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Gäste (nicht eingeloggte Spieler) erhalten keine Errungenschaften und keine in-game Benachrichtigungen."
+      },
+      {
+        "type": "feature",
+        "desc": "Gäste verlieren ihren Database-Fortschritt sofort beim Neuladen der Seite."
+      },
+      {
+        "type": "feature",
+        "desc": "Bei einer Neuregistrierung wird die Database vollständig auf '? UNKNOWN ENTITY' zurückgesetzt."
+      },
+      {
+        "type": "fix",
+        "desc": "Konfetti-Animation und Achievement-Popup erscheinen nur noch für eingeloggte Spieler."
+      }
+    ]
+  },
+  {
+    "version": "v2.13.0",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Errungenschaften (Achievements) voll aktiv an die Datenbank angebunden."
+      },
+      {
+        "type": "feature",
+        "desc": "Fünf neue Errungenschaften hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "Bunte in-game Konfetti-Animation beim Freischalten hinzugefügt."
+      }
+    ]
+  },
+  {
     "version": "v2.12.1",
     "date": "4. Juni 2026",
     "status": "active",

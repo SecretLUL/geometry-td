@@ -37,8 +37,17 @@
         }
 
         .portal-title-outer-wrapper {
-            padding: 15px 0 0 0;
-            /* completely centered, no left offset padding */
+            padding: 0;
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            top: 20vh;
+            z-index: 100000;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            transition: top 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: top, transform;
         }
 
         .portal-container {
@@ -79,6 +88,26 @@
         .title-block {
             text-align: center;
             position: relative;
+            animation: header-float 10s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        @keyframes header-float {
+            0% {
+                transform: translate(-3px, -3px) rotate(-0.5deg);
+            }
+            25% {
+                transform: translate(3px, -2px) rotate(0.2deg);
+            }
+            50% {
+                transform: translate(2px, 3px) rotate(0.5deg);
+            }
+            75% {
+                transform: translate(-3px, 2px) rotate(-0.2deg);
+            }
+            100% {
+                transform: translate(-3px, -3px) rotate(-0.5deg);
+            }
         }
 
         .portal-title {
@@ -88,14 +117,21 @@
             margin: 0;
             margin-bottom: 16px;
             line-height: 1;
+            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform;
+        }
+
+        .portal-title.beat {
+            transform: scale(1.02);
+            transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .portal-title .word-1 {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: 800;
-            letter-spacing: 12px;
-            padding-left: 12px;
+            letter-spacing: 14px;
+            padding-left: 14px;
             /* mathematically offsets letter-spacing of the last character to guarantee exact centering */
             color: var(--tesla-cyan);
             text-transform: uppercase;
@@ -115,7 +151,7 @@
         .portal-title .word-2,
         .portal-title .word-3 {
             font-family: 'BladeRunner', sans-serif;
-            font-size: 5.6rem;
+            font-size: 6.8rem;
             font-weight: normal;
             line-height: 0.95;
             letter-spacing: 4px;
@@ -2046,4 +2082,358 @@
 
         .portal-footer .live-ticker-container {
             margin: 0 auto;
+        }
+
+        /* ── Music Credit Widget ─────────────────────────────── */
+        .music-credit-widget {
+            position: fixed;
+            bottom: 28px;
+            left: 28px;
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(8, 8, 22, 0.72);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(76, 201, 240, 0.22);
+            border-radius: 14px;
+            padding: 10px 18px 10px 14px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 18px rgba(76, 201, 240, 0.06);
+            pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0.82;
+        }
+
+        .music-credit-widget:hover {
+            opacity: 1;
+        }
+
+        /* Equalizer bars */
+        .music-credit-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .mc-bar {
+            display: block;
+            width: 3px;
+            border-radius: 2px;
+            background: var(--tesla-cyan);
+            box-shadow: 0 0 6px rgba(76, 201, 240, 0.8);
+            transform-origin: bottom center;
+            animation: mc-eq-idle 1.8s ease-in-out infinite;
+        }
+
+        .mc-bar:nth-child(1) { animation-delay: 0s;    animation-duration: 1.4s; }
+        .mc-bar:nth-child(2) { animation-delay: 0.2s;  animation-duration: 1.9s; }
+        .mc-bar:nth-child(3) { animation-delay: 0.4s;  animation-duration: 1.2s; }
+        .mc-bar:nth-child(4) { animation-delay: 0.1s;  animation-duration: 1.6s; }
+
+        @keyframes mc-eq-idle {
+            0%, 100% { height: 6px;  opacity: 0.5; }
+            50%       { height: 22px; opacity: 1;   }
+        }
+
+        /* Beat-pulse removed: pulsing redirected to header */
+
+        /* Text block */
+        .music-credit-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .mc-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--tesla-cyan);
+            opacity: 0.75;
+        }
+
+        .mc-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .mc-artist {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem;
+            color: #a8a8b3;
+            letter-spacing: 0.3px;
+        }
+
+        .mc-artist strong {
+            color: var(--tesla-cyan);
+            font-weight: 700;
+        }
+
+        /* Hide widget when music is muted (handled by JS opacity) */
+        .music-credit-widget.muted {
+            opacity: 0.25;
+        }
+
+        /* ── Splash Screen (Start Screen) ── */
+        .splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 5; /* Lowered so the wrapper's title is layered on top of it */
+            background: radial-gradient(circle at center, rgba(10, 10, 26, 0.85) 0%, #050510 100%);
+            backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform, filter;
+        }
+
+        .splash-screen.fade-out {
+            opacity: 0;
+            transform: scale(1.1); /* Zoom in as we enter the menu */
+            filter: blur(15px);
+            pointer-events: none;
+        }
+
+        .splash-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            margin-top: 25vh; /* Pushes the diagnostic/action block down to center under the floating title */
+            animation: splash-entrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes splash-entrance {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .splash-subtitle {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: var(--tesla-cyan);
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+            display: block;
+            opacity: 1;
+            max-height: 40px;
+            margin-top: 16px;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        /* Collapse subtitle when entering the system */
+        body:not(.splash-active) .splash-subtitle {
+            opacity: 0 !important;
+            max-height: 0 !important;
+            margin-top: 0 !important;
+        }
+
+        /* Floating title destination state in main menu mode */
+        body:not(.splash-active) .portal-title-outer-wrapper {
+            top: 15px; /* Settles perfectly at the top of the column inside the placeholder space */
+            transform: translate(-50%, 0) scale(1.0); /* Combined to guarantee correct scale origin relative to translation */
+            z-index: 90; /* Let modals and overlays sit on top */
+        }
+
+        /* Spacer to reserve space for the absolutely floated title in normal document flow */
+        .portal-title-placeholder {
+            height: 150px;
+            width: 100%;
+            flex-shrink: 0;
+            transition: height 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .splash-status-panel {
+            background: rgba(13, 13, 31, 0.6);
+            border: 1px solid rgba(76, 201, 240, 0.15);
+            border-radius: 16px;
+            padding: 20px 30px;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: inset 0 0 20px rgba(76, 201, 240, 0.03);
+        }
+
+        .status-row-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .status-label {
+            color: #888899;
+            text-transform: uppercase;
+        }
+
+        .status-val {
+            font-weight: 700;
+        }
+
+        .status-val.ok {
+            color: #00ff88;
+            text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+        }
+
+        .status-val.ready {
+            color: var(--tesla-cyan);
+            text-shadow: 0 0 8px rgba(76, 201, 240, 0.4);
+        }
+
+        .splash-enter-btn {
+            position: relative;
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.25) 0%, rgba(76, 201, 240, 0.05) 100%);
+            border: 2px solid var(--tesla-cyan);
+            color: #fff;
+            padding: 18px 45px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 30px rgba(76, 201, 240, 0.2), inset 0 0 15px rgba(76, 201, 240, 0.1);
+            overflow: hidden;
+            pointer-events: auto; /* Explicitly interactive */
+        }
+
+        .splash-enter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .splash-enter-btn:hover::before {
+            left: 100%;
+        }
+
+        .splash-enter-btn:hover {
+            background: var(--tesla-cyan);
+            color: var(--bg-dark);
+            box-shadow: 0 0 40px var(--tesla-cyan), inset 0 0 10px rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .splash-enter-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .splash-footer {
+            position: absolute;
+            bottom: 30px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+        }
+
+        /* ── Menu Layout Wrapper Transition state ── */
+        .menu-layout-wrapper {
+            position: relative;
+            z-index: 10; /* Rendered on top of the splash overlay so descendants can be seen */
+            pointer-events: none; /* Ignore clicks in splash mode to allow button click */
+            transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: filter, opacity, transform;
+        }
+
+        body:not(.splash-active) .menu-layout-wrapper {
+            pointer-events: auto; /* Restore normal mouse interactions */
+        }
+
+        .portal-container.blur-hidden {
+            opacity: 0 !important;
+            filter: blur(20px);
+            transform: scale(0.96);
+            pointer-events: none;
+        }
+
+        .portal-container {
+            transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: filter, opacity, transform;
+        }
+
+        .portal-footer.blur-hidden {
+            opacity: 0 !important;
+            transform: translateY(15px);
+            pointer-events: none;
+        }
+
+        .portal-footer {
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+
+        #changelog-panel.blur-hidden {
+            opacity: 0 !important;
+            filter: blur(10px);
+            transform: translateX(30px);
+            pointer-events: none;
+        }
+
+        #changelog-panel {
+            transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), width 0.5s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: filter, opacity, transform;
+        }
+
+        .music-credit-widget.blur-hidden {
+            opacity: 0 !important;
+            filter: blur(10px);
+            transform: translateY(15px);
+            pointer-events: none;
+        }
+
+        /* ── Responsive Styling overrides for floating header on mobile landscape ── */
+        @media screen and (max-width: 950px) and (orientation: landscape) {
+            .portal-title-outer-wrapper {
+                top: 18vh;
+            }
+            body:not(.splash-active) .portal-title-outer-wrapper {
+                top: 0;
+                transform: translate(-50%, 0) scale(0.85);
+            }
+            .portal-title-placeholder {
+                height: 60px;
+            }
+            .splash-content {
+                margin-top: 15vh;
+                gap: 20px;
+            }
+            .splash-enter-btn {
+                padding: 10px 25px;
+                font-size: 0.95rem;
+            }
         }

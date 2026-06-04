@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-01 / v1.9.1 - Added Boss shield health bar rendering updates.
+ * @last_update: 2026-06-04 / v1.10.0 - Added Boss shield health bar rendering updates and integrated achievements check.
  */
 import { state } from '../state';
 import { Multiplayer } from '../multiplayer/index';
@@ -28,6 +28,7 @@ import { waypoints } from '../map';
 import { Enemy } from '../../types';
 import { handleWaveLogic } from './wave';
 import { drawScene } from './renderer';
+import { checkAchievements } from '../achievements';
 
 const isHeadlessMode = new URLSearchParams(window.location.search).get('headless') === 'true';
 
@@ -727,6 +728,10 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         cachedBossHpContainer.classList.add('hidden');
                     }
                 }
+            }
+
+            if (frameCount % 30 === 0 && !isHeadlessMode) {
+                checkAchievements();
             }
 
             drawScene(fpsDisplayVal);
