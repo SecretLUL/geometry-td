@@ -46,15 +46,11 @@
                         <nav class="portal-tabs">
                             <button class="portal-tab active" data-tab="maps">Maps</button>
                             <button class="portal-tab" data-tab="lexicon">Database</button>
+                            <button class="portal-tab" data-tab="leaderboard">Leaderboard</button>
                             <button class="portal-tab" data-tab="settings">Einstellungen</button>
                             <button class="portal-tab" data-tab="profile">Profil</button>
                             <div class="portal-tab-indicator"></div>
                         </nav>
-                        <div class="live-ticker-container">
-                            <span class="ticker-pulse"></span>
-                            <span class="ticker-label">COMBATANTS ONLINE:</span>
-                            <span id="liveTickerValue" class="ticker-value">0</span>
-                        </div>
                     </div>
                 </header>
 
@@ -219,6 +215,38 @@
                         </div>
                         <div id="lexiconPlaceholder" style="flex: 1; display: flex; align-items: center; justify-content: center; color: #444; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 4px;">
                             Select Entity to Analyze
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Tab -->
+                <div id="tab-leaderboard" class="tab-content-wrapper hidden">
+                    <div class="leaderboard-container">
+                        <div class="leaderboard-header">
+                            <div class="leaderboard-title-block">
+                                <h2 class="leaderboard-title">SIMULATIONS-BESTENLISTE</h2>
+                                <p class="leaderboard-subtitle">Die ruhmreichsten Taktiker im Kampf gegen die Unendlichkeit</p>
+                            </div>
+                            <button id="refresh-leaderboard-btn" class="leaderboard-refresh-btn glitch-hover">
+                                <span class="refresh-icon">🔄</span> AKTUALISIEREN
+                            </button>
+                        </div>
+                        <div class="leaderboard-table-wrapper">
+                            <table class="leaderboard-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-rank">Rang</th>
+                                        <th class="col-user">Kämpfer</th>
+                                        <th class="col-wave">Höchste Welle</th>
+                                        <th class="col-date">Erreicht am</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-list">
+                                    <tr class="leaderboard-loading-row">
+                                        <td colspan="4">Lade Bestenliste...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -460,6 +488,13 @@
                 </div>
 
             </main>
+            <footer class="portal-footer">
+                <div class="live-ticker-container">
+                    <span class="ticker-pulse"></span>
+                    <span class="ticker-label">COMBATANTS ONLINE:</span>
+                    <span id="liveTickerValue" class="ticker-value">0</span>
+                </div>
+            </footer>
         </div>
         </div>
 

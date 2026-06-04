@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-04 / v1.8.0 - Added user profile tab, auth state management, registration/login flow and progression dashboards.
+ * @last_update: 2026-06-04 / v1.9.0 - Added Leaderboard tab, refresh handler, styling integration and profile picture rendering in lists.
  */
 import { EnemyData } from '../core/config';
 import { EnemyFactory } from '../entities/enemies';
@@ -32,6 +32,9 @@ class MenuController {
 
     // Room System Selection state
     private selectedMapName: string | null = null;
+
+    // User Session state
+    private currentUsername: string | null = null;
 
     constructor() {
         this.tabs = document.querySelectorAll('.portal-tab');
@@ -56,6 +59,7 @@ class MenuController {
         this.initChangelog();
         this.initModeModal();
         this.initProfile();
+        this.initLeaderboard();
         
         // Listen to real-time updates from server
         try {
@@ -195,6 +199,8 @@ class MenuController {
                 
                 if (tabId === 'lexicon') {
                     this.initLexicon(); // Refresh Lexicon
+                } else if (tabId === 'leaderboard') {
+                    this.loadLeaderboard();
                 }
             }, 250); // Matches the 0.25s CSS transition duration!
         } else {
@@ -204,6 +210,8 @@ class MenuController {
             targetActive.classList.add('active-tab-content');
             if (tabId === 'lexicon') {
                 this.initLexicon();
+            } else if (tabId === 'leaderboard') {
+                this.loadLeaderboard();
             }
         }
     }
@@ -958,11 +966,13 @@ class MenuController {
         };
 
         const showAuth = () => {
+            this.currentUsername = null;
             if (authSection) { authSection.style.display = 'block'; authSection.classList.remove('hidden'); }
             if (dashboardSection) { dashboardSection.style.display = 'none'; dashboardSection.classList.add('hidden'); }
         };
 
         const showDashboard = async (user: { username: string, avatar?: string | null, created_at?: string | Date | null }) => {
+            this.currentUsername = user.username;
             if (authSection) { authSection.style.display = 'none'; authSection.classList.add('hidden'); }
             if (dashboardSection) { dashboardSection.style.display = 'grid'; dashboardSection.classList.remove('hidden'); }
 
@@ -1232,6 +1242,7 @@ class MenuController {
                 if (response.ok && result.success) {
                     const userEl = document.getElementById('dashboard-username');
                     if (userEl) userEl.textContent = newUsername;
+                    this.currentUsername = newUsername;
                     closeUsernameEdit();
                 } else {
                     if (usernameEditError) {
@@ -1351,6 +1362,129 @@ class MenuController {
 
         // Initial session check
         checkSession();
+    }
+
+    private initLeaderboard(): void {
+        const refreshBtn = document.getElementById('refresh-leaderboard-btn');
+        refreshBtn?.addEventListener('click', () => {
+            this.loadLeaderboard();
+        });
+    }
+
+    private async loadLeaderboard(): Promise<void> {
+        const listContainer = document.getElementById('leaderboard-list');
+        if (!listContainer) return;
+
+        listContainer.innerHTML = `
+            <tr class="leaderboard-loading-row">
+                <td colspan="4">Lade Bestenliste...</td>
+            </tr>
+        `;
+
+        try {
+            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                            ? 'http://localhost:3000' : '';
+            const response = await fetch(`${baseUrl}/api/leaderboard`, { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            const data = await response.json();
+            const list = data.leaderboard || [];
+
+            listContainer.innerHTML = '';
+            if (list.length === 0) {
+                listContainer.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; font-style: italic; color: #555566; padding: 30px 0;">
+                            Keine Einträge vorhanden.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            list.forEach((entry: any, index: number) => {
+                const rank = index + 1;
+                const tr = document.createElement('tr');
+                
+                if (this.currentUsername && entry.username === this.currentUsername) {
+                    tr.classList.add('current-user-row');
+                }
+
+                const tdRank = document.createElement('td');
+                tdRank.className = 'col-rank';
+                
+                let badgeClass = '';
+                if (rank === 1) badgeClass = 'rank-1';
+                else if (rank === 2) badgeClass = 'rank-2';
+                else if (rank === 3) badgeClass = 'rank-3';
+
+                const badge = document.createElement('span');
+                badge.className = `rank-badge ${badgeClass}`;
+                badge.textContent = String(rank);
+                tdRank.appendChild(badge);
+                tr.appendChild(tdRank);
+
+                const tdUser = document.createElement('td');
+                const userCellDiv = document.createElement('div');
+                userCellDiv.className = 'leaderboard-user-cell';
+
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'leaderboard-avatar';
+
+                if (entry.avatar) {
+                    const img = document.createElement('img');
+                    img.src = entry.avatar;
+                    img.alt = 'Avatar';
+                    avatarDiv.appendChild(img);
+                } else {
+                    avatarDiv.textContent = '👤';
+                }
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'leaderboard-username';
+                nameSpan.textContent = entry.username;
+
+                userCellDiv.appendChild(avatarDiv);
+                userCellDiv.appendChild(nameSpan);
+                tdUser.appendChild(userCellDiv);
+                tr.appendChild(tdUser);
+
+                const tdWave = document.createElement('td');
+                tdWave.className = 'col-wave';
+                
+                const waveVal = document.createElement('span');
+                waveVal.className = 'leaderboard-wave-val';
+                waveVal.textContent = `Welle ${entry.highest_wave}`;
+                tdWave.appendChild(waveVal);
+                tr.appendChild(tdWave);
+
+                const tdDate = document.createElement('td');
+                tdDate.className = 'col-date';
+                
+                let formattedDate = '--.--.----';
+                if (entry.updated_at) {
+                    const date = new Date(entry.updated_at);
+                    formattedDate = date.toLocaleDateString('de-DE', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                }
+                tdDate.textContent = formattedDate;
+                tr.appendChild(tdDate);
+
+                listContainer.appendChild(tr);
+            });
+
+        } catch (err) {
+            console.error('Error fetching leaderboard:', err);
+            listContainer.innerHTML = `
+                <tr class="leaderboard-error-row">
+                    <td colspan="4">Fehler beim Laden der Bestenliste.</td>
+                </tr>
+            `;
+        }
     }
 }
 

@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-04 / v1.9.0 - Added PostgreSQL database integration, user authentication and progression save system.
+ * @last_update: 2026-06-04 / v1.10.0 - Added Leaderboard endpoint.
  */
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
@@ -317,6 +317,23 @@ app.post('/api/user/profile', authenticateUser, async (req: Request, res: Respon
     res.json({ success: true, user: { id: userId, username: newUsername, avatar: avatar !== undefined ? avatar : undefined, created_at: user.created_at } });
   } catch (error) {
     console.error('[PROFILE] Fehler beim Aktualisieren des Profils:', error);
+    res.status(500).json({ error: 'Interner Serverfehler.' });
+  }
+});
+
+app.get('/api/leaderboard', async (_req: Request, res: Response) => {
+  try {
+    const leaderboard = await db.any(
+      `SELECT u.username, u.avatar, p.highest_wave, p.updated_at
+       FROM progress p
+       JOIN users u ON p.user_id = u.id
+       WHERE p.highest_wave > 0
+       ORDER BY p.highest_wave DESC, p.updated_at ASC
+       LIMIT 100`
+    );
+    res.json({ leaderboard });
+  } catch (error) {
+    console.error('[LEADERBOARD] Fehler beim Laden:', error);
     res.status(500).json({ error: 'Interner Serverfehler.' });
   }
 });

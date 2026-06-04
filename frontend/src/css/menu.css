@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-30 / v2.0.0 - Styled smooth dynamic sliding tab indicator and deleted legacy active tab underline pseudo-elements.
+ * @last_update: 2026-06-04 / v2.1.0 - Adjusted menu layout wrapper and portal container height to accommodate bottom centered live ticker.
  */
 /* ── Menu Specific Styles (Portal, Missions, Lexicon) ── */
 body.menu-page {
@@ -511,7 +511,7 @@ body.menu-page {
     justify-content: center;
     max-width: 1600px;
     width: 95vw;
-    height: 85vh;
+    height: 88vh;
     position: relative;
 }
 
@@ -951,7 +951,7 @@ body.menu-page {
 
     .menu-layout-wrapper .portal-container {
         max-width: 100%;
-        height: 85vh;
+        height: 88vh;
         margin: 0 25px;
     }
 
