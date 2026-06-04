@@ -1,7 +1,7 @@
 /*
  * @file: backend\src\server.ts
  * @purpose: Authoritative Headless-Host coordinating Express & Socket.io server using Puppeteer to run secure, background-safe Coop game simulations.
- * @dependencies: express, http, socket.io, path, puppeteer-core, zod
+ * @dependencies: express, http, socket.io, path, puppeteer-core, zod, cookie-parser, bcrypt, jsonwebtoken, pg-promise
  * 
  * --- KI-INTEGRATIONS-DIREKTIVE ---
  * Diese Datei unterliegt einer strikten Dokumentationspflicht.
@@ -12,13 +12,17 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-01 / v1.8.1 - Added shieldHp and maxShieldHp fields to SyncEnemyState.
+ * @last_update: 2026-06-04 / v1.9.0 - Added PostgreSQL database integration, user authentication and progression save system.
  */
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 import path from 'path';
 import puppeteer, { Browser, Page, ConsoleMessage } from 'puppeteer-core';
+import cookieParser from 'cookie-parser';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { db, initDatabaseSchema } from './db';
 import {
   JoinMissionSchema,
   RequestPlaceTowerSchema,
@@ -42,11 +46,242 @@ import {
 
 const app = express();
 const server = http.createServer(app);
+
+app.use(express.json());
+app.use(cookieParser());
+
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_dev_key_123!';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: number;
+    username: string;
+  };
+}
+
+function authenticateUser(req: Request, res: Response, next: NextFunction) {
+  const isProd = process.env.NODE_ENV === 'production';
+  const cName = isProd ? '__Host-gtd-session' : 'gtd-session';
+  const token = req.cookies[cName];
+  
+  if (!token) {
+    res.status(401).json({ error: 'Nicht authentifiziert' });
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; username: string };
+    (req as AuthenticatedRequest).user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Ungültige Sitzung' });
+  }
+}
+
+// REST-Endpunkte für Authentication & Progression
+app.post('/api/auth/register', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  
+  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+    res.status(400).json({ error: 'Ungültige Eingabedaten' });
+    return;
+  }
+  
+  const trimmedUser = username.trim();
+  if (trimmedUser.length < 4 || trimmedUser.length > 20 || !/^[a-zA-Z0-9_-]+$/.test(trimmedUser)) {
+    res.status(400).json({ error: 'Benutzername muss zwischen 4 und 20 Zeichen lang sein und darf nur Buchstaben, Zahlen, _ und - enthalten.' });
+    return;
+  }
+  
+  if (password.length < 8) {
+    res.status(400).json({ error: 'Passwort muss mindestens 8 Zeichen lang sein.' });
+    return;
+  }
+  
+  try {
+    const existing = await db.oneOrNone('SELECT id FROM users WHERE username = $1', [trimmedUser]);
+    if (existing) {
+      res.status(400).json({ error: 'Benutzername ist bereits vergeben.' });
+      return;
+    }
+    
+    const saltRounds = 12;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+    
+    await db.tx(async t => {
+      const newUser = await t.one(
+        'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id',
+        [trimmedUser, passwordHash]
+      );
+      await t.none(
+        'INSERT INTO progress (user_id, highest_wave, unlocked_skins, unlocked_achievements, selected_skin) VALUES ($1, 0, $2, $3, $4)',
+        [newUser.id, JSON.stringify(['default']), JSON.stringify([]), 'default']
+      );
+    });
+    
+    res.status(201).json({ success: true, message: 'Registrierung erfolgreich.' });
+  } catch (error) {
+    console.error('[AUTH] Fehler bei Registrierung:', error);
+    res.status(500).json({ error: 'Interner Serverfehler.' });
+  }
+});
+
+app.post('/api/auth/login', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  
+  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+    res.status(400).json({ error: 'Ungültige Eingabedaten' });
+    return;
+  }
+  
+  try {
+    const user = await db.oneOrNone('SELECT id, username, password_hash FROM users WHERE username = $1', [username.trim()]);
+    if (!user) {
+      res.status(400).json({ error: 'Ungültiger Benutzername oder Passwort.' });
+      return;
+    }
+    
+    const valid = await bcrypt.compare(password, user.password_hash);
+    if (!valid) {
+      res.status(400).json({ error: 'Ungültiger Benutzername oder Passwort.' });
+      return;
+    }
+    
+    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    
+    const isProd = process.env.NODE_ENV === 'production';
+    const cName = isProd ? '__Host-gtd-session' : 'gtd-session';
+    
+    res.cookie(cName, token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Tage
+      path: '/'
+    });
+    
+    res.json({ success: true, user: { id: user.id, username: user.username } });
+  } catch (error) {
+    console.error('[AUTH] Fehler bei Login:', error);
+    res.status(500).json({ error: 'Interner Serverfehler.' });
+  }
+});
+
+app.post('/api/auth/logout', (_req: Request, res: Response) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  const cName = isProd ? '__Host-gtd-session' : 'gtd-session';
+  res.clearCookie(cName, { path: '/' });
+  res.json({ success: true });
+});
+
+app.get('/api/auth/me', authenticateUser, (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  res.json({ user: authReq.user });
+});
+
+app.get('/api/user/progress', authenticateUser, async (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  try {
+    const progress = await db.oneOrNone(
+      'SELECT highest_wave, unlocked_skins, unlocked_achievements, selected_skin FROM progress WHERE user_id = $1',
+      [authReq.user!.id]
+    );
+    if (!progress) {
+      res.status(404).json({ error: 'Fortschritt nicht gefunden.' });
+      return;
+    }
+    res.json({ progress });
+  } catch (error) {
+    console.error('[PROGRESS] Fehler beim Laden:', error);
+    res.status(500).json({ error: 'Interner Serverfehler.' });
+  }
+});
+
+app.post('/api/user/progress', authenticateUser, async (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  const { selected_skin } = req.body;
+  
+  if (selected_skin && typeof selected_skin !== 'string') {
+    res.status(400).json({ error: 'Ungültiges Format für selected_skin' });
+    return;
+  }
+  
+  try {
+    if (selected_skin) {
+      const progress = await db.one('SELECT unlocked_skins FROM progress WHERE user_id = $1', [authReq.user!.id]);
+      const unlocked = progress.unlocked_skins || [];
+      if (!unlocked.includes(selected_skin)) {
+        res.status(400).json({ error: 'Dieser Skin ist noch nicht freigeschaltet.' });
+        return;
+      }
+      
+      await db.none('UPDATE progress SET selected_skin = $1, updated_at = NOW() WHERE user_id = $2', [selected_skin, authReq.user!.id]);
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[PROGRESS] Fehler beim Speichern:', error);
+    res.status(500).json({ error: 'Interner Serverfehler.' });
+  }
+});
+
+// Sicheres Highscore-Update bei Wellen-Fortschritt
+async function updateRoomHighscores(roomId: string) {
+  const state = roomStates[roomId];
+  if (!state) return;
+  
+  const currentWave = state.wave;
+  if (currentWave <= 1) return; // Welle 1 muss nicht separat gespeichert werden
+  
+  for (const socketId of state.sockets) {
+    const s = io.sockets.sockets.get(socketId) as CustomSocket;
+    if (s && s.user) {
+      try {
+        await db.none(
+          `INSERT INTO progress (user_id, highest_wave) 
+           VALUES ($1, $2) 
+           ON CONFLICT (user_id) 
+           DO UPDATE SET highest_wave = GREATEST(progress.highest_wave, EXCLUDED.highest_wave), updated_at = NOW()`,
+          [s.user.id, currentWave]
+        );
+      } catch (err) {
+        console.error(`[DATABASE] Fehler beim Speichern des Highscores für User ${s.user.username}:`, err);
+      }
+    }
+  }
+}
+
 const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
   }
+});
+
+// Middleware zur Authentifizierung von Socket.io-Verbindungen über Cookies
+io.use((socket: any, next) => {
+  const cookieHeader = socket.handshake.headers.cookie;
+  if (cookieHeader) {
+    const cookies = Object.fromEntries(
+      cookieHeader.split(';').map((c: string) => {
+        const parts = c.trim().split('=');
+        return [parts[0], parts.slice(1).join('=')];
+      })
+    );
+    const isProd = process.env.NODE_ENV === 'production';
+    const cName = isProd ? '__Host-gtd-session' : 'gtd-session';
+    const token = cookies[cName];
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: number; username: string };
+        socket.user = decoded;
+        console.log(`[SOCKET] Benutzer authentifiziert: ${decoded.username} (${socket.id})`);
+      } catch (err) {
+        console.warn(`[SOCKET] Ungültiges Token bei Verbindung ${socket.id}`);
+      }
+    }
+  }
+  next();
 });
 
 // Serve frontend static files
@@ -465,6 +700,10 @@ app.get('/api/room/:roomId', (req: Request, res: Response) => {
 interface CustomSocket extends Socket {
   mission?: string;
   isHeadless?: boolean;
+  user?: {
+    id: number;
+    username: string;
+  };
 }
 
 io.on("connection", (socket: CustomSocket) => {
@@ -772,6 +1011,11 @@ io.on("connection", (socket: CustomSocket) => {
     data.tick = state.currentTick || 0;
     data.timestamp = Date.now();
     
+    // Automatisch den Highscore in der DB aktualisieren für alle angemeldeten Spieler im Raum
+    updateRoomHighscores(socket.mission).catch(err => {
+      console.error("[DATABASE] Fehler beim asynchronen Update der Highscores im Raum:", err);
+    });
+    
     console.log(`Welle ${state.wave} in ${socket.mission} gestartet (angefordert von ${socket.id})`);
     io.to(socket.mission).emit("start_wave_sync", data);
   });
@@ -989,8 +1233,14 @@ io.on("connection", (socket: CustomSocket) => {
   });
 });
 
-server.listen(3000, () => {
+server.listen(3000, async () => {
   console.log("Server lauscht auf http://localhost:3000");
+  
+  try {
+    await initDatabaseSchema();
+  } catch (err) {
+    console.error("Schwerwiegender Fehler beim Initialisieren der Datenbank:", err);
+  }
   
   // Periodischen Health-Check alle 30 Sekunden starten
   setInterval(() => {

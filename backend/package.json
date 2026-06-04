@@ -12,12 +12,19 @@
     "express": "^5.2.1",
     "puppeteer-core": "^22.6.0",
     "socket.io": "^4.8.3",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "pg-promise": "^11.5.4",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "cookie-parser": "^1.4.6"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
     "typescript": "^5.4.5",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/cookie-parser": "^1.4.7"
   }
 }

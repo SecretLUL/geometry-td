@@ -13,3 +13,6 @@ build/
 # Betriebssystem-Müll
 .DS_Store
 Thumbs.db
+
+# Datenbanken
+postgres_data/

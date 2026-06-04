@@ -47,6 +47,7 @@
                             <button class="portal-tab active" data-tab="maps">Maps</button>
                             <button class="portal-tab" data-tab="lexicon">Database</button>
                             <button class="portal-tab" data-tab="settings">Einstellungen</button>
+                            <button class="portal-tab" data-tab="profile">Profil</button>
                             <div class="portal-tab-indicator"></div>
                         </nav>
                         <div class="live-ticker-container">
@@ -307,6 +308,130 @@
                             </div>
                         </div>
 
+                    </div>
+                </div>
+
+                <!-- Profile Tab -->
+                <div id="tab-profile" class="tab-content-wrapper hidden">
+                    <div class="profile-container">
+                        <!-- 1. Authentication Card (shows if not logged in) -->
+                        <div id="profile-auth-section" class="auth-card">
+                            <!-- Login Form -->
+                            <div id="auth-login-form">
+                                <h2>Login</h2>
+                                <p class="auth-subtitle">Melde dich an, um deinen Spielfortschritt zu speichern</p>
+                                
+                                <div class="auth-error-msg" id="login-error-msg"></div>
+                                
+                                <div class="auth-form-group">
+                                    <label for="login-username">Benutzername</label>
+                                    <input type="text" id="login-username" class="auth-input" placeholder="Spielername" autocomplete="username">
+                                </div>
+                                <div class="auth-form-group">
+                                    <label for="login-password">Passwort</label>
+                                    <input type="password" id="login-password" class="auth-input" placeholder="••••••••" autocomplete="current-password">
+                                </div>
+                                <button id="login-submit-btn" class="auth-btn glitch-hover">Einloggen</button>
+                                
+                                <div class="auth-toggle-link" id="goto-register">
+                                    Noch kein Konto? Jetzt <span>Registrieren</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Register Form (hidden by default) -->
+                            <div id="auth-register-form" class="hidden" style="display: none;">
+                                <h2>Registrieren</h2>
+                                <p class="auth-subtitle">Erstelle ein neues Konto für Geometry TD</p>
+                                
+                                <div class="auth-error-msg" id="register-error-msg"></div>
+                                <div class="auth-success-msg" id="register-success-msg"></div>
+                                
+                                <div class="auth-form-group">
+                                    <label for="register-username">Benutzername</label>
+                                    <input type="text" id="register-username" class="auth-input" placeholder="Spielername" autocomplete="username">
+                                </div>
+                                <div class="auth-form-group">
+                                    <label for="register-password">Passwort</label>
+                                    <input type="password" id="register-password" class="auth-input" placeholder="Min. 8 Zeichen" autocomplete="new-password">
+                                </div>
+                                <button id="register-submit-btn" class="auth-btn glitch-hover">Konto erstellen</button>
+                                
+                                <div class="auth-toggle-link" id="goto-login">
+                                    Bereits registriert? Jetzt <span>Einloggen</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Profile Dashboard (shows if logged in) -->
+                        <div id="profile-dashboard-section" class="profile-dashboard hidden" style="display: none;">
+                            <div class="profile-sidebar">
+                                <div class="profile-avatar">👤</div>
+                                <div class="profile-username" id="dashboard-username">SPIELER</div>
+                                <div class="profile-joined" id="dashboard-joined">Mitglied seit: --.--.----</div>
+                                
+                                <div class="profile-stat-box">
+                                    <div class="profile-stat-val" id="dashboard-highest-wave">0</div>
+                                    <div class="profile-stat-lbl">Höchste Welle</div>
+                                </div>
+                                
+                                <button class="profile-logout-btn" id="logout-btn">Abmelden</button>
+                            </div>
+                            
+                            <div class="profile-main-content">
+                                <!-- Skins Section -->
+                                <div class="profile-section-card">
+                                    <h3>Skins (Kosmetika)</h3>
+                                    <div class="skins-grid">
+                                        <div class="skin-card selected" data-skin="default">
+                                            <div class="skin-preview-dot" style="background-color: var(--tesla-cyan);"></div>
+                                            <div class="skin-name">Standard</div>
+                                            <div class="skin-status">Ausgerüstet</div>
+                                        </div>
+                                        <div class="skin-card skin-locked" data-skin="neon_blue">
+                                            <div class="skin-preview-dot" style="background-color: #0077ff;"></div>
+                                            <div class="skin-name">Neon Blau</div>
+                                            <div class="skin-status">Gesperrt</div>
+                                        </div>
+                                        <div class="skin-card skin-locked" data-skin="gold_tesla">
+                                            <div class="skin-preview-dot" style="background-color: var(--gold);"></div>
+                                            <div class="skin-name">Gold Tesla</div>
+                                            <div class="skin-status">Gesperrt</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Achievements Section -->
+                                <div class="profile-section-card">
+                                    <h3>Errungenschaften</h3>
+                                    <div class="profile-achievements-list">
+                                        <div class="achievement-item" id="ach-first-wave">
+                                            <div class="achievement-icon">👾</div>
+                                            <div class="achievement-info">
+                                                <div class="achievement-title">Erste Wellen</div>
+                                                <div class="achievement-desc">Überlebe Welle 5 in einer beliebigen Simulation.</div>
+                                            </div>
+                                            <div class="achievement-status">Gesperrt</div>
+                                        </div>
+                                        <div class="achievement-item" id="ach-wave-20">
+                                            <div class="achievement-icon">🛡️</div>
+                                            <div class="achievement-info">
+                                                <div class="achievement-title">Verteidiger-Veteran</div>
+                                                <div class="achievement-desc">Erreiche Welle 20 in einer beliebigen Simulation.</div>
+                                            </div>
+                                            <div class="achievement-status">Gesperrt</div>
+                                        </div>
+                                        <div class="achievement-item" id="ach-wave-50">
+                                            <div class="achievement-icon">👑</div>
+                                            <div class="achievement-info">
+                                                <div class="achievement-title">Sektor-Beherrscher</div>
+                                                <div class="achievement-desc">Erreiche Welle 50 in einer beliebigen Simulation.</div>
+                                            </div>
+                                            <div class="achievement-status">Gesperrt</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

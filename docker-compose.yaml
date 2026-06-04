@@ -10,6 +10,8 @@ services:
     restart: unless-stopped
     ports:
       - "8181:80" # Dein Reverse Proxy (z.B. NPM) leitet die Live-Domain hierher
+    networks:
+      - gtd-prod-network
 
   backend-prod:
     build:
@@ -25,6 +27,8 @@ services:
       - NODE_ENV=production
     cap_add:
       - SYS_ADMIN
+    networks:
+      - gtd-prod-network
 
   # =========================================================================
   # 2. ENTWICKLUNGS-UMGEBUNG (DEV) -> gtd-dev.ammar-nas.duckdns.org
@@ -42,6 +46,8 @@ services:
       - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
     command: >
       sh -c "npm install && npm run dev -- --host"
+    networks:
+      - gtd-dev-network
 
   backend-dev:
     build:
@@ -53,8 +59,16 @@ services:
     working_dir: /home/node/app
     ports:
       - "7676:3000" # Separates Dev-Backend auf Port 7676!
+    depends_on:
+      - db-dev
     environment:
       - NODE_ENV=development
+      - DB_HOST=db-dev
+      - DB_PORT=5432
+      - DB_NAME=geometry_td
+      - DB_USER=gtd_user
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - /volume1/docker/geometry-td/backend:/home/node/app
       - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
@@ -67,3 +81,29 @@ services:
         limits:
           cpus: '1.5'
           memory: 1.5G
+    networks:
+      - gtd-dev-network
+
+  db-dev:
+    image: postgres:16-alpine
+    container_name: gtd-db-dev
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=geometry_td
+      - POSTGRES_USER=gtd_user
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - /volume1/docker/geometry-td/postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - gtd-dev-network
+
+networks:
+  gtd-prod-network:
+    driver: bridge
+  gtd-dev-network:
+    driver: bridge

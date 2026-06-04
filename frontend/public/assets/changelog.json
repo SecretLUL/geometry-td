@@ -4,6 +4,37 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.10.0",
+    "date": "4. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Registrierung und Login zur Fortschrittsspeicherung hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "PostgreSQL-Datenbank für Kontodaten und Spielstände angebunden."
+      },
+      {
+        "type": "feature",
+        "desc": "Profil-Dashboard für Welle, Errungenschaften und Skins integriert."
+      },
+      {
+        "type": "security",
+        "desc": "Sitzungs-Authentifizierung über sichere HttpOnly Cookies geschützt."
+      },
+      {
+        "type": "feature",
+        "desc": "Serverseitige Speicherung von Highscores bei Wellenstarts abgesichert."
+      },
+      {
+        "type": "fix",
+        "desc": "Log-Download durch Drücken von L beim Tippen in Eingabefeldern unterbunden."
+      }
+    ]
+  },
+  {
     "version": "v2.9.4",
     "date": "1. Juni 2026",
     "status": "active",

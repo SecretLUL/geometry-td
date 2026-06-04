@@ -1,6 +1,6 @@
 /*
  * @file: frontend\src\js\ui\menu.ts
- * @purpose: Controls the game's home page menus, level selections, lobby status checks, and the database lexicon.
+ * @purpose: Controls the game's home page menus, level selections, lobby status checks, database lexicon, and user profiles/authentication.
  * @dependencies: config, enemies, background, types
  * 
  * --- KI-INTEGRATIONS-DIREKTIVE ---
@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-01 / v1.7.4 - Added rotationSpeedMultiplier support to Lexicon enemy preview spin animation.
+ * @last_update: 2026-06-04 / v1.8.0 - Added user profile tab, auth state management, registration/login flow and progression dashboards.
  */
 import { EnemyData } from '../core/config';
 import { EnemyFactory } from '../entities/enemies';
@@ -55,6 +55,7 @@ class MenuController {
         this.fetchOnlinePlayers();
         this.initChangelog();
         this.initModeModal();
+        this.initProfile();
         
         // Listen to real-time updates from server
         try {
@@ -889,6 +890,279 @@ class MenuController {
         if (renderedCount === 0) {
             listContainer.innerHTML = '<div class="changelog-empty">Keine Einträge vorhanden.</div>';
         }
+    }
+
+    private initProfile(): void {
+        const authSection = document.getElementById('profile-auth-section');
+        const dashboardSection = document.getElementById('profile-dashboard-section');
+        
+        // Forms toggle
+        const loginForm = document.getElementById('auth-login-form');
+        const registerForm = document.getElementById('auth-register-form');
+        const gotoRegister = document.getElementById('goto-register');
+        const gotoLogin = document.getElementById('goto-login');
+
+        // Form fields & Buttons
+        const loginUser = document.getElementById('login-username') as HTMLInputElement | null;
+        const loginPass = document.getElementById('login-password') as HTMLInputElement | null;
+        const loginBtn = document.getElementById('login-submit-btn');
+        const loginError = document.getElementById('login-error-msg');
+
+        const regUser = document.getElementById('register-username') as HTMLInputElement | null;
+        const regPass = document.getElementById('register-password') as HTMLInputElement | null;
+        const regBtn = document.getElementById('register-submit-btn');
+        const regError = document.getElementById('register-error-msg');
+        const regSuccess = document.getElementById('register-success-msg');
+
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Base URL helper
+        const getBaseUrl = () => {
+            return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                   ? 'http://localhost:3000' : '';
+        };
+
+        // Form switching
+        gotoRegister?.addEventListener('click', () => {
+            if (loginForm) { loginForm.style.display = 'none'; loginForm.classList.add('hidden'); }
+            if (registerForm) { registerForm.style.display = 'block'; registerForm.classList.remove('hidden'); }
+            if (loginError) loginError.style.display = 'none';
+        });
+
+        gotoLogin?.addEventListener('click', () => {
+            if (registerForm) { registerForm.style.display = 'none'; registerForm.classList.add('hidden'); }
+            if (loginForm) { loginForm.style.display = 'block'; loginForm.classList.remove('hidden'); }
+            if (regError) regError.style.display = 'none';
+            if (regSuccess) regSuccess.style.display = 'none';
+        });
+
+        // 1. Fetch current session
+        const checkSession = async () => {
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/auth/me`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.user) {
+                        showDashboard(data.user.username);
+                    } else {
+                        showAuth();
+                    }
+                } else {
+                    showAuth();
+                }
+            } catch (err) {
+                console.warn('Session check failed:', err);
+                showAuth();
+            }
+        };
+
+        const showAuth = () => {
+            if (authSection) { authSection.style.display = 'block'; authSection.classList.remove('hidden'); }
+            if (dashboardSection) { dashboardSection.style.display = 'none'; dashboardSection.classList.add('hidden'); }
+        };
+
+        const showDashboard = async (username: string) => {
+            if (authSection) { authSection.style.display = 'none'; authSection.classList.add('hidden'); }
+            if (dashboardSection) { dashboardSection.style.display = 'grid'; dashboardSection.classList.remove('hidden'); }
+
+            const userEl = document.getElementById('dashboard-username');
+            if (userEl) userEl.textContent = username;
+
+            // Load progress stats
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/user/progress`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const progress = data.progress;
+                    if (progress) {
+                        const highestWaveEl = document.getElementById('dashboard-highest-wave');
+                        if (highestWaveEl) highestWaveEl.textContent = String(progress.highest_wave || 0);
+
+                        // Save high score to localStorage as fallback/sync
+                        if (progress.highest_wave) {
+                            localStorage.setItem('td_record_wave', String(progress.highest_wave));
+                        }
+
+                        // Unlock achievements in UI
+                        updateAchievementsUI(progress.highest_wave || 0);
+                        
+                        // Select active skin in UI
+                        updateSkinsUI(progress.unlocked_skins || ['default'], progress.selected_skin || 'default');
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching progress:', err);
+            }
+        };
+
+        const updateAchievementsUI = (highestWave: number) => {
+            const achievements = [
+                { id: 'ach-first-wave', reqWave: 5 },
+                { id: 'ach-wave-20', reqWave: 20 },
+                { id: 'ach-wave-50', reqWave: 50 }
+            ];
+
+            achievements.forEach(ach => {
+                const item = document.getElementById(ach.id);
+                if (item) {
+                    const statusEl = item.querySelector('.achievement-status');
+                    if (highestWave >= ach.reqWave) {
+                        item.classList.add('unlocked');
+                        if (statusEl) statusEl.textContent = 'Freigeschaltet';
+                    } else {
+                        item.classList.remove('unlocked');
+                        if (statusEl) statusEl.textContent = 'Gesperrt';
+                    }
+                }
+            });
+        };
+
+        const updateSkinsUI = (unlockedSkins: string[], selectedSkin: string) => {
+            const skinCards = document.querySelectorAll('.skin-card');
+            skinCards.forEach(card => {
+                const htmlCard = card as HTMLElement;
+                const skinKey = htmlCard.dataset.skin;
+                if (!skinKey) return;
+
+                const statusEl = htmlCard.querySelector('.skin-status');
+
+                // 1. Reset classes
+                htmlCard.classList.remove('selected', 'skin-locked');
+
+                // 2. Lock/Unlock
+                const isUnlocked = unlockedSkins.includes(skinKey);
+                if (isUnlocked) {
+                    if (skinKey === selectedSkin) {
+                        htmlCard.classList.add('selected');
+                        if (statusEl) statusEl.textContent = 'Ausgerüstet';
+                    } else {
+                        if (statusEl) statusEl.textContent = 'Auswählen';
+                    }
+                    
+                    // Add click event for unlocking selection
+                    htmlCard.onclick = async () => {
+                        try {
+                            const response = await fetch(`${getBaseUrl()}/api/user/progress`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ selected_skin: skinKey })
+                            });
+                            if (response.ok) {
+                                updateSkinsUI(unlockedSkins, skinKey);
+                            }
+                        } catch (err) {
+                            console.error('Error equipping skin:', err);
+                        }
+                    };
+                } else {
+                    htmlCard.classList.add('skin-locked');
+                    if (statusEl) statusEl.textContent = 'Gesperrt';
+                    htmlCard.onclick = null;
+                }
+            });
+        };
+
+        // Submit Login
+        loginBtn?.addEventListener('click', async () => {
+            const username = loginUser?.value.trim();
+            const password = loginPass?.value;
+
+            if (!username || !password) {
+                if (loginError) {
+                    loginError.textContent = 'Bitte fülle alle Felder aus.';
+                    loginError.style.display = 'block';
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    if (loginUser) loginUser.value = '';
+                    if (loginPass) loginPass.value = '';
+                    if (loginError) loginError.style.display = 'none';
+                    showDashboard(data.user.username);
+                } else {
+                    if (loginError) {
+                        loginError.textContent = data.error || 'Fehler beim Einloggen.';
+                        loginError.style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                if (loginError) {
+                    loginError.textContent = 'Verbindungsfehler zum Server.';
+                    loginError.style.display = 'block';
+                }
+            }
+        });
+
+        // Submit Register
+        regBtn?.addEventListener('click', async () => {
+            const username = regUser?.value.trim();
+            const password = regPass?.value;
+
+            if (!username || !password) {
+                if (regError) {
+                    regError.textContent = 'Bitte fülle alle Felder aus.';
+                    regError.style.display = 'block';
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    if (regUser) regUser.value = '';
+                    if (regPass) regPass.value = '';
+                    if (regError) regError.style.display = 'none';
+                    if (regSuccess) {
+                        regSuccess.textContent = 'Registrierung erfolgreich! Bitte logge dich ein.';
+                        regSuccess.style.display = 'block';
+                    }
+                    setTimeout(() => {
+                        gotoLogin?.click();
+                    }, 1500);
+                } else {
+                    if (regError) {
+                        regError.textContent = data.error || 'Fehler bei der Registrierung.';
+                        regError.style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                if (regError) {
+                    regError.textContent = 'Verbindungsfehler zum Server.';
+                    regError.style.display = 'block';
+                }
+            }
+        });
+
+        // Submit Logout
+        logoutBtn?.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/auth/logout`, { method: 'POST' });
+                if (response.ok) {
+                    showAuth();
+                }
+            } catch (err) {
+                console.error('Logout error:', err);
+                showAuth();
+            }
+        });
+
+        // Initial session check
+        checkSession();
     }
 }
 

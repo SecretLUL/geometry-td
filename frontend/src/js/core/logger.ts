@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-21 / v1.1.0
+ * @last_update: 2026-06-04 / v1.1.1 - Ignored manual log sync keydown event when input fields are active.
  */
 import { state } from './state';
 
@@ -117,6 +117,10 @@ class Logger {
 
     initKeyboardListener(): void {
         window.addEventListener('keydown', (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+                return;
+            }
             if (e.key.toLowerCase() === 'l' && !e.ctrlKey && !e.metaKey) {
                 this.sync();
                 console.info('Manual log sync triggered.');
