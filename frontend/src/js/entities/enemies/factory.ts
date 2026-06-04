@@ -12,11 +12,11 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.2.0 - Fixed pool enemy invisibility: initPixi() is now called when reusing a pooled enemy to restore sprite visibility.
+ * @last_update: 2026-06-01 / v1.3.0 - Registered AcceleratorEnemy.
  */
 import { Enemy, EnemyType } from '../../types';
 import { NormalEnemy, ScoutEnemy, BruiserEnemy } from './types/basic';
-import { RegrowerEnemy, ShieldedEnemy, SwarmEnemy } from './types/special';
+import { RegrowerEnemy, ShieldedEnemy, SwarmEnemy, AcceleratorEnemy } from './types/special';
 import { BossEnemy, DefragmenterEnemy, DefragmenterFragmentEnemy, DefragmenterSubfragmentEnemy } from './types/bosses';
 import { CollectorEnemy, FortressEnemy, SplinterEnemy, SplinterFragmentEnemy } from './types/event';
 import { inactivePoolContainer } from '../../core/game/viewport';
@@ -104,6 +104,7 @@ export class EnemyFactory {
             case 'Splinter': enemy = new SplinterEnemy(waveNumber); break;
             case 'SplinterFragment': enemy = new SplinterFragmentEnemy(waveNumber); break;
             case 'Swarm': enemy = new SwarmEnemy(waveNumber); break;
+            case 'Accelerator': enemy = new AcceleratorEnemy(waveNumber); break;
             case 'Normal':
             default: enemy = new NormalEnemy(waveNumber); break;
         }

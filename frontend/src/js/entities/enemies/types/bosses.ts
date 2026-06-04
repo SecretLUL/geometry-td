@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-22 / v1.0.0 - Created bosses.ts as part of enemies.ts split.
+ * @last_update: 2026-06-01 / v1.0.2 - Added drawShape overrides for boss hit-flash to match boss geometry; fixed Defragmenter shield bar bleeding.
  */
 import { BaseEnemy } from '../base';
 import { Config, EnemyData } from '../../../core/config';
@@ -34,7 +34,9 @@ export class BossEnemy extends BaseEnemy {
         const hpMultiplier = Config.getHpMultiplier(waveNumber);
         this.maxHp = Math.floor(baseHp * hpMultiplier * 160); // Buffed from 60x to 160x for true boss threat level
         this.reward = Config.WAVE_BONUS_BASE * 10;
-        this.shieldActive = true; // Equips initial shield to block the first massive hit (e.g. sniper shot)
+        this.shieldActive = true; // Equips initial shield
+        this.maxShieldHp = Math.floor(this.maxHp * 0.5); // Shield has 50% of the max HP
+        this.shieldHp = this.maxShieldHp;
         this.initHp();
 
         this.abilityTimer = 0;
@@ -43,6 +45,25 @@ export class BossEnemy extends BaseEnemy {
         this.stunRange = 300;
         this.specialAbility = 'Spawnt Gegner & Stunnt Türme';
         this.hideHealthBar = true;
+    }
+
+    public override takeDamage(amount: number, source?: any): number {
+        if (this.shieldActive && this.shieldHp !== undefined) {
+            const actualShieldDmg = Math.min(amount, Math.max(0, this.shieldHp));
+            this.shieldHp -= amount;
+            this.flashTime = 3;
+            if (this.shieldHp <= 0) {
+                this.shieldActive = false;
+                this.shieldHp = 0;
+                createExplosion(this.x, this.y, '#00f5d4', 15);
+            }
+            if (source) {
+                const current = this.damageSources.get(source) || 0;
+                this.damageSources.set(source, current + actualShieldDmg);
+            }
+            return actualShieldDmg;
+        }
+        return super.takeDamage(amount, source);
     }
 
     public performAbility(): void {
@@ -87,6 +108,9 @@ export class BossEnemy extends BaseEnemy {
     }
 
     public override update(): 'stunned' | 'reached_end' | 'moving' {
+        if (this.shieldActive) {
+            this.stunTimer = 0;
+        }
         if (!state.isHost) {
             const res = super.update();
             const hpFill = document.getElementById('bossHpFill');
@@ -165,6 +189,13 @@ export class BossEnemy extends BaseEnemy {
         return res;
     }
 
+    public override drawShape(g: any): void {
+        // Used by base class to pre-render the flash graphics with the correct shape
+        const pulse = Math.sin(this.pulseTime * 3) * 0.2 + 1;
+        g.ellipse(0, 0, this.radius * 0.5 * pulse, this.radius * 0.5 * pulse)
+            .fill({ color: this.flashTime > 0 ? '#ffffff' : '#ff3366' });
+    }
+
     public override updatePixi(): void {
         super.updatePixi();
         if (!this.bodyGraphics) return;
@@ -219,6 +250,20 @@ export class DefragmenterEnemy extends BaseEnemy {
 
     public override update(): 'stunned' | 'reached_end' | 'moving' {
         return super.update();
+    }
+
+    public override drawShape(g: any): void {
+        // Hexagon shape used by base class to pre-render the flash graphics
+        const pulse = Math.sin(this.pulseTime * 2.5) * 0.15 + 0.85;
+        const color = this.flashTime > 0 ? '#ffffff' : '#00f5d4';
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i;
+            const px = Math.cos(angle) * (this.radius * 0.65 * pulse);
+            const py = Math.sin(angle) * (this.radius * 0.65 * pulse);
+            if (i === 0) g.moveTo(px, py);
+            else g.lineTo(px, py);
+        }
+        g.fill({ color, alpha: this.flashTime > 0 ? 1 : 0.85 });
     }
 
     public override updatePixi(): void {

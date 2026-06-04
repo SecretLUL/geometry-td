@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-27 / v1.2.0 - Unified and localized tower tooltips on the battlefield and in the shop UI, removed Kills completely, hid Spezial/Upgrade in shop tooltips, and simplified Prisma Tower stats to DPS.
+ * @last_update: 2026-06-01 / v1.3.0 - Added Accelerator ability tooltip support.
  */
 import { state } from '../core/state';
 import { Config, TowerData } from '../core/config';
@@ -131,6 +131,7 @@ export function updateTooltip(): void {
             if (hoveredEnemy.typeName === 'Scout') specialAbility = 'Schnell';
             if (hoveredEnemy.typeName === 'Splinter') specialAbility = 'Spaltet sich beim Tod';
             if (hoveredEnemy.typeName === 'SplinterFragment') specialAbility = 'Sehr schnell';
+            if (hoveredEnemy.typeName === 'Accelerator') specialAbility = 'Tempo-Aura (+40%)';
         }
 
         tooltip.innerHTML = `

@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.4.1 - Reduced Collector spawn frequency, increased HP/reward config.
+ * @last_update: 2026-06-01 / v2.5.0 - Added Accelerator enemy config data.
  */
 import { roundUpgradeCost } from './utils';
 
@@ -293,6 +293,22 @@ export const EnemyData: Record<string, EnemyConfig> = {
         ability: 'Cluster-Spawn',
         flavorText: 'Spawnen in extrem großen Gruppen. Einzeln nutzlos, in der Masse tödlich.',
         weakness: 'Flächenschaden (Bomben, Kettenblitz) vernichtet sie mühelos.'
+    },
+    'Accelerator': {
+        category: 'Special Minions',
+        unlockWave: 14,
+        poolWeight: 0.08,
+        name: 'Accelerator',
+        icon: '⏩',
+        color: '#ccff00',
+        description: 'Erhöht das Bewegungstempo aller Gegner im Umkreis um 40%.',
+        hp: 30,
+        speed: 15,
+        reward: 20,
+        difficulty: 4,
+        ability: 'Tempo-Aura (+40%)',
+        flavorText: 'Ein aerodynamisches Kraftpaket. Seine bloße Anwesenheit verzerrt das Raum-Zeit-Gitter und peitscht andere Formen voran.',
+        weakness: 'Muss sofort priorisiert werden, bevor er andere Feinde beschleunigt.'
     }
 };
 

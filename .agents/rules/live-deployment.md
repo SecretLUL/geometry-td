@@ -12,3 +12,5 @@ trigger: always_on
 * Nach jedem Deployment MUSS der erfolgreiche Start und die Fehlerfreiheit der Produktions-Container über die Logs validiert werden:
   `docker logs gtd-frontend-prod`
   `docker logs gtd-backend-prod`
+
+WICHTIG: FÜHRE EIN DEPLOYMENT NUR AUS, WENN ICH DICH EXPLIZIT DAZU AUFFORDERE!!!

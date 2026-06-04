@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.9.3 - Added host_ended_wave socket event to SocketEventMap.
+ * @last_update: 2026-06-01 / v2.0.2 - Added shieldHp and maxShieldHp optional fields to SyncEnemyState interface.
  */
 /**
  * Geometry Tower Defense - Core TypeScript Definitions
@@ -85,7 +85,7 @@ export interface Vector2D {
 
 // ─── ENEMY ENTITY TYPES ───────────────────────────────────────────────────────
 
-export type EnemyType = 'Base' | 'Normal' | 'Scout' | 'Bruiser' | 'Regrower' | 'Shielded' | 'Boss' | 'Collector' | 'Fortress' | 'Splinter' | 'SplinterFragment' | 'Defragmenter' | 'DefragmenterFragment' | 'DefragmenterSubfragment' | 'Swarm';
+export type EnemyType = 'Base' | 'Normal' | 'Scout' | 'Bruiser' | 'Regrower' | 'Shielded' | 'Boss' | 'Collector' | 'Fortress' | 'Splinter' | 'SplinterFragment' | 'Defragmenter' | 'DefragmenterFragment' | 'DefragmenterSubfragment' | 'Swarm' | 'Accelerator';
 
 export interface Enemy {
     id: number;
@@ -113,6 +113,7 @@ export interface Enemy {
     spawnFrames?: number;
     swarmGroupId?: number;
     damageSources?: Map<any, number>;
+    rotationSpeedMultiplier?: number;
 
     // Regrower / Heal traits
     healTimer?: number;
@@ -130,6 +131,7 @@ export interface Enemy {
     regenTimer?: number;
     incomingDamage?: number;
     pixiSprite?: any;
+    auraGraphics?: any;
 
     // Instance Methods
     initHp(): void;
@@ -252,6 +254,8 @@ export interface SyncEnemyState {
     shieldActive: boolean;
     maxHp: number;
     swarmGroupId?: number;
+    shieldHp?: number;
+    maxShieldHp?: number;
 }
 
 export type ProjectileEventType = 'projectile' | 'sniper' | 'tesla';

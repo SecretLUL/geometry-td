@@ -12,11 +12,11 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-22 / v1.0.0 - Created index.ts as part of enemies.ts split.
+ * @last_update: 2026-06-01 / v1.1.0 - Exported AcceleratorEnemy.
  */
 export { BaseEnemy } from './base';
 export { EnemyFactory } from './factory';
 export { NormalEnemy, ScoutEnemy, BruiserEnemy } from './types/basic';
-export { RegrowerEnemy, ShieldedEnemy, SwarmEnemy } from './types/special';
+export { RegrowerEnemy, ShieldedEnemy, SwarmEnemy, AcceleratorEnemy } from './types/special';
 export { BossEnemy, DefragmenterEnemy, DefragmenterFragmentEnemy, DefragmenterSubfragmentEnemy } from './types/bosses';
 export { CollectorEnemy, FortressEnemy, SplinterEnemy, SplinterFragmentEnemy } from './types/event';

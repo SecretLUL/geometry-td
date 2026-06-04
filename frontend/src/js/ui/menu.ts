@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-06-01 / v1.7.2 - Removed unused local variables (background, particles, activeFilter) to satisfy strict TypeScript type-checking.
+ * @last_update: 2026-06-01 / v1.7.4 - Added rotationSpeedMultiplier support to Lexicon enemy preview spin animation.
  */
 import { EnemyData } from '../core/config';
 import { EnemyFactory } from '../entities/enemies';
@@ -686,13 +686,16 @@ class MenuController {
                 if (enemyType === 'Boss' || enemyType === 'Defragmenter') scaleFactor = 0.8;
                 if (enemyType === 'DefragmenterFragment') scaleFactor = 1.5;
                 if (enemyType === 'Bruiser') scaleFactor = 2.2;
+                if (enemyType === 'Accelerator') scaleFactor = 2.0;
                 
                 enemy.pixiSprite.scale.set(scaleFactor);
             }
 
             const tickFn = () => {
                 if (enemy.pulseTime !== undefined) enemy.pulseTime += 0.05 * Math.max(1, enemy.speed);
-                if (enemy.rotation !== undefined) enemy.rotation += 0.02 * Math.max(1, enemy.speed);
+                if (enemyType !== 'Accelerator' && enemy.rotation !== undefined) {
+                    enemy.rotation += 0.02 * Math.max(1, enemy.speed) * (enemy.rotationSpeedMultiplier ?? 1.0);
+                }
                 if (enemy.outerRotation !== undefined) enemy.outerRotation += 0.02 * Math.max(1, enemy.speed);
                 
                 if (enemy.updatePixi) enemy.updatePixi();

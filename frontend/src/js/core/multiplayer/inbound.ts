@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.10.2 - Added host_ended_wave listener to show system notifications on clients.
+ * @last_update: 2026-06-01 / v1.10.3 - Synchronize shieldHp and maxShieldHp in processIncomingGameState.
  */
 import { state } from '../state';
 import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../../entities/towers/index';
@@ -129,7 +129,9 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
             targetWaypointIndex: e.targetWaypointIndex,
             speed: e.speed,
             shieldActive: e.shieldActive,
-            swarmGroupId: e.swarmGroupId
+            swarmGroupId: e.swarmGroupId,
+            shieldHp: e.shieldHp,
+            maxShieldHp: e.maxShieldHp
         }))
     };
 
@@ -570,7 +572,9 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                         targetWaypointIndex: eData.targetWaypointIndex !== undefined ? eData.targetWaypointIndex : 0,
                         speed: eData.speed !== undefined ? eData.speed : 1, // In Host-Koordinaten belassen!
                         shieldActive: eData.shieldActive || false,
-                        swarmGroupId: eData.swarmGroupId
+                        swarmGroupId: eData.swarmGroupId,
+                        shieldHp: eData.shieldHp,
+                        maxShieldHp: eData.maxShieldHp
                     })) : [],
                     enemiesToSpawn: enemiesToSpawn || 0,
                     spawnCooldown: spawnCooldown || 0,

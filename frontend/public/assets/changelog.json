@@ -4,6 +4,90 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.9.4",
+    "date": "1. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Schild-Lebensleiste wird beim Defragmentierer-Boss nicht mehr angezeigt."
+      },
+      {
+        "type": "fix",
+        "desc": "Boss-Treffer-Flash zeigt nun die korrekte Boss-Form statt eines Quadrats."
+      }
+    ]
+  },
+  {
+    "version": "v2.9.3",
+    "date": "1. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Mutterschiff mit einer separaten, wunderschönen Schild-Lebensleiste unter der Haupt-HP-Leiste ausgestattet."
+      },
+      {
+        "type": "balance",
+        "desc": "Mutterschiff-Schild absorbiert nun Schaden über einen eigenen HP-Pool anstatt nur den ersten Schuss abzuwehren."
+      },
+      {
+        "type": "balance",
+        "desc": "Mutterschiff ist während des aktiven Schutzschilds immun gegen Betäubungen (z. B. durch Tesla-Schock-Türme)."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.9.2",
+    "date": "1. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Rotationsgeschwindigkeit des Collector-Gegners um 75% reduziert."
+      }
+    ]
+  },
+  {
+    "version": "v2.9.1",
+    "date": "1. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Gegner-Spawn durch ein instabiles Singularitäts-Spalten-Design visuell überarbeitet."
+      },
+      {
+        "type": "feature",
+        "desc": "Spielerbasis durch ein edles, dynamisches holografisches Matrix-Design visuell überarbeitet."
+      },
+      {
+        "type": "fix",
+        "desc": "Störende animierte Linien um die Spielerbasis vollständig entfernt."
+      }
+    ]
+  },
+  {
+    "version": "v2.9.0",
+    "date": "1. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Neuen Gegnertyp 'Der Beschleuniger' (Accelerator) mit beschleunigender Aura und visuellen Effekten hinzugefügt."
+      },
+      {
+        "type": "balance",
+        "desc": "Pfeilrichtung des Beschleunigers an seine tatsächliche Bewegungsrichtung gekoppelt und seine Geschwindigkeit drastisch verringert."
+      },
+      {
+        "type": "feature",
+        "desc": "Visuelle Sichtbarkeit des Beschleunigungs-Radius auf dem Schlachtfeld durch eine deutlichere Kreislinie hervorgehoben."
+      }
+    ]
+  },
+  {
     "version": "v2.8.1",
     "date": "1. Juni 2026",
     "status": "active",

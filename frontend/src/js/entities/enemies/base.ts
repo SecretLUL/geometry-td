@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-30 / v1.1.0 - Allowed initPixi to run on the main menu page without requiring active game viewport app.renderer.
+ * @last_update: 2026-06-01 / v1.2.1 - Added rotationSpeedMultiplier support to limit rotation speed for fast enemies like Collector.
  */
 import { state } from '../../core/state';
 import { waypoints } from '../../core/map';
@@ -20,6 +20,8 @@ import { createExplosion } from '../../fx/fx';
 import { getDistance } from '../../core/utils';
 import { Enemy, EnemyType } from '../../types';
 import { app, entitiesContainer } from '../../core/game/viewport';
+import { Config } from '../../core/config';
+import { PoolManager } from '../../core/pool';
 import * as PIXI from 'pixi.js';
 
 export class BaseEnemy implements Enemy {
@@ -61,6 +63,7 @@ export class BaseEnemy implements Enemy {
     public regenTimer?: number;
     public swarmGroupId?: number;
     public needsRedraw: boolean = true;
+    public rotationSpeedMultiplier: number = 1.0;
 
     public pixiSprite?: PIXI.Container;
     public bodyGraphics?: PIXI.Graphics;
@@ -68,6 +71,7 @@ export class BaseEnemy implements Enemy {
     public hpGraphics?: PIXI.Graphics; // Used as background
     public hpFillGraphics?: PIXI.Graphics; // Used for dynamic scaling
     public shieldGraphics?: PIXI.Graphics;
+    public auraGraphics?: PIXI.Graphics;
 
     constructor(waveNumber: number) {
         this.x = waypoints.length > 0 ? waypoints[0].x : 0;
@@ -92,6 +96,7 @@ export class BaseEnemy implements Enemy {
         this.stunCooldown = 0;
         this.lastDamageParticleTime = 0;
         this.damageSources = new Map();
+        this.rotationSpeedMultiplier = 1.0;
 
         this.initPixi();
     }
@@ -199,16 +204,33 @@ export class BaseEnemy implements Enemy {
 
         this.pixiSprite.position.set(this.x, this.y);
 
-        if (this.speed > 0 && !state.isPaused) {
-            this.pulseTime += 0.05 * this.speed;
+        // Check for Accelerator speed buff aura
+        let speedMultiplier = 1.0;
+        const auraRadius = 3.0 * Config.TILE_SIZE;
+        const hasAcceleratorAura = state.enemies.some(e =>
+            e.typeName === 'Accelerator' &&
+            !e.deadMarked &&
+            getDistance(this.x, this.y, e.x, e.y) <= auraRadius
+        );
+        if (hasAcceleratorAura) {
+            speedMultiplier = 1.4;
+        }
+
+        const effectiveSpeed = this.speed * speedMultiplier;
+
+        if (effectiveSpeed > 0 && !state.isPaused) {
+            this.pulseTime += 0.05 * effectiveSpeed;
         }
 
         let scale = 1;
         if (this.typeName === 'Regrower') {
             scale = 1 + Math.sin(this.pulseTime * 2) * 0.15;
+        } else if (this.typeName === 'Accelerator') {
+            this.bodyGraphics.rotation = this.rotation;
+            if (this.flashGraphics) this.flashGraphics.rotation = this.rotation;
         } else {
             if (!state.isPaused) {
-                this.rotation += 0.02 * this.speed;
+                this.rotation += 0.02 * effectiveSpeed * this.rotationSpeedMultiplier;
             }
             this.bodyGraphics.rotation = this.rotation;
             if (this.flashGraphics) this.flashGraphics.rotation = this.rotation;
@@ -264,6 +286,32 @@ export class BaseEnemy implements Enemy {
             if (!this.swarmGroupId) this.hpGraphics.visible = false;
             if (this.hpFillGraphics) this.hpFillGraphics.visible = false;
         }
+
+        // Draw Accelerator glowing speed aura range circle
+        if (this.typeName === 'Accelerator') {
+            if (!this.auraGraphics) {
+                this.auraGraphics = new PIXI.Graphics();
+                this.pixiSprite.addChildAt(this.auraGraphics, 0);
+            }
+            this.auraGraphics.clear();
+            const pulse = 1.0 + Math.sin(state.animTime * 0.01) * 0.015;
+            const alpha = 0.03 + Math.sin(state.animTime * 0.01) * 0.01;
+
+            this.auraGraphics.circle(0, 0, auraRadius * pulse)
+                .fill({ color: 0xccff00, alpha: alpha })
+                .stroke({ color: 0xccff00, width: 1.0, alpha: 0.15 });
+        }
+
+        // Spawn neon glowing speed trail particles behind accelerated enemies
+        if (hasAcceleratorAura && !state.isPaused && Math.random() < 0.10) {
+            PoolManager.getParticle(
+                this.x + (Math.random() - 0.5) * 12,
+                this.y + (Math.random() - 0.5) * 12,
+                '#ccff00',
+                1.5,
+                1.5
+            );
+        }
     }
 
     public draw(): void {}
@@ -286,12 +334,30 @@ export class BaseEnemy implements Enemy {
             }
         }
 
+        // Check for Accelerator speed buff aura
+        let speedMultiplier = 1.0;
+        const auraRadius = 3.0 * Config.TILE_SIZE;
+        const hasAcceleratorAura = state.enemies.some(e =>
+            e.typeName === 'Accelerator' &&
+            !e.deadMarked &&
+            getDistance(this.x, this.y, e.x, e.y) <= auraRadius
+        );
+        if (hasAcceleratorAura) {
+            speedMultiplier = 1.4;
+        }
+
+        const effectiveSpeed = this.speed * speedMultiplier;
+
         const target = waypoints[this.targetWaypointIndex];
         const distance = getDistance(this.x, this.y, target.x, target.y);
         const dx = target.x - this.x;
         const dy = target.y - this.y;
 
-        if (distance < this.speed) {
+        if (this.typeName === 'Accelerator') {
+            this.rotation = Math.atan2(dy, dx);
+        }
+
+        if (distance < effectiveSpeed) {
             this.x = target.x;
             this.y = target.y;
             this.targetWaypointIndex++;
@@ -299,11 +365,11 @@ export class BaseEnemy implements Enemy {
                 return 'reached_end';
             }
         } else {
-            const moveX = (dx / distance) * this.speed;
-            const moveY = (dy / distance) * this.speed;
+            const moveX = (dx / distance) * effectiveSpeed;
+            const moveY = (dy / distance) * effectiveSpeed;
             this.x += moveX;
             this.y += moveY;
-            this.distanceTravelled += this.speed;
+            this.distanceTravelled += effectiveSpeed;
         }
         
         this.updatePixi();

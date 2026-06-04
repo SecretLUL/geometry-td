@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.3.1 - Implemented Collector spawn frequency constraints and multiplayer tracking.
+ * @last_update: 2026-06-01 / v1.4.0 - Added Accelerator to new geometry unlock warning descriptions.
  */
 import { state } from '../state';
 import { Config, EnemyData } from '../config';
@@ -162,6 +162,7 @@ export function executeStartWave(data: any): void {
             if (type === 'Shielded') return 'Schild-Feind 🧪';
             if (type === 'Regrower') return 'Heil-Feind 🩹';
             if (type === 'Splinter') return 'Splitter-Feind 🌀';
+            if (type === 'Accelerator') return 'Beschleuniger ⏩';
             return type;
         }).join(', ');
         showGameNotification(

@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v2.0.0 - Migrated rendering to PixiJS.
+ * @last_update: 2026-06-01 / v2.0.1 - Prevent stunning the Boss/Mutterschiff if its shield is active.
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';
 import { state } from '../../core/state';
@@ -377,9 +377,11 @@ export class TeslaTower extends Tower {
                     const actualDmg = enemy.takeDamage(dmg, this);
                     this.damageDealt += actualDmg;
                     if (stunDuration > 0 && (!enemy.stunCooldown || enemy.stunCooldown <= 0)) {
-                        enemy.stunTimer = Math.max(enemy.stunTimer || 0, stunDuration);
-                        const spec = TowerData[this.type].specializations['stun'];
-                        enemy.stunCooldown = stunDuration + spec.values!.cooldown;
+                        if (!(enemy.typeName === 'Boss' && enemy.shieldActive)) {
+                            enemy.stunTimer = Math.max(enemy.stunTimer || 0, stunDuration);
+                            const spec = TowerData[this.type].specializations['stun'];
+                            enemy.stunCooldown = stunDuration + spec.values!.cooldown;
+                        }
                     }
                     if (enemy.hp <= 0 && !enemy.deadMarked) {
                         enemy.deadMarked = true;

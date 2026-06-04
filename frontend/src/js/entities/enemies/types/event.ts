@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.0.1 - Buffed Collector HP and rewards.
+ * @last_update: 2026-06-01 / v1.0.2 - Reduced Collector rotation speed by setting rotationSpeedMultiplier to 0.25.
  */
 import { BaseEnemy } from '../base';
 import { Config } from '../../../core/config';
@@ -25,6 +25,7 @@ export class CollectorEnemy extends BaseEnemy {
         this.radius = 12;
         this.color = '#ffd700';
         this.speed = 5.0;
+        this.rotationSpeedMultiplier = 0.25; // 4x slower rotation
 
         const baseHp = Config.ENEMY_BASE_HP;
         const hpMultiplier = Config.getHpMultiplier(waveNumber);

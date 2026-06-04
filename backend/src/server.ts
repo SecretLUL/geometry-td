@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-30 / v1.8.0 - Added global online players live ticker REST endpoint and WebSocket synchronizers.
+ * @last_update: 2026-06-01 / v1.8.1 - Added shieldHp and maxShieldHp fields to SyncEnemyState.
  */
 import express, { Request, Response } from 'express';
 import http from 'http';
@@ -292,6 +292,8 @@ interface SyncEnemyState {
   shieldActive: boolean;
   maxHp: number;
   swarmGroupId?: number;
+  shieldHp?: number;
+  maxShieldHp?: number;
 }
 
 interface RoomTowerState {

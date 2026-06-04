@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-30 / v2.0.0 - Optimized rendering performance: cached static paths, sprite pooled photons, and GPU-rotated spawner graphics.
+ * @last_update: 2026-06-01 / v2.2.0 - Fully overhauled spawners and base with counter-rotating geometric portals (triangles for spawners, diamonds for base) and breathing fluid cores.
  */
 import { state } from '../state';
 import { Config } from '../config';
@@ -77,7 +77,6 @@ let pauseText: PIXI.Text | null = null;
 // --- Performance Cache & Optimization variables ---
 let photonTexture: PIXI.Texture | null = null;
 const photonSprites: PIXI.Sprite[] = [];
-let rotatingSpawnerGraphics: PIXI.Graphics | null = null;
 
 function getPhotonTexture(): PIXI.Texture {
     if (!photonTexture && typeof window !== 'undefined' && app && app.renderer) {
@@ -123,28 +122,7 @@ function redrawStaticPaths(): void {
     }
 }
 
-function redrawSpawnerGraphics(): void {
-    if (!rotatingSpawnerGraphics) {
-        rotatingSpawnerGraphics = new PIXI.Graphics();
-        pathAnimContainer.addChild(rotatingSpawnerGraphics);
-    }
-    rotatingSpawnerGraphics.clear();
-    
-    if (waypoints.length === 0) return;
-
-    const TS = Config.TILE_SIZE;
-    const dashRadius = TS * 0.58;
-    const numSegments = 12;
-    const angleStep = (Math.PI * 2) / numSegments;
-    for (let i = 0; i < numSegments; i++) {
-        if (i % 2 === 0) {
-            const startAngle = i * angleStep;
-            const endAngle = (i + 0.5) * angleStep;
-            rotatingSpawnerGraphics.arc(0, 0, dashRadius, startAngle, endAngle);
-        }
-    }
-    rotatingSpawnerGraphics.stroke({ color: 0x4cc9f0, alpha: 0.5, width: 1.5 });
-}
+// redrawSpawnerGraphics has been removed as the rotating line around the base was removed
 
 export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): void {
     if (isHeadlessMode) return;
@@ -247,7 +225,6 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
         lastTileSize = TS;
         drawMap(mapContainer);
         redrawStaticPaths();
-        redrawSpawnerGraphics();
     }
     
     // PixiJS Panning
@@ -285,32 +262,92 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
     // 2. Draw Start & End Spawners
     if (waypoints.length > 0) {
         const time = state.animTime * 0.002;
-        const pulse = Math.sin(time * 2) * 0.15 + 0.85;
         
         const start = waypoints[0];
-        pathAnimGraphics.circle(start.x, start.y, TS * 0.32 * pulse).stroke({ color: 0xff0055, alpha: 0.85, width: 3 });
-        pathAnimGraphics.circle(start.x, start.y, TS * 0.25 * (2 - pulse)).fill({ color: 0xff0055, alpha: 0.18 * pulse });
-        pathAnimGraphics.circle(start.x, start.y, TS * 0.12).fill({ color: 0xff0055, alpha: 1.0 });
+        
+        // 1. Ambient Spawner Glow (pulsating in size and intensity)
+        const spawnerPulse = Math.sin(time * 3.0);
+        const spawnGlowRadius = TS * (0.38 + 0.04 * spawnerPulse);
+        const spawnGlowAlpha = 0.08 + 0.03 * spawnerPulse;
+        pathAnimGraphics.circle(start.x, start.y, spawnGlowRadius).fill({ color: 0xff0055, alpha: spawnGlowAlpha });
+
+        // 2. Outer Holographic Spawner Triangle (Rotates counter-clockwise)
+        const spawnTheta2 = -time * 0.55;
+        const spawnR2 = TS * (0.44 + 0.015 * Math.sin(time * 3.5 + 1.0));
+        const a2_0 = spawnTheta2;
+        const a2_1 = spawnTheta2 + 2.0944;
+        const a2_2 = spawnTheta2 + 4.1888;
+        pathAnimGraphics.poly([
+            start.x + spawnR2 * Math.cos(a2_0), start.y + spawnR2 * Math.sin(a2_0),
+            start.x + spawnR2 * Math.cos(a2_1), start.y + spawnR2 * Math.sin(a2_1),
+            start.x + spawnR2 * Math.cos(a2_2), start.y + spawnR2 * Math.sin(a2_2)
+        ], true).stroke({ color: 0xff0055, alpha: 0.45, width: 1.5 });
+
+        // 3. Inner Holographic Spawner Triangle (Rotates clockwise)
+        const spawnTheta1 = time * 0.9;
+        const spawnR1 = TS * (0.35 + 0.01 * Math.sin(time * 5));
+        const a1_0 = spawnTheta1;
+        const a1_1 = spawnTheta1 + 2.0944;
+        const a1_2 = spawnTheta1 + 4.1888;
+        pathAnimGraphics.poly([
+            start.x + spawnR1 * Math.cos(a1_0), start.y + spawnR1 * Math.sin(a1_0),
+            start.x + spawnR1 * Math.cos(a1_1), start.y + spawnR1 * Math.sin(a1_1),
+            start.x + spawnR1 * Math.cos(a1_2), start.y + spawnR1 * Math.sin(a1_2)
+        ], true).stroke({ color: 0xff0055, alpha: 0.75, width: 2 });
+
+        // 4. Intensively Pulsating Pink/Magenta Core
+        const rSpawnCore = TS * (0.20 + 0.02 * spawnerPulse);
+        pathAnimGraphics.circle(start.x, start.y, rSpawnCore).fill({ color: 0xff0055, alpha: 1.0 });
+
+        // 5. White Hot Inner Core (Out of phase breathing for depth)
+        const rSpawnWhite = TS * (0.09 + 0.02 * Math.sin(time * 3.0 + Math.PI));
+        pathAnimGraphics.circle(start.x, start.y, rSpawnWhite).fill({ color: 0xffffff, alpha: 1.0 });
 
         const end = waypoints[waypoints.length - 1];
-        pathAnimGraphics.circle(end.x, end.y, TS * 0.42 * pulse).stroke({ color: 0x00d4ff, alpha: 0.85, width: 4 });
-        pathAnimGraphics.circle(end.x, end.y, TS * 0.35).fill({ color: 0x00d4ff, alpha: 0.12 });
+        
+        // 1. Ambient Holographic Glow (pulsating in size and intensity)
+        const glowPulse = Math.sin(time * 2.5);
+        const glowRadius = TS * (0.42 + 0.05 * glowPulse);
+        const glowAlpha = 0.08 + 0.03 * glowPulse;
+        pathAnimGraphics.circle(end.x, end.y, glowRadius).fill({ color: 0x00d4ff, alpha: glowAlpha });
+
+        // 2. Outer Holographic Diamond Frame (Rotates counter-clockwise, pulses slightly)
+        const baseR2 = TS * (0.48 + 0.015 * Math.sin(time * 3 + 1.5));
+        const baseTheta2 = -time * 0.5;
         pathAnimGraphics.poly([
-            end.x, end.y - TS * 0.28,
-            end.x + TS * 0.28, end.y,
-            end.x, end.y + TS * 0.28,
-            end.x - TS * 0.28, end.y
+            end.x + baseR2 * Math.cos(baseTheta2), end.y + baseR2 * Math.sin(baseTheta2),
+            end.x - baseR2 * Math.sin(baseTheta2), end.y + baseR2 * Math.cos(baseTheta2),
+            end.x - baseR2 * Math.cos(baseTheta2), end.y - baseR2 * Math.sin(baseTheta2),
+            end.x + baseR2 * Math.sin(baseTheta2), end.y - baseR2 * Math.cos(baseTheta2)
+        ], true).stroke({ color: 0x00d4ff, alpha: 0.4, width: 1.5 });
+
+        // 3. Inner Holographic Diamond Frame (Rotates clockwise, pulses in opposition)
+        const baseR1 = TS * (0.38 + 0.01 * Math.sin(time * 4));
+        const baseTheta1 = time * 0.85;
+        pathAnimGraphics.poly([
+            end.x + baseR1 * Math.cos(baseTheta1), end.y + baseR1 * Math.sin(baseTheta1),
+            end.x - baseR1 * Math.sin(baseTheta1), end.y + baseR1 * Math.cos(baseTheta1),
+            end.x - baseR1 * Math.cos(baseTheta1), end.y - baseR1 * Math.sin(baseTheta1),
+            end.x + baseR1 * Math.sin(baseTheta1), end.y - baseR1 * Math.cos(baseTheta1)
+        ], true).stroke({ color: 0x00d4ff, alpha: 0.7, width: 2 });
+
+        // 4. Fluid Breathing Cyan Core Diamond
+        const rCore = TS * (0.24 + 0.02 * glowPulse);
+        pathAnimGraphics.poly([
+            end.x, end.y - rCore,
+            end.x + rCore, end.y,
+            end.x, end.y + rCore,
+            end.x - rCore, end.y
         ], true).fill({ color: 0x00d4ff, alpha: 1.0 });
 
-        if (rotatingSpawnerGraphics) {
-            rotatingSpawnerGraphics.visible = true;
-            rotatingSpawnerGraphics.position.set(end.x, end.y);
-            rotatingSpawnerGraphics.rotation = time * 0.75;
-        }
-    } else {
-        if (rotatingSpawnerGraphics) {
-            rotatingSpawnerGraphics.visible = false;
-        }
+        // 5. Breathing White Core Diamond (Out of phase with cyan core for floating/liquid depth)
+        const rWhite = TS * (0.11 + 0.02 * Math.sin(time * 2.5 + Math.PI));
+        pathAnimGraphics.poly([
+            end.x, end.y - rWhite,
+            end.x + rWhite, end.y,
+            end.x, end.y + rWhite,
+            end.x - rWhite, end.y
+        ], true).fill({ color: 0xffffff, alpha: 1.0 });
     }
 
     // Context Shop Selection Highlight via PixiJS

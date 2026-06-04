@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.9.0 - Fixed enemy invisibility on clients: added explicit updatePixi() call after client-side enemy interpolation.
+ * @last_update: 2026-06-01 / v1.9.1 - Added Boss shield health bar rendering updates.
  */
 import { state } from '../state';
 import { Multiplayer } from '../multiplayer/index';
@@ -75,6 +75,8 @@ let cachedBossHpFill: HTMLElement | null = null;
 let cachedBossHpContainer: HTMLElement | null = null;
 let cachedBossName: HTMLElement | null = null;
 let cachedBossHpBar: HTMLElement | null = null;
+let cachedBossShieldFill: HTMLElement | null = null;
+let cachedBossShieldBar: HTMLElement | null = null;
 
 export function gameLoop(timestamp: number, fromWorker = false): void {
     if (!fromWorker) {
@@ -664,6 +666,11 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         cachedBossName.style.textShadow = '0 0 10px #00f5d4';
                     }
 
+                    // Shield bar must be hidden for the Defragmenter
+                    if (cachedBossShieldBar) {
+                        cachedBossShieldBar.classList.add('hidden');
+                    }
+
                     if (currentHpSum < totalMaxHp * 0.25) {
                         const isFlickering = Math.floor(state.animTime / 100) % 2 === 0;
                         cachedBossHpFill.style.background = isFlickering ? '#ffffff' : 'linear-gradient(90deg, #00b894, #00f5d4)';
@@ -702,6 +709,17 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                             cachedBossHpFill.style.background = 'linear-gradient(90deg, #ff3366, #ff0000)';
                             if (cachedBossHpContainer) cachedBossHpContainer.style.borderColor = '#ff3366';
                             if (cachedBossHpBar) cachedBossHpBar.style.borderColor = '#ff3366';
+                        }
+
+                        if (cachedBossShieldBar) {
+                            if (boss.shieldActive && boss.shieldHp !== undefined && boss.maxShieldHp !== undefined && boss.shieldHp > 0) {
+                                cachedBossShieldBar.classList.remove('hidden');
+                                if (cachedBossShieldFill) {
+                                    cachedBossShieldFill.style.width = (Math.max(0, boss.shieldHp) / boss.maxShieldHp * 100) + '%';
+                                }
+                            } else {
+                                cachedBossShieldBar.classList.add('hidden');
+                            }
                         }
                     }
                 } else {
@@ -775,6 +793,8 @@ export function tryStartGame(): void {
         cachedBossHpContainer = document.getElementById('bossHpContainer');
         cachedBossName = document.getElementById('bossName');
         cachedBossHpBar = document.getElementById('bossHpBar');
+        cachedBossShieldFill = document.getElementById('bossShieldFill');
+        cachedBossShieldBar = document.getElementById('bossShieldBar');
 
         const loaderStatus = document.getElementById('loader-status');
         if (loaderStatus) loaderStatus.innerText = "Synchronisation abgeschlossen!";

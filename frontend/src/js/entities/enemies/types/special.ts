@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.2.0 - Fixed SwarmEnemy invisibility: update() now calls updatePixi() to position the sprite on the Host (was missing, unlike BaseEnemy).
+ * @last_update: 2026-06-01 / v1.3.0 - Added AcceleratorEnemy subclass with custom Chevron shape and speed aura properties.
  */
 import { BaseEnemy } from '../base';
 import { Config } from '../../../core/config';
@@ -155,5 +155,31 @@ export class SwarmEnemy extends BaseEnemy {
                 this.hpGraphics.clear();
             }
         }
+    }
+}
+
+export class AcceleratorEnemy extends BaseEnemy {
+    constructor(waveNumber: number) {
+        super(waveNumber);
+        this.typeName = 'Accelerator';
+        this.radius = 12;
+        this.color = '#ccff00';
+        this.speed = 0.6;
+
+        const baseHp = Config.ENEMY_BASE_HP;
+        const hpMultiplier = Config.getHpMultiplier(waveNumber);
+        this.maxHp = Math.floor(baseHp * hpMultiplier * 1.5);
+        this.reward = Math.floor((Config.ENEMY_REWARD_BASE * 2.0) * Math.pow(Config.ENEMY_REWARD_MULTIPLIER, waveNumber - 1));
+        this.initHp();
+    }
+
+    public override drawShape(g: any): void {
+        // Premium chevron polygon pointing right (>)
+        g.moveTo(this.radius, 0);
+        g.lineTo(-this.radius, -this.radius);
+        g.lineTo(-this.radius / 3, 0);
+        g.lineTo(-this.radius, this.radius);
+        g.lineTo(this.radius, 0);
+        g.fill({ color: this.flashTime > 0 ? '#ffffff' : this.color });
     }
 }

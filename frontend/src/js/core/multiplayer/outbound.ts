@@ -12,7 +12,7 @@
  * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
  *    vordringliche Kontext-Information.
  * ----------------------------------
- * @last_update: 2026-05-29 / v1.2.1 - Implemented emitHostEndedWave.
+ * @last_update: 2026-06-01 / v1.2.2 - Include shieldHp and maxShieldHp in activeEnemies sync mapping.
  */
 import { state } from '../state';
 import { Config } from '../config';
@@ -158,7 +158,8 @@ export function syncNow(): void {
                 targetWaypointIndex: e.targetWaypointIndex,
                 x: e.x, y: e.y, wave: e.waveNumber, speed: e.speed,
                 shieldActive: e.shieldActive, maxHp: e.maxHp,
-                swarmGroupId: e.swarmGroupId
+                swarmGroupId: e.swarmGroupId,
+                shieldHp: e.shieldHp, maxShieldHp: e.maxShieldHp
             })),
             enemiesToSpawn: state.enemiesToSpawn,
             spawnCooldown: state.spawnCooldown,
