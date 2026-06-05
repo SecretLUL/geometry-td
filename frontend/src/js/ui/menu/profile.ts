@@ -32,8 +32,7 @@ export class ProfileController {
         const logoutBtn = document.getElementById('logout-btn');
 
         const getBaseUrl = () => {
-            return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3000' : '';
+            return '';
         };
 
         gotoRegister?.addEventListener('click', () => {

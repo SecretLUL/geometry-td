@@ -65,6 +65,7 @@ export interface GameState {
     lastCollectorWave?: number;
     unlockedAchievements?: string[];
     isGuest?: boolean;
+    activeAccelerators?: Enemy[];
 }
 
 export interface Vector2D {

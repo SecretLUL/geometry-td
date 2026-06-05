@@ -93,6 +93,9 @@ export class BaseEnemy implements Enemy {
 
     public initPixi(): void {
         if (typeof window === 'undefined') return;
+        const isHeadlessMode = new URLSearchParams(window.location.search).get('headless') === 'true';
+        if (isHeadlessMode) return;
+
         if (!this.pixiSprite) {
             this.pixiSprite = new PIXI.Container();
             this.bodyGraphics = new PIXI.Graphics();
@@ -197,8 +200,8 @@ export class BaseEnemy implements Enemy {
         // Check for Accelerator speed buff aura
         let speedMultiplier = 1.0;
         const auraRadius = 3.0 * Config.TILE_SIZE;
-        const hasAcceleratorAura = state.enemies.some(e =>
-            e.typeName === 'Accelerator' &&
+        const accelerators = state.activeAccelerators || [];
+        const hasAcceleratorAura = accelerators.length > 0 && accelerators.some(e =>
             !e.deadMarked &&
             getDistance(this.x, this.y, e.x, e.y) <= auraRadius
         );
@@ -327,8 +330,8 @@ export class BaseEnemy implements Enemy {
         // Check for Accelerator speed buff aura
         let speedMultiplier = 1.0;
         const auraRadius = 3.0 * Config.TILE_SIZE;
-        const hasAcceleratorAura = state.enemies.some(e =>
-            e.typeName === 'Accelerator' &&
+        const accelerators = state.activeAccelerators || [];
+        const hasAcceleratorAura = accelerators.length > 0 && accelerators.some(e =>
             !e.deadMarked &&
             getDistance(this.x, this.y, e.x, e.y) <= auraRadius
         );

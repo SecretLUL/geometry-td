@@ -114,25 +114,27 @@ export class SwarmEnemy extends BaseEnemy {
         this.updatePixi();
         return 'moving';
     }
-
     public override updatePixi(): void {
         super.updatePixi();
         
         if (this.swarmGroupId) {
-            const swarmMembers = state.enemies.filter(e => e.swarmGroupId === this.swarmGroupId);
-            const firstMember = swarmMembers[0];
+            const firstMember = state.enemies.find(e => e.swarmGroupId === this.swarmGroupId);
             
             if (firstMember === this && this.hpGraphics) {
-                const aliveCount = swarmMembers.length;
+                let aliveCount = 0;
+                let sumX = 0;
+                let sumY = 0;
+                for (let i = 0; i < state.enemies.length; i++) {
+                    const e = state.enemies[i];
+                    if (e.swarmGroupId === this.swarmGroupId) {
+                        aliveCount++;
+                        sumX += e.x;
+                        sumY += e.y;
+                    }
+                }
+                
                 if (aliveCount > 0) {
                     const ratio = Math.max(0, aliveCount / 12);
-                    
-                    let sumX = 0;
-                    let sumY = 0;
-                    for (const member of swarmMembers) {
-                        sumX += member.x;
-                        sumY += member.y;
-                    }
                     const centerX = sumX / aliveCount;
                     const centerY = sumY / aliveCount;
                     

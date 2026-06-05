@@ -94,6 +94,8 @@ export class Tower {
 
     public initPixi() {
         if (typeof window === 'undefined' || !app || !app.renderer) return;
+        const isHeadlessMode = new URLSearchParams(window.location.search).get('headless') === 'true';
+        if (isHeadlessMode) return;
         
         if (!this.pixiSprite) {
             this.pixiSprite = new PIXI.Container();
@@ -442,13 +444,7 @@ export class Tower {
                     bestViableEnemy = enemy;
                 }
             } else {
-                let incomingDmg = (enemy as any).incomingDamage || 0;
-                for (let j = 0; j < state.projectiles.length; j++) {
-                    const p = state.projectiles[j];
-                    if (p.active && p.tower === this && p.target === enemy) {
-                        incomingDmg -= p.damage;
-                    }
-                }
+                const incomingDmg = (enemy as any).incomingDamage || 0;
                 
                 if (enemy.hp - incomingDmg > 0) {
                     if (enemy.distanceTravelled > bestViableDist) {

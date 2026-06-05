@@ -4,6 +4,54 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.16.8",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Overkill-Verhinderung korrigiert: Turm-Subtraktions-Loop für eigene Projektile entfernt."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.7",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Beschleuniger-Gegner-Scan durch globales Caching optimiert."
+      },
+      {
+        "type": "perf",
+        "desc": "Schwarm-Gegner-Rendering zur Vermeidung von GC-Rucklern ohne Array-Allokationen refaktoriert."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.6",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Hartcodierte localhost:3000 API-Verbindungen im Frontend durch relative Pfade ersetzt."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.5",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Grafik-Instanziierungen in initPixi() bei aktivem Headless-Modus unterdrückt, um Abstürze zu verhindern."
+      }
+    ]
+  },
+  {
     "version": "v2.16.4",
     "date": "5. Juni 2026",
     "status": "active",

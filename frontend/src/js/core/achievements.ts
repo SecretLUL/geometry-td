@@ -77,8 +77,7 @@ export const AchievementsList: Achievement[] = [
 ];
 
 const getBaseUrl = () => {
-    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-           ? 'http://localhost:3000' : '';
+    return '';
 };
 
 // Loads already-unlocked achievements from the database on session start

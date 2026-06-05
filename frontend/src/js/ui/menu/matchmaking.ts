@@ -29,8 +29,7 @@ export class MatchmakingController {
 
     private async fetchMissionStats(): Promise<void> {
         try {
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3000' : '';
+            const baseUrl = '';
             const response = await fetch(`${baseUrl}/api/mission_stats`, { cache: 'no-store' });
             if (response.ok) {
                 const stats = await response.json();
@@ -43,8 +42,7 @@ export class MatchmakingController {
 
     private async fetchOnlinePlayers(): Promise<void> {
         try {
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3000' : '';
+            const baseUrl = '';
             const response = await fetch(`${baseUrl}/api/online_players`, { cache: 'no-store' });
             if (response.ok) {
                 const data = await response.json();
@@ -201,8 +199,7 @@ export class MatchmakingController {
 
     private async verifyAndJoinRoom(code: string): Promise<void> {
         try {
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3000' : '';
+            const baseUrl = '';
             const response = await fetch(`${baseUrl}/api/room/${encodeURIComponent(code)}`);
             if (response.ok) {
                 const data = await response.json();

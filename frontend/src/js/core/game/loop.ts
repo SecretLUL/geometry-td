@@ -290,6 +290,16 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         state.enemies.push(newEnemiesBuffer[i]);
                     }
 
+                    // Rebuild activeAccelerators cache for the client frame
+                    if (!state.activeAccelerators) state.activeAccelerators = [];
+                    state.activeAccelerators.length = 0;
+                    for (let i = 0; i < state.enemies.length; i++) {
+                        const e = state.enemies[i];
+                        if (e.typeName === 'Accelerator') {
+                            state.activeAccelerators.push(e);
+                        }
+                    }
+
                     // On the host, enemy.update() calls updatePixi() internally.
                     // Clients skip enemy.update() entirely, so sprites are never repositioned and become invisible.
                     // Fix: call updatePixi() explicitly after each interpolation round.
@@ -306,6 +316,16 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
             
             while (speedAccumulator >= 1) {
                 speedAccumulator -= 1;
+
+                // Rebuild activeAccelerators cache for the game tick
+                if (!state.activeAccelerators) state.activeAccelerators = [];
+                state.activeAccelerators.length = 0;
+                for (let i = 0; i < state.enemies.length; i++) {
+                    const e = state.enemies[i];
+                    if (e.typeName === 'Accelerator') {
+                        state.activeAccelerators.push(e);
+                    }
+                }
 
                 // Spatial Hashing Grid for Collision optimization (Optimized Map)
                 if (!state.enemyGrid) state.enemyGrid = new Map();

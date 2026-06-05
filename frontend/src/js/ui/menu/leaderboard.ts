@@ -26,8 +26,7 @@ export class LeaderboardController {
         `;
 
         try {
-            const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3000' : '';
+            const baseUrl = '';
             const response = await fetch(`${baseUrl}/api/leaderboard`, { cache: 'no-store' });
             if (!response.ok) {
                 throw new Error('Server returned ' + response.status);
