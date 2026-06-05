@@ -4,6 +4,17 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.16.4",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Alle Quellcode-Kommentare, System-Logs und Datei-Header auf Englisch übersetzt und bereinigt."
+      }
+    ]
+  },
+  {
     "version": "v2.16.3",
     "date": "5. Juni 2026",
     "status": "active",

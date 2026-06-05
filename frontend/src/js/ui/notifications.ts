@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\notifications.ts
+ * @file: frontend/src/js/ui/notifications.ts
  * @purpose: Component rendering temporary in-game alerts (e.g. Success, Warning) overlayed on top of the screen.
  * @dependencies: None
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-20 / v1.0.0
  */
 export function showGameNotification(type: 'wave' | 'warning' | 'info', title: string, description: string, meta: any = null): void {

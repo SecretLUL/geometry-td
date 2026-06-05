@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\ui.ts
+ * @file: frontend/src/js/ui/ui.ts
  * @purpose: Main orchestration layer coordinating UI updates, setting key listeners, and linking panels together.
  * @dependencies: state, multiplayer, config, utils, icons, hud, tooltips, modals, modMenu, events, notifications
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v1.6.1 - Enabled dynamic modUndoWaveBtn status updates for hosts.
  */
 import { state } from '../core/state';

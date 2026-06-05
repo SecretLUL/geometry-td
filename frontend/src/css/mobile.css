@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\css\mobile.css
+ * @file: frontend/src/css/mobile.css
  * @purpose: Mobile layout optimization and orientation lock styles, split into modular stylesheets under src/css/mobile/.
  * @dependencies: CSS values
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-05 / v2.3.0 - Modularized mobile.css, splitting it into separate stylesheets under src/css/mobile/ for orientation, landscape/portrait HUDs, landscape menu, and context shop.
  */
 

@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\menu.ts
+ * @file: frontend/src/js/ui/menu.ts
  * @purpose: Controls the game's home page menus, level selections, lobby status checks, database lexicon, and user profiles/authentication.
  * @dependencies: config, enemies, background, types
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v2.16.0 - Refactored menu.ts into modular sub-controllers under src/js/ui/menu/
  */
 import { NavigationController } from './menu/navigation';

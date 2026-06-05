@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\background.ts
+ * @file: frontend/src/js/ui/background.ts
  * @purpose: Background animator that renders ambient starry particle flows and laser beam grids using PixiJS.
  * @dependencies: None
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v2.1.0 - Migrated entirely to pure PixiJS.
  */
 import * as PIXI from 'pixi.js';

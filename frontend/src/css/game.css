@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\css\game.css
+ * @file: frontend/src/css/game.css
  * @purpose: Styling for the in-game HUD (lives, wave, gold, speed/auto buttons, progress bar), boss HP bar, mod menu, and the sidebar layout.
  * @dependencies: CSS values
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v1.0.1 - Added styling for the Boss shield health bar.
  */
 /* ── Game Specific Styles (HUD, Panel, Tower Buttons, Boss Bar) ── */

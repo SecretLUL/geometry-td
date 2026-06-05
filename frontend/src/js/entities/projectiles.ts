@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\entities\projectiles.ts
+ * @file: frontend/src/js/entities/projectiles.ts
  * @purpose: Models standard and rocket projectiles, including trajectories, homing updates, trails, area-of-effect detonations, and target tracking.
  * @dependencies: config, state, fx, utils, types, pool
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v1.1.0 - Integrated new premium visual rendering for Cluster parent bombs and fragmentation sub-munitions.
  */
 import { Config, TowerData } from '../core/config';

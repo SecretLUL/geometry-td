@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\events.ts
+ * @file: frontend/src/js/ui/events.ts
  * @purpose: Setup and bindings for client click events, tower placement triggers, selling/upgrading selections, and button clicks.
  * @dependencies: state, config, multiplayer, pool, map, modals, tooltips, ui, hud
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v1.9.1 - Reset originalWave and waveModified in game resets.
  */
 import { state } from '../core/state';

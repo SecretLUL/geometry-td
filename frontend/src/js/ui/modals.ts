@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\modals.ts
+ * @file: frontend/src/js/ui/modals.ts
  * @purpose: Renders game overlay panels including Level Up selections, upgrade paths, and the Game Over layout.
  * @dependencies: state, config, multiplayer, pool, utils, ui, events
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v1.11.0 - Dynamically save record wave to sessionStorage or localStorage depending on isGuest state.
  */
 import { state } from '../core/state';

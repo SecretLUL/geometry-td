@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\css\base.css
+ * @file: frontend/src/css/base.css
  * @purpose: Global CSS variables (colors, layout dimensions) and canvas layout styling.
  * @dependencies: CSS values
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-30 / v1.1.0 - Registered the BladeRunner font-face globally.
  */
 @font-face {

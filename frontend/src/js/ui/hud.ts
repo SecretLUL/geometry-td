@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\hud.ts
+ * @file: frontend/src/js/ui/hud.ts
  * @purpose: Renders and updates resource UI numbers (Gold, Lives, Wave) using smooth counting animations.
  * @dependencies: state, utils
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-27 / v1.1.0 - Use formatNumber utility for HUD gold display.
  */
 import { state } from '../core/state';

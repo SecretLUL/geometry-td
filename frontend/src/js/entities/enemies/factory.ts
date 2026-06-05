@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\entities\enemies\factory.ts
+ * @file: frontend/src/js/entities/enemies/factory.ts
  * @purpose: Factory for creating enemies based on EnemyType and managing discovered enemies in local storage.
  * @dependencies: types, basic, special, bosses, event
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-04 / v1.4.0 - Selected sessionStorage for guest discovered enemies storage.
  */
 import { Enemy, EnemyType } from '../../types';
@@ -60,8 +50,8 @@ export class EnemyFactory {
     public static releaseEnemyToPool(enemy: Enemy): void {
         if (!enemy || !enemy.typeName) return;
 
-        // WICHTIG: Pixi-Sprite in den inaktiven Container verschieben, damit der Gegner sofort verschwindet,
-        // auch wenn er die Base erreicht hat oder gecancelt wurde, und Iterationskosten vermieden werden.
+        // IMPORTANT: Move Pixi sprite to the inactive container so that the enemy disappears immediately,
+        // even if they reached the base or were cancelled, avoiding iteration overhead.
         if ((enemy as any).pixiSprite) {
             inactivePoolContainer.addChild((enemy as any).pixiSprite);
         }

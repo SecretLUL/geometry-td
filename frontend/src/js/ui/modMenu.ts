@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\ui\modMenu.ts
+ * @file: frontend/src/js/ui/modMenu.ts
  * @purpose: Cheat, admin, and test sidebar overlay allowing developers to activate God Mode, Infinite Gold, and map custom waves.
  * @dependencies: state, config, multiplayer, pool, towers, map, ui
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v2.5.3 - Removed unused cancelPlacement import from ui.ts to satisfy strict TypeScript unused checks.
  */
 import { state } from '../core/state';

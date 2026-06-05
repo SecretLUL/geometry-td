@@ -1,17 +1,7 @@
 /*
- * @file: frontend\vite.config.js
+ * @file: frontend/vite.config.js
  * @purpose: Configuration for Vite bundler, dev server settings (ports, hosts, allowedHosts), and proxying API/Websocket connections to the backend.
  * @dependencies: vite, path
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Ã„nderung der FunktionalitÃ¤t MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-20 / v1.0.0
  */
 import { defineConfig } from 'vite';

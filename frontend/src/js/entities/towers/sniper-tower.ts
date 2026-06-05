@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\entities\towers\sniper-tower.ts
+ * @file: frontend/src/js/entities/towers/sniper-tower.ts
  * @purpose: Defines the precise sniper tower targeting, muzzle fire, precise line traces, and kill bounty modifiers.
  * @dependencies: config, state, fx, base-tower, utils, types, pool
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v2.2.0 - Implemented fire rate balancing for Bounty Hunter specialization.
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';

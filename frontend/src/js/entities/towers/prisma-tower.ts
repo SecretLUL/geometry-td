@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\entities\towers\prisma-tower.ts
+ * @file: frontend/src/js/entities/towers/prisma-tower.ts
  * @purpose: High-tier focusing defense utilizing continuous locking beams, structural meltdowns, and ray refraction to melt targets.
  * @dependencies: config, state, fx, base-tower, utils, types, pool
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v2.1.0 - Redesigned Level 20 Mastery visuals with levitating crystal shards, light focusing traces, and counter-rotating rings.
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';

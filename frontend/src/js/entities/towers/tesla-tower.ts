@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\entities\towers\tesla-tower.ts
+ * @file: frontend/src/js/entities/towers/tesla-tower.ts
  * @purpose: Melee AOE electricity tower executing high-voltage discharges and stunning chains.
  * @dependencies: config, state, fx, base-tower, utils, types, pool
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v2.0.1 - Prevent stunning the Boss/Mutterschiff if its shield is active.
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';

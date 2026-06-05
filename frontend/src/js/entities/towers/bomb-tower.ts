@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\entities\towers\bomb-tower.ts
+ * @file: frontend/src/js/entities/towers/bomb-tower.ts
  * @purpose: Bomb Tower class specialized in heavy splash damage, homing missiles, and nuclear payloads.
  * @dependencies: config, state, fx, projectiles, base-tower, utils, types, pool
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-05-29 / v2.5.0 - Adjusted to use the newly reduced aoeRadiusPerLevel value.
  */
 import { Config, TowerData, TowerBalancer } from '../../core/config';

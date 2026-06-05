@@ -1,17 +1,7 @@
 /*
- * @file: frontend\src\js\entities\enemies\base.ts
+ * @file: frontend/src/js/entities/enemies/base.ts
  * @purpose: Implementation of the abstract BaseEnemy class managing coordinates, flashing visual cues, stun conditions, and path traversing.
  * @dependencies: config, state, map, fx, utils, types
- * 
- * --- KI-INTEGRATIONS-DIREKTIVE ---
- * Diese Datei unterliegt einer strikten Dokumentationspflicht.
- * 1. Dieser Header ist ein integraler Bestandteil des Codes.
- * 2. Bei JEDER Änderung der Funktionalität MUSS dieser Block zwingend 
- *    aktualisiert werden, um den aktuellen Stand widerzuspiegeln.
- * 3. Veraltete Dokumentation gilt als technisches Defizit (Technical Debt).
- * 4. Behandle diesen Block bei jeder Interaktion mit dem LLM als 
- *    vordringliche Kontext-Information.
- * ----------------------------------
  * @last_update: 2026-06-01 / v1.2.1 - Added rotationSpeedMultiplier support to limit rotation speed for fast enemies like Collector.
  */
 import { state } from '../../core/state';
