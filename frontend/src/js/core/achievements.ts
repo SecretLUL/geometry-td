@@ -56,9 +56,9 @@ export const AchievementsList: Achievement[] = [
     {
         id: 'ach-kill-boss',
         title: 'Chef-Schredder',
-        description: 'Besiege das Mutterschiff (Welle 10).',
+        description: 'Besiege das Mutterschiff (Welle 20).',
         icon: '☠️',
-        check: () => state.wave > 10
+        check: () => state.wave > 20
     },
     {
         id: 'ach-no-lives-lost',
@@ -110,7 +110,7 @@ export async function checkAchievements(): Promise<void> {
     }
 
     // Achievements are locked when cheats or mods are active
-    if (state.godMode || state.infiniteGold || state.waveModified) {
+    if (state.godMode || state.infiniteGold || state.waveModified || state.benchmarkActive) {
         return;
     }
 

@@ -104,6 +104,8 @@ export interface Enemy {
     swarmGroupId?: number;
     damageSources?: Map<any, number>;
     rotationSpeedMultiplier?: number;
+    customFlash?: boolean;
+    triggerFlash?: (duration: number) => void;
 
     // Regrower / Heal traits
     healTimer?: number;
@@ -375,7 +377,7 @@ export interface SocketEventMap {
     // Control broadcasts
     'toggle_pause': boolean;
     'change_speed': number;
-    'toggle_mod': { mod: 'godMode' | 'infiniteGold' | 'waveModified'; value: boolean };
+    'toggle_mod': { mod: 'godMode' | 'infiniteGold' | 'waveModified' | 'benchmarkActive'; value: boolean };
     'toggle_auto': boolean;
     'start_wave_sync': any;
     'sync_lives': number;

@@ -98,7 +98,7 @@ export function updateUI(): void {
         }
     }
 
-    const cheatsActive = state.godMode || state.infiniteGold || state.waveModified;
+    const cheatsActive = state.godMode || state.infiniteGold || state.waveModified || state.benchmarkActive;
     if (lastRenderedCheats !== cheatsActive) {
         lastRenderedCheats = cheatsActive;
         const cheatInd = getEl('cheatIndicator');

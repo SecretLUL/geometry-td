@@ -25,7 +25,7 @@ export class BossEnemy extends BaseEnemy {
         this.maxHp = Math.floor(baseHp * hpMultiplier * 160); // Buffed from 60x to 160x for true boss threat level
         this.reward = Config.WAVE_BONUS_BASE * 10;
         this.shieldActive = true; // Equips initial shield
-        this.maxShieldHp = Math.floor(this.maxHp * 0.5); // Shield has 50% of the max HP
+        this.maxShieldHp = Math.floor(this.maxHp * 0.2); // Shield has 20% of the max HP (reduced from 50%)
         this.shieldHp = this.maxShieldHp;
         this.initHp();
 
@@ -35,13 +35,14 @@ export class BossEnemy extends BaseEnemy {
         this.stunRange = 300;
         this.specialAbility = 'Spawnt Gegner & Stunnt Türme';
         this.hideHealthBar = true;
+        this.customFlash = true;
     }
 
     public override takeDamage(amount: number, source?: any): number {
         if (this.shieldActive && this.shieldHp !== undefined) {
             const actualShieldDmg = Math.min(amount, Math.max(0, this.shieldHp));
             this.shieldHp -= amount;
-            this.flashTime = 3;
+            this.triggerFlash(3);
             if (this.shieldHp <= 0) {
                 this.shieldActive = false;
                 this.shieldHp = 0;
@@ -59,16 +60,53 @@ export class BossEnemy extends BaseEnemy {
     public performAbility(): void {
         if (this.nextAbility === 'spawn') {
             const count = Math.floor(Math.random() * 3) + 3; // Buffed from 2-3 to 3-5 enemies for heavy path flooding
-            const availableTypes = Object.keys(EnemyData).filter(type => EnemyData[type as EnemyType].category !== 'Bosse' && EnemyData[type as EnemyType].unlockWave <= this.waveNumber);
-            const enemyTypes = availableTypes.length > 0 ? availableTypes : ['Normal'];
+            const availableTypes = Object.keys(EnemyData).filter(type => EnemyData[type as EnemyType].category !== 'Bosse' && EnemyData[type as EnemyType].unlockWave <= this.waveNumber) as EnemyType[];
+            const enemyTypes = availableTypes.length > 0 ? availableTypes : ['Normal' as EnemyType];
+            
+            const weights = enemyTypes.map(type => {
+                const weight = EnemyData[type].poolWeight;
+                return weight !== undefined ? weight : 1.0;
+            });
+            const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+
             for (let i = 0; i < count; i++) {
-                const randomType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-                const spawnedEnemy = EnemyFactory.createEnemy(randomType as EnemyType, this.waveNumber);
-                spawnedEnemy.x = this.x + (Math.random() - 0.5) * 40;
-                spawnedEnemy.y = this.y + (Math.random() - 0.5) * 40;
-                spawnedEnemy.targetWaypointIndex = this.targetWaypointIndex;
-                spawnedEnemy.distanceTravelled = this.distanceTravelled;
-                state.enemies.push(spawnedEnemy);
+                let randomType = enemyTypes[0];
+                if (totalWeight > 0) {
+                    let randomVal = Math.random() * totalWeight;
+                    for (let j = 0; j < enemyTypes.length; j++) {
+                        randomVal -= weights[j];
+                        if (randomVal <= 0) {
+                            randomType = enemyTypes[j];
+                            break;
+                        }
+                    }
+                }
+                if (randomType === 'Swarm') {
+                    const clusterSize = 12;
+                    const swarmGroupId = Math.floor(Math.random() * 1000000000);
+                    for (let k = 0; k < clusterSize; k++) {
+                        const spawnedEnemy = EnemyFactory.createEnemy('Swarm', this.waveNumber) as any;
+                        spawnedEnemy.swarmGroupId = swarmGroupId;
+
+                        const angle = Math.random() * Math.PI * 2;
+                        const r = 20 * Math.sqrt(Math.random());
+                        spawnedEnemy.swarmOffsetX = Math.cos(angle) * r;
+                        spawnedEnemy.swarmOffsetY = Math.sin(angle) * r;
+
+                        spawnedEnemy.x = this.x + (Math.random() - 0.5) * 40 + spawnedEnemy.swarmOffsetX;
+                        spawnedEnemy.y = this.y + (Math.random() - 0.5) * 40 + spawnedEnemy.swarmOffsetY;
+                        spawnedEnemy.targetWaypointIndex = this.targetWaypointIndex;
+                        spawnedEnemy.distanceTravelled = this.distanceTravelled;
+                        state.enemies.push(spawnedEnemy);
+                    }
+                } else {
+                    const spawnedEnemy = EnemyFactory.createEnemy(randomType, this.waveNumber);
+                    spawnedEnemy.x = this.x + (Math.random() - 0.5) * 40;
+                    spawnedEnemy.y = this.y + (Math.random() - 0.5) * 40;
+                    spawnedEnemy.targetWaypointIndex = this.targetWaypointIndex;
+                    spawnedEnemy.distanceTravelled = this.distanceTravelled;
+                    state.enemies.push(spawnedEnemy);
+                }
             }
             createExplosion(this.x, this.y, '#aa00ff', 12);
             this.nextAbility = 'stun';
@@ -113,7 +151,7 @@ export class BossEnemy extends BaseEnemy {
                 }
                 const bossName = document.getElementById('bossName');
                 if (bossName) {
-                    bossName.textContent = 'M U T T E R S C H I F F';
+                    bossName.textContent = 'm u t t e r s c h i f f';
                     bossName.style.textShadow = '0 0 10px #ff3366';
                 }
                 const bossHpBar = document.getElementById('bossHpBar');
@@ -155,7 +193,7 @@ export class BossEnemy extends BaseEnemy {
             }
             const bossName = document.getElementById('bossName');
             if (bossName) {
-                bossName.textContent = 'M U T T E R S C H I F F';
+                bossName.textContent = 'm u t t e r s c h i f f';
                 bossName.style.textShadow = '0 0 10px #ff3366';
             }
             const bossHpBar = document.getElementById('bossHpBar');
@@ -206,7 +244,7 @@ export class BossEnemy extends BaseEnemy {
         g.rotation = 0; // Prevent super from rotating us globally
 
         const rot = this.outerRotation || 0;
-        const color = isEnraged ? '#8b0000' : '#aa00ff';
+        const color = this.flashTime > 0 ? '#ffffff' : (isEnraged ? '#8b0000' : '#aa00ff');
         
         g.arc(0, 0, this.radius, rot, rot + Math.PI * 0.7).stroke({ color, width: 6 });
         g.arc(0, 0, this.radius, rot + Math.PI, rot + Math.PI * 1.7).stroke({ color, width: 6 });
@@ -236,6 +274,7 @@ export class DefragmenterEnemy extends BaseEnemy {
         this.outerRotation = 0;
         this.specialAbility = 'Ketten-Spaltung';
         this.hideHealthBar = true;
+        this.customFlash = true;
     }
 
     public override update(): 'stunned' | 'reached_end' | 'moving' {
@@ -268,6 +307,9 @@ export class DefragmenterEnemy extends BaseEnemy {
         g.clear();
         g.rotation = 0; // Prevent super from rotating us globally
 
+        const flashActive = this.flashTime > 0;
+        const mainColor = flashActive ? '#ffffff' : '#00f5d4';
+
         // Draw outer rotating triangle satellites
         const rot = -(this.outerRotation || 0);
         for (let i = 0; i < 6; i++) {
@@ -289,7 +331,7 @@ export class DefragmenterEnemy extends BaseEnemy {
             g.moveTo(tPts[0].x, tPts[0].y);
             g.lineTo(tPts[1].x, tPts[1].y);
             g.lineTo(tPts[2].x, tPts[2].y);
-            g.fill({ color: 0x00f5d4, alpha: 0.4 });
+            g.fill({ color: mainColor, alpha: flashActive ? 0.8 : 0.4 });
         }
 
         // Draw hexagon outline (rotated by outerRotation)
@@ -302,12 +344,12 @@ export class DefragmenterEnemy extends BaseEnemy {
             else g.lineTo(px, py);
         }
         g.lineTo(Math.cos(hexRot)*this.radius, Math.sin(hexRot)*this.radius);
-        g.stroke({ color: '#00f5d4', width: 4 });
+        g.stroke({ color: mainColor, width: 4 });
 
         // Draw inner pulsing core
         const pulse = Math.sin(this.pulseTime * 2.5) * 0.15 + 0.85;
-        const colorCore = this.flashTime > 0 ? '#ffffff' : '#00f5d4';
-        const alphaCore = this.flashTime > 0 ? 1 : 0.85;
+        const colorCore = mainColor;
+        const alphaCore = flashActive ? 1 : 0.85;
         
         for (let i = 0; i < 6; i++) {
             const angle = (Math.PI / 3) * i;

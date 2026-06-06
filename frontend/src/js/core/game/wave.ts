@@ -18,7 +18,7 @@ export function generateEnemyPool(wave: number): string[] {
     let enemiesToSpawn = Config.WAVE_BASE_ENEMIES + Math.floor(wave * Config.WAVE_ENEMIES_MULTIPLIER);
     let pool: string[] = [];
 
-    const bossInterval = 10;
+    const bossInterval = 20;
     if (wave > 0 && wave % bossInterval === 0) {
         const primaryBosses = Object.keys(EnemyData).filter(type =>
             EnemyData[type as any].category === 'Bosse' &&
@@ -82,6 +82,7 @@ export function generateEnemyPool(wave: number): string[] {
         });
 
         pool.sort(() => Math.random() - 0.5);
+        pool = spaceOutEnemyType(pool, 'Accelerator');
 
         // Guarantee newly unlocked enemies spawn first (and are guaranteed to be in the pool)
         let newlyUnlocked = availableEnemies.filter(type => EnemyData[type].unlockWave === wave);
@@ -247,3 +248,39 @@ export function handleWaveLogic(): void {
         }
     }
 }
+
+/**
+ * Spaces out a specific enemy type in the pool as evenly as possible to avoid clustering.
+ */
+function spaceOutEnemyType(pool: string[], typeToSpace: string): string[] {
+    const targets = pool.filter(x => x === typeToSpace);
+    if (targets.length <= 1) return pool;
+
+    const rest = pool.filter(x => x !== typeToSpace);
+    if (rest.length === 0) return pool;
+
+    const result: string[] = [];
+    const A = targets.length;
+    const N = rest.length;
+    const step = N / (A + 1);
+    let targetIdx = 0;
+
+    // Insert targets that should go at index 0 (before rest[0])
+    while (targetIdx < A && Math.floor((targetIdx + 1) * step) === 0) {
+        result.push(targets[targetIdx++]);
+    }
+
+    for (let i = 0; i < N; i++) {
+        result.push(rest[i]);
+        while (targetIdx < A && (i + 1) >= Math.floor((targetIdx + 1) * step)) {
+            result.push(targets[targetIdx++]);
+        }
+    }
+
+    while (targetIdx < A) {
+        result.push(targets[targetIdx++]);
+    }
+
+    return result;
+}
+

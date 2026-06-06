@@ -331,7 +331,7 @@ export class Projectile {
                             const distSq = getDistanceSq(enemy.x, enemy.y, this.x, this.y);
 
                             if (distSq <= aoeSq) {
-                                enemy.flashTime = 5; // Visual feedback
+                                enemy.triggerFlash?.(5); // Visual feedback
                             }
                         }
 
@@ -404,8 +404,8 @@ export class Projectile {
                                 targetEnemy.lastDamageParticleTime = state.animTime;
                             }
                         }
-                        if (targetEnemy && 'flashTime' in targetEnemy) {
-                            targetEnemy.flashTime = 5;
+                        if (targetEnemy && typeof targetEnemy.triggerFlash === 'function') {
+                            targetEnemy.triggerFlash(5);
                         }
 
                         // LOGICAL STATE: Strictly host-isolated

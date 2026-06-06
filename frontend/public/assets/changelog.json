@@ -4,6 +4,184 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.16.21",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Errungenschaften und Highscore-Zählung werden bei jeglichen aktiven Cheats sofort blockiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.20",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Laser-Animation des Prisma-Turms visuell komplett überarbeitet."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.19",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Stun-Indikator (Blitz-Symbol) wird nun auf allen betäubten Türmen korrekt angezeigt."
+      },
+      {
+        "type": "fix",
+        "desc": "Mutterschiff spawnt nun einen vollständigen Gegner-Schwarm anstelle eines einzelnen Elements."
+      },
+      {
+        "type": "balance",
+        "desc": "Schild-HP des Mutterschiffs von 50% auf 20% der maximalen HP reduziert."
+      },
+      {
+        "type": "fix",
+        "desc": "Flimmern bei kontinuierlichem Schaden implementiert und Verschwinden der Mutterschiff-Details beim Flashen behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.18",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Spawnabstand der Beschleuniger-Gegner erhöht, um deren Tempo-Auren gleichmäßig zu verteilen."
+      },
+      {
+        "type": "balance",
+        "desc": "Basis-HP des Beschleuniger-Gegners leicht erhöht."
+      },
+      {
+        "type": "balance",
+        "desc": "Splitter-Fragmente weichen beim Entstehen nun weiter senkrecht vom Pfad ab."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.17",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Konfetti-Animation beim Freischalten von Errungenschaften vergrößert, verlangsamt und mit dynamischen Dreheffekten aufgewertet."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.16",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Game-Over-Bildschirm im Cyber-Glassmorphismus mit Blade-Runner-Font in Kleinschreibung überarbeitet."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.17",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Überlauf und Abschneiden des Game-Over-Bildschirms durch responsive Höhenanpassungen und vertikale Scroll-Ausrichtung behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.15",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Boss-Wellen-Intervall von 10 auf 20 Wellen erhöht."
+      },
+      {
+        "type": "balance",
+        "desc": "Gold-Einkommen durch Erhöhung von Startgold, Basis-Belohnungen und Wellen-Boni angehoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.14",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Gegner-Spawnpool des Mutterschiffs an die Seltenheiten angepasst."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.13",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Schrift des Mutterschiff-Namens in der Healthbar auf Kleinbuchstaben umgestellt."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.12",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Treppeneffekt bei Abrundungen durch Aktivieren von Antialiasing behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.11",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "In-Game UI und HUD im cyberpunk-glassmorphic Design des Hauptmenüs überarbeitet."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.10",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Geschwindigkeitsschwankungen der Gegnerpfad-Visualisierung bei aktivem Browserfokus behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.9",
+    "date": "5. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Map-Namen zur Simulations-Bestenliste hinzugefügt, um den Austragungsort von Rekorden anzuzeigen."
+      }
+    ]
+  },
+  {
     "version": "v2.16.8",
     "date": "5. Juni 2026",
     "status": "active",

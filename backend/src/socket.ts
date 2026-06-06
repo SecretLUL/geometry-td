@@ -43,6 +43,10 @@ async function updateRoomHighscores(roomId: string, io: Server) {
   const state = roomStates[roomId];
   if (!state) return;
   
+  if (state.godModeActive || state.infiniteGoldActive || state.waveModified || state.benchmarkActive) {
+    return;
+  }
+  
   const currentWave = state.wave;
   if (currentWave <= 1) return;
   
@@ -51,11 +55,14 @@ async function updateRoomHighscores(roomId: string, io: Server) {
     if (s && s.user) {
       try {
         await db.none(
-          `INSERT INTO progress (user_id, highest_wave) 
-           VALUES ($1, $2) 
+          `INSERT INTO progress (user_id, highest_wave, highest_wave_map) 
+           VALUES ($1, $2, $3) 
            ON CONFLICT (user_id) 
-           DO UPDATE SET highest_wave = GREATEST(progress.highest_wave, EXCLUDED.highest_wave), updated_at = NOW()`,
-          [s.user.id, currentWave]
+           DO UPDATE SET 
+             highest_wave_map = CASE WHEN EXCLUDED.highest_wave > progress.highest_wave THEN EXCLUDED.highest_wave_map ELSE progress.highest_wave_map END,
+             highest_wave = GREATEST(progress.highest_wave, EXCLUDED.highest_wave), 
+             updated_at = NOW()`,
+          [s.user.id, currentWave, state.mapName]
         );
       } catch (err) {
         console.error(`[DATABASE] Error saving highscore for user ${s.user.username}:`, err);

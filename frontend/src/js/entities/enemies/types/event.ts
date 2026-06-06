@@ -69,7 +69,7 @@ export class FortressEnemy extends BaseEnemy {
         if (this.shieldActive) {
             const actualShieldDmg = Math.min(amount, Math.max(0, this.shieldHp!));
             this.shieldHp! -= amount;
-            this.flashTime = 3;
+            this.triggerFlash(3);
             if (this.shieldHp! <= 0) {
                 this.shieldActive = false;
                 this.shieldHp = 0;

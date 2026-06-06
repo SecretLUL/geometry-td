@@ -2,17 +2,17 @@
 #context-shop {
     position: fixed;
     z-index: 2000;
-    background: rgba(15, 15, 35, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(76, 201, 240, 0.3);
-    border-radius: 12px;
-    padding: 8px;
+    background: rgba(10, 10, 26, 0.95);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(0, 212, 255, 0.35);
+    border-radius: 16px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    gap: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 212, 255, 0.15), inset 0 0 15px rgba(0, 212, 255, 0.05);
     pointer-events: auto;
-    min-width: 120px;
+    min-width: 130px;
     max-height: calc(100vh - 20px);
     overflow-y: auto;
     animation: context-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -54,49 +54,69 @@
 
 
 .context-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
     padding: 10px 14px;
     color: #fff;
     font-family: 'Outfit', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 15px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     text-align: left;
+}
+
+.context-btn:hover {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.45);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    transform: translateY(-1px);
 }
 
 .context-btn:active {
     background: var(--tesla-cyan);
-    color: #000;
+    color: #05070f;
     transform: scale(0.95);
 }
 
 .context-btn .cost {
     font-size: 0.75rem;
-    opacity: 0.8;
-    background: rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+    opacity: 0.9;
+    background: rgba(0, 0, 0, 0.4);
     padding: 2px 6px;
     border-radius: 4px;
-    color: #fca311;
+    color: var(--gold);
 }
 
 .context-btn.too-expensive {
-    opacity: 0.5;
+    opacity: 0.4;
     pointer-events: none;
+    background: rgba(255, 51, 102, 0.02) !important;
+    border-color: rgba(255, 51, 102, 0.08) !important;
+}
+
+.context-btn.too-expensive .cost {
+    color: #ff3366;
 }
 
 .context-btn.cancel-btn {
-    background: rgba(255, 51, 102, 0.1) !important;
+    background: rgba(255, 51, 102, 0.08) !important;
     border-color: rgba(255, 51, 102, 0.3) !important;
     color: #ff3366 !important;
     justify-content: center !important;
     margin-top: 5px !important;
+}
+
+.context-btn.cancel-btn:hover {
+    background: rgba(255, 51, 102, 0.15) !important;
+    border-color: rgba(255, 51, 102, 0.6) !important;
+    box-shadow: 0 0 10px rgba(255, 51, 102, 0.25);
 }
 
 .context-btn.cancel-btn:active {

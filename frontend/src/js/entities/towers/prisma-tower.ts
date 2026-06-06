@@ -528,122 +528,335 @@ export class PrismaTower extends Tower {
 
         const progress = Math.min(1.0, lockTime / TowerData['Prisma'].prismaChargeFrames!);
         const widthMultiplier = isSplit ? 0.85 : (1.0 + progress * 2.0);
-
         const colorNum = parseInt(colorStr.replace('#', '0x'), 16);
 
-        // Ambient outer glow
-        g.moveTo(x1, y1).lineTo(x2, y2).stroke({ 
-            color: colorNum, 
-            alpha: isSplit ? 0.35 : (0.2 + progress * 0.2), 
-            width: (isSplit ? 5 : 8) * widthMultiplier,
-            cap: 'round'
-        });
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
 
-        // Inner laser
-        g.moveTo(x1, y1).lineTo(x2, y2).stroke({ 
-            color: 0xffffff, 
-            alpha: 0.95, 
-            width: (isSplit ? 1.4 : 1.8) * widthMultiplier,
-            cap: 'round'
-        });
+        // --- SPECIFIC VISUALS PER SPECIALIZATION ---
+        const isMeltdown = this.specialization === 'meltdown' && !isSplit;
+        const isRefraction = this.specialization === 'refraction' || isSplit;
 
-        // Plasma Spiral
-        if (!isSplit && progress > 0.25) {
-            const dx = x2 - x1;
-            const dy = y2 - y1;
-            const len = Math.sqrt(dx * dx + dy * dy);
-            
-            if (len > 10) {
+        if (isRefraction && len > 5) {
+            // Neon teal curve for Refraction splits & Refraction primary beam
+            // Generate a stable control point based on enemy ID to avoid rapid chaotic shaking,
+            // but add a tiny high-frequency crystal shimmer.
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            const nx = -dy / len;
+            const ny = dx / len;
+
+            // Stable offset determined by target.id
+            const curveDirection = (target.id % 2 === 0) ? 1 : -1;
+            const baseOffset = curveDirection * (len * 0.12);
+            // Crystal micro-vibration (balanced speed)
+            const shimmer = Math.sin(state.animTime * 0.02 + target.id) * 1.5;
+            const finalOffset = baseOffset + shimmer;
+
+            const cx = midX + nx * finalOffset;
+            const cy = midY + ny * finalOffset;
+
+            // Draw refraction laser core layers
+            // 1. Crystal Neon Aura
+            const refractionColor = isSplit ? 0x00ffcc : 0x00e699;
+            g.moveTo(x1, y1).quadraticCurveTo(cx, cy, x2, y2).stroke({
+                color: refractionColor,
+                alpha: 0.15 + (isSplit ? 0.1 : progress * 0.15),
+                width: (isSplit ? 7 : 11) * widthMultiplier,
+                cap: 'round'
+            });
+
+            // 2. Middle laser body
+            g.moveTo(x1, y1).quadraticCurveTo(cx, cy, x2, y2).stroke({
+                color: refractionColor,
+                alpha: 0.5 + (isSplit ? 0.1 : progress * 0.25),
+                width: (isSplit ? 3.5 : 5) * widthMultiplier,
+                cap: 'round'
+            });
+
+            // 3. Ultra white core
+            g.moveTo(x1, y1).quadraticCurveTo(cx, cy, x2, y2).stroke({
+                color: 0xffffff,
+                alpha: 0.95,
+                width: (isSplit ? 1.2 : 1.6) * widthMultiplier,
+                cap: 'round'
+            });
+
+            // Traveling Light Shards on Refraction curve (balanced speed)
+            const numShards = isSplit ? 1 : 2;
+            for (let s = 0; s < numShards; s++) {
+                const t = ((state.animTime * (isSplit ? 0.002 : 0.003) + s / numShards)) % 1.0;
+                // Quadratic Bezier interpolation: B(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+                const t1 = 1 - t;
+                const bx = t1 * t1 * x1 + 2 * t1 * t * cx + t * t * x2;
+                const by = t1 * t1 * y1 + 2 * t1 * t * cy + t * t * y2;
+
+                // Draw small diamond shard
+                const shardSize = (isSplit ? 2.5 : 3.5) * widthMultiplier;
+                g.moveTo(bx, by - shardSize)
+                 .lineTo(bx + shardSize, by)
+                 .lineTo(bx, by + shardSize)
+                 .lineTo(bx - shardSize, by)
+                 .closePath()
+                 .fill({ color: 0xffffff, alpha: 0.85 })
+                 .stroke({ color: refractionColor, width: 1 });
+            }
+
+        } else if (isMeltdown && len > 5) {
+            // Raging Orange-Red Plasma Stream
+            const nx = -dy / len;
+            const ny = dx / len;
+
+            // 1. Unstable plasma fire aura (wobbles in size and alpha - balanced)
+            const heatPulse = 1.0 + 0.15 * Math.sin(state.animTime * 0.02);
+            g.moveTo(x1, y1).lineTo(x2, y2).stroke({
+                color: colorNum,
+                alpha: 0.25 + progress * 0.25,
+                width: 14 * widthMultiplier * heatPulse,
+                cap: 'round'
+            });
+
+            // 2. Yellow middle heat cylinder
+            g.moveTo(x1, y1).lineTo(x2, y2).stroke({
+                color: 0xffcc00,
+                alpha: 0.6 + progress * 0.3,
+                width: 6.5 * widthMultiplier,
+                cap: 'round'
+            });
+
+            // 3. Super hot white core
+            g.moveTo(x1, y1).lineTo(x2, y2).stroke({
+                color: 0xffffff,
+                alpha: 0.95,
+                width: 2.2 * widthMultiplier,
+                cap: 'round'
+            });
+
+            // 4. Crackling lightning arcs along the beam (balanced)
+            const steps = 18;
+            const time = state.animTime * 0.035;
+            const maxOffset = (3.5 + progress * 7.5) * widthMultiplier;
+
+            g.moveTo(x1, y1);
+            for (let i = 1; i < steps; i++) {
+                const t = i / steps;
+                const basePx = x1 + dx * t;
+                const basePy = y1 + dy * t;
+                
+                // Jagged wave function using high-frequency sine/cos combination
+                const noise = Math.sin(t * Math.PI * 8 - time) * Math.cos(t * Math.PI * 4 + time * 0.5);
+                const offset = noise * maxOffset * Math.sin(t * Math.PI); // Pin to ends
+                const hx = basePx + nx * offset;
+                const hy = basePy + ny * offset;
+                g.lineTo(hx, hy);
+            }
+            g.lineTo(x2, y2);
+            g.stroke({
+                color: 0xff6600,
+                alpha: 0.55 + progress * 0.35,
+                width: 1.2 + progress * 1.5,
+                cap: 'round',
+                join: 'round'
+            });
+
+            // White hot secondary thin arc inside the main arc for high charge (balanced)
+            if (progress > 0.5) {
+                g.moveTo(x1, y1);
+                for (let i = 1; i < steps; i++) {
+                    const t = i / steps;
+                    const basePx = x1 + dx * t;
+                    const basePy = y1 + dy * t;
+                    
+                    const noise = Math.cos(t * Math.PI * 10 + time * 1.1) * Math.sin(t * Math.PI * 5 - time * 0.7);
+                    const offset = noise * maxOffset * 0.65 * Math.sin(t * Math.PI);
+                    const hx = basePx + nx * offset;
+                    const hy = basePy + ny * offset;
+                    g.lineTo(hx, hy);
+                }
+                g.lineTo(x2, y2);
+                g.stroke({
+                    color: 0xffffff,
+                    alpha: 0.75,
+                    width: 0.7 + progress * 0.7,
+                    cap: 'round',
+                    join: 'round'
+                });
+            }
+
+        } else {
+            // --- Standard / Default gold/yellow laser beam ---
+            // 1. Outer golden aura
+            g.moveTo(x1, y1).lineTo(x2, y2).stroke({
+                color: colorNum,
+                alpha: 0.18 + progress * 0.22,
+                width: 10 * widthMultiplier,
+                cap: 'round'
+            });
+
+            // 2. Middle yellow laser body
+            g.moveTo(x1, y1).lineTo(x2, y2).stroke({
+                color: colorNum,
+                alpha: 0.55 + progress * 0.25,
+                width: 5 * widthMultiplier,
+                cap: 'round'
+            });
+
+            // 3. Core white laser line
+            g.moveTo(x1, y1).lineTo(x2, y2).stroke({
+                color: 0xffffff,
+                alpha: 0.95,
+                width: 1.8 * widthMultiplier,
+                cap: 'round'
+            });
+
+            // 4. Plasma Spiral wrapping around the core (balanced)
+            if (progress > 0.2 && len > 10) {
                 const nx = -dy / len;
                 const ny = dx / len;
                 const steps = 24;
-                const time = state.animTime * (0.01 + progress * 0.015);
+                const time = state.animTime * (0.0015 + progress * 0.002);
                 
+                g.moveTo(x1, y1);
                 for (let i = 0; i <= steps; i++) {
                     const t = i / steps;
                     const px = x1 + dx * t;
                     const py = y1 + dy * t;
                     const waveAngle = t * Math.PI * 6 - time;
-                    const amplitude = (8 + progress * 12) * Math.sin(t * Math.PI) * widthMultiplier;
+                    const amplitude = (7 + progress * 10) * Math.sin(t * Math.PI) * widthMultiplier;
                     const hx = px + nx * Math.cos(waveAngle) * amplitude;
                     const hy = py + ny * Math.cos(waveAngle) * amplitude;
                     
                     if (i === 0) g.moveTo(hx, hy);
                     else g.lineTo(hx, hy);
                 }
-                g.stroke({ color: colorNum, alpha: 0.4 + progress * 0.5, width: 1.0 + progress * 2.0 });
+                g.stroke({
+                    color: colorNum,
+                    alpha: 0.45 + progress * 0.45,
+                    width: 1.0 + progress * 1.5
+                });
                 
-                if (progress > 0.6) {
+                if (progress > 0.55) {
+                    g.moveTo(x1, y1);
                     for (let i = 0; i <= steps; i++) {
                         const t = i / steps;
                         const px = x1 + dx * t;
                         const py = y1 + dy * t;
                         const waveAngle = t * Math.PI * 6 - time;
-                        const amplitude = (8 + progress * 12) * Math.sin(t * Math.PI) * widthMultiplier;
+                        const amplitude = (7 + progress * 10) * Math.sin(t * Math.PI) * widthMultiplier;
                         const hx = px + nx * Math.cos(waveAngle) * amplitude;
                         const hy = py + ny * Math.cos(waveAngle) * amplitude;
                         
                         if (i === 0) g.moveTo(hx, hy);
                         else g.lineTo(hx, hy);
                     }
-                    g.stroke({ color: 0xffffff, alpha: 0.85, width: 0.6 + progress * 0.6 });
+                    g.stroke({
+                        color: 0xffffff,
+                        alpha: 0.75,
+                        width: 0.6 + progress * 0.6
+                    });
                 }
+            }
+
+            // 5. Flowing energy nodes (Traveling golden rings/capsules - balanced)
+            const numNodes = 3;
+            for (let i = 0; i < numNodes; i++) {
+                const t = ((state.animTime * 0.002) + i / numNodes) % 1.0;
+                const px = x1 + dx * t;
+                const py = y1 + dy * t;
+
+                // Perpendicular tick representing energy capsule
+                const nx = -dy / len;
+                const ny = dx / len;
+                const tickLen = 4 * widthMultiplier;
+
+                g.moveTo(px - nx * tickLen, py - ny * tickLen)
+                 .lineTo(px + nx * tickLen, py + ny * tickLen)
+                 .stroke({
+                     color: 0xffffff,
+                     alpha: 0.8,
+                     width: 2.0 * widthMultiplier,
+                     cap: 'round'
+                 });
             }
         }
 
-        // Source muzzle flare
-        if (!isSplit && progress > 0.1) {
-            const flareR = (8 + progress * 15) * widthMultiplier;
-            g.circle(x1, y1, flareR).fill({ color: colorNum, alpha: 0.4 });
-            g.circle(x1, y1, flareR * 0.5).fill({ color: 0xffffff, alpha: 0.8 });
+        // --- MUZZLE FLARE (TOWER TIP EFFECTS) ---
+        // REDESIGN: Scaled down and softened white flare so it doesn't cover the turret crystal.
+        if (!isSplit && progress > 0.05) {
+            const flareR = (4 + progress * 8) * Math.min(1.3, widthMultiplier);
+            // Pulsing glow rings centered on muzzle (balanced)
+            const ringCount = 2;
+            for (let r = 0; r < ringCount; r++) {
+                const pulseR = flareR * (0.5 + 0.5 * Math.sin(state.animTime * 0.015 + r * Math.PI));
+                g.circle(x1, y1, pulseR).stroke({
+                    color: colorNum,
+                    alpha: 0.25 * (1 - pulseR / (flareR * 1.0)),
+                    width: 1.0
+                });
+            }
+
+            // Core glow
+            g.circle(x1, y1, flareR * 0.75).fill({ color: colorNum, alpha: 0.25 });
+            g.circle(x1, y1, Math.min(2.5, flareR * 0.3)).fill({ color: 0xffffff, alpha: 0.75 });
         }
 
-        // Holographic Targeting Reticle
-        const targetRadius = (isSplit ? 8 : (12 + progress * 24)) * widthMultiplier;
+        // --- HOLOGRAPHIC TARGETING RETICLE (HEXAGON HUD) ---
+        const targetRadius = (isSplit ? 8 : (11 + progress * 22)) * widthMultiplier;
 
-        // 1. Thin outer boundary ring (soft target outline)
+        // 1. Soft target outline circle
         g.circle(x2, y2, targetRadius).stroke({ 
             color: colorNum, 
-            alpha: isSplit ? 0.25 : (0.12 + progress * 0.18), 
+            alpha: isSplit ? 0.2 : (0.1 + progress * 0.15), 
             width: 1.0 
         });
 
-        // 2. Concentric inner soft glow ring
-        g.circle(x2, y2, targetRadius * 0.85).stroke({ 
+        // 2. Concentric inner glow ring
+        g.circle(x2, y2, targetRadius * 0.82).stroke({ 
             color: colorNum, 
-            alpha: isSplit ? 0.35 : (0.2 + progress * 0.35), 
-            width: 1.5 
+            alpha: isSplit ? 0.3 : (0.2 + progress * 0.3), 
+            width: 1.2 
         });
 
-        // 3. Rotating Tech-HUD Arcs / Brackets
+        // 3. Rotating Hexagonal Visier (balanced)
         if (!isSplit) {
-            const rot = state.animTime * 0.04;
-            const numArcs = 3;
-            const arcAngle = (Math.PI * 2) / numArcs;
-            const gap = 0.45; // Gap in radians between brackets
-            
-            for (let i = 0; i < numArcs; i++) {
-                const startAngle = rot + i * arcAngle;
-                const endAngle = startAngle + arcAngle - gap;
-                const rArc = targetRadius * 1.05;
-                
-                // Draw rotating arc
-                g.moveTo(x2 + Math.cos(startAngle) * rArc, y2 + Math.sin(startAngle) * rArc);
-                g.arc(x2, y2, rArc, startAngle, endAngle);
+            const rot = state.animTime * 0.006;
+            g.moveTo(x2 + targetRadius * Math.cos(rot), y2 + targetRadius * Math.sin(rot));
+            for (let i = 1; i <= 6; i++) {
+                const angle = rot + (i * Math.PI * 2 / 6);
+                g.lineTo(x2 + targetRadius * Math.cos(angle), y2 + targetRadius * Math.sin(angle));
             }
-            g.stroke({ 
-                color: colorNum, 
-                alpha: 0.4 + progress * 0.5, 
-                width: 2.0 
+            g.closePath();
+            g.stroke({
+                color: colorNum,
+                alpha: 0.25 + progress * 0.35,
+                width: 1.2
+            });
+
+            // Outer brackets on corners of Hexagon (balanced)
+            const bracketRot = -state.animTime * 0.003;
+            for (let i = 0; i < 3; i++) {
+                const angle = bracketRot + (i * Math.PI * 2 / 3);
+                const aStart = angle - 0.25;
+                const aEnd = angle + 0.25;
+                const bracketR = targetRadius * 1.2;
+
+                g.moveTo(x2 + Math.cos(aStart) * bracketR, y2 + Math.sin(aStart) * bracketR);
+                g.arc(x2, y2, bracketR, aStart, aEnd);
+            }
+            g.stroke({
+                color: colorNum,
+                alpha: 0.35 + progress * 0.45,
+                width: 1.6
             });
         }
 
-        // 4. Precision Crosshair Ticks (stops outside center to keep target visible)
-        if (!isSplit && progress > 0.2) {
-            const innerBound = targetRadius * 0.35;
-            const outerBound = targetRadius * 0.7;
-            const tickAlpha = 0.3 + progress * 0.5;
-            const tickWidth = 1.2 * widthMultiplier;
+        // 4. Precision Crosshair Ticks (Horizontal & Vertical, stopping before center)
+        if (!isSplit && progress > 0.15) {
+            const innerBound = targetRadius * 0.3;
+            const outerBound = targetRadius * 0.75;
+            const tickAlpha = 0.25 + progress * 0.5;
+            const tickWidth = 1.0 * widthMultiplier;
             
             g.moveTo(x2 - outerBound, y2).lineTo(x2 - innerBound, y2)
              .moveTo(x2 + innerBound, y2).lineTo(x2 + outerBound, y2)
@@ -652,37 +865,55 @@ export class PrismaTower extends Tower {
              .stroke({ color: 0xffffff, alpha: tickAlpha, width: tickWidth });
         }
 
-        // 5. Shrinking Energy Pulse (dynamic focusing effect)
-        if (!isSplit && progress > 0.1) {
-            const pulseProgress = (state.animTime * 0.02) % 1.0;
-            const pulseRadius = targetRadius * (1.0 - pulseProgress);
+        // 5. Focusing Containment Funnel (expanding/contracting ring - balanced)
+        if (!isSplit && progress > 0.05) {
+            const pulseProgress = (state.animTime * 0.003) % 1.0;
+            const pulseRadius = targetRadius * (1.1 - pulseProgress * 0.9);
             g.circle(x2, y2, pulseRadius).stroke({ 
                 color: colorNum, 
                 alpha: (1.0 - pulseProgress) * (0.35 + progress * 0.45), 
-                width: 1.5 
+                width: 1.2 
             });
         }
 
-        // 6. Central Precision Core (very small, semi-transparent focal point)
-        const coreRadius = Math.max(3, targetRadius * 0.15);
-        g.circle(x2, y2, coreRadius).fill({ color: 0xffffff, alpha: 0.35 + progress * 0.35 });
-        g.circle(x2, y2, coreRadius).stroke({ color: colorNum, alpha: 0.5 + progress * 0.3, width: 1.0 });
+        // 6. Central Precision Core & Star Lens Flare
+        const coreRadius = Math.max(3.0, targetRadius * 0.15);
+        g.circle(x2, y2, coreRadius).fill({ color: 0xffffff, alpha: 0.4 + progress * 0.4 });
+        g.circle(x2, y2, coreRadius).stroke({ color: colorNum, alpha: 0.55 + progress * 0.35, width: 1.0 });
 
-        if (!isSplit && progress > 0.4) {
-            const flareSize = 16 * progress * widthMultiplier;
-            g.moveTo(x2 - flareSize, y2).lineTo(x2 + flareSize, y2)
-             .moveTo(x2, y2 - flareSize).lineTo(x2, y2 + flareSize)
-             .stroke({ color: 0xffffff, alpha: 0.6 * progress, width: 1.0 * widthMultiplier });
+        if (!isSplit && progress > 0.35) {
+            const flareSize = 14 * progress * widthMultiplier;
+            const flareRot = state.animTime * 0.0015;
+            
+            // Draw diagonal cross flare
+            for (let i = 0; i < 2; i++) {
+                const angle = flareRot + (i * Math.PI / 2);
+                g.moveTo(x2 - Math.cos(angle) * flareSize, y2 - Math.sin(angle) * flareSize)
+                 .lineTo(x2 + Math.cos(angle) * flareSize, y2 + Math.sin(angle) * flareSize);
+            }
+            g.stroke({
+                color: 0xffffff,
+                alpha: 0.55 * progress,
+                width: 1.0 * widthMultiplier
+            });
         }
 
-        const sparkCount = isSplit ? 1 : Math.floor(1 + progress * 4);
+        // --- SPARK PARTICLES FADE OUT (balanced speed and Snappy 500ms lifetime) ---
+        const sparkCount = isSplit ? 1 : Math.floor(2 + progress * 5);
         for (let i = 0; i < sparkCount; i++) {
-            const sparkR = (isSplit ? 3 : (4 + Math.random() * 4)) * widthMultiplier;
-            const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * (isSplit ? 4 : (8 + progress * 15));
+            // Seeded randomness based on animTime, spark index and target ID to keep them moving but smooth
+            const seed = state.animTime * 0.005 + i * 1.5 + target.id;
+            const sparkR = (isSplit ? 2.5 : (3.5 + (Math.sin(seed * 2.3) * 0.5 + 0.5) * 3)) * widthMultiplier;
+            const angle = seed * 3.7;
+            const maxDist = isSplit ? 4 : (7 + progress * 16);
+            
+            // Snappy 500ms lifetime per spark cycle
+            const lifetime = 500;
+            const tElapsed = (state.animTime + i * (lifetime / sparkCount)) % lifetime;
+            const dist = (tElapsed / lifetime) * maxDist;
             const sx = x2 + Math.cos(angle) * dist;
             const sy = y2 + Math.sin(angle) * dist;
-            g.circle(sx, sy, sparkR).fill({ color: colorNum });
+            g.circle(sx, sy, sparkR).fill({ color: colorNum, alpha: 0.85 * (1 - tElapsed / lifetime) });
         }
     }
 

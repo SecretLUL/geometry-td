@@ -282,7 +282,7 @@ authRouter.post('/user/profile', authenticateUser, async (req: Request, res: Res
 authRouter.get('/leaderboard', async (_req: Request, res: Response) => {
   try {
     const leaderboard = await db.any(
-      `SELECT u.username, u.avatar, p.highest_wave, p.updated_at
+      `SELECT u.username, u.avatar, p.highest_wave, p.highest_wave_map, p.updated_at
        FROM progress p
        JOIN users u ON p.user_id = u.id
        WHERE p.highest_wave > 0

@@ -370,6 +370,7 @@ export class BombTower extends Tower {
 
         if (this.stunTimer > 0) {
             this.stunTimer--;
+            this.updatePixi();
             return;
         }
         if (this.fireCooldown > 0) this.fireCooldown--;

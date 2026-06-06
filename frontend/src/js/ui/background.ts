@@ -59,7 +59,8 @@ export class BackgroundController {
             backgroundAlpha: 0,
             resizeTo: window,
             autoDensity: true,
-            resolution: window.devicePixelRatio || 1
+            resolution: window.devicePixelRatio || 1,
+            antialias: true
         });
         
         this.gridGraphics = new PIXI.Graphics();

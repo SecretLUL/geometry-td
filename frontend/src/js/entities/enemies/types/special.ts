@@ -160,7 +160,7 @@ export class AcceleratorEnemy extends BaseEnemy {
 
         const baseHp = Config.ENEMY_BASE_HP;
         const hpMultiplier = Config.getHpMultiplier(waveNumber);
-        this.maxHp = Math.floor(baseHp * hpMultiplier * 1.5);
+        this.maxHp = Math.floor(baseHp * hpMultiplier * 1.8);
         this.reward = Math.floor((Config.ENEMY_REWARD_BASE * 2.0) * Math.pow(Config.ENEMY_REWARD_MULTIPLIER, waveNumber - 1));
         this.initHp();
     }

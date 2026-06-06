@@ -400,6 +400,7 @@ export class Tower {
             if ((this as any).lockTimer !== undefined) {
                 (this as any).lockTimer = 0;
             }
+            this.updatePixi();
             return;
         }
         if (this.fireCooldown > 0) this.fireCooldown--;

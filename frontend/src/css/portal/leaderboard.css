@@ -123,6 +123,11 @@
     text-align: center;
 }
 
+.col-map {
+    width: 180px;
+    font-weight: 600;
+}
+
 .col-wave {
     width: 180px;
     font-weight: 800;

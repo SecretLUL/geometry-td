@@ -47,6 +47,7 @@ export async function initPixi() {
         height: initH,
         preference: 'webgl',
         powerPreference: 'high-performance',
+        antialias: true,
     });
     pixiContainer.appendChild(app.canvas);
 

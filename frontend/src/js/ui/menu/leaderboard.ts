@@ -21,7 +21,7 @@ export class LeaderboardController {
 
         listContainer.innerHTML = `
             <tr class="leaderboard-loading-row">
-                <td colspan="4">Lade Bestenliste...</td>
+                <td colspan="5">Lade Bestenliste...</td>
             </tr>
         `;
 
@@ -38,7 +38,7 @@ export class LeaderboardController {
             if (list.length === 0) {
                 listContainer.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align: center; font-style: italic; color: #555566; padding: 30px 0;">
+                        <td colspan="5" style="text-align: center; font-style: italic; color: #555566; padding: 30px 0;">
                             Keine Einträge vorhanden.
                         </td>
                     </tr>
@@ -93,6 +93,11 @@ export class LeaderboardController {
                 tdUser.appendChild(userCellDiv);
                 tr.appendChild(tdUser);
 
+                const tdMap = document.createElement('td');
+                tdMap.className = 'col-map';
+                tdMap.textContent = entry.highest_wave_map || 'Unbekannt';
+                tr.appendChild(tdMap);
+
                 const tdWave = document.createElement('td');
                 tdWave.className = 'col-wave';
 
@@ -124,7 +129,7 @@ export class LeaderboardController {
             console.error('Error fetching leaderboard:', err);
             listContainer.innerHTML = `
                 <tr class="leaderboard-error-row">
-                    <td colspan="4">Fehler beim Laden der Bestenliste.</td>
+                    <td colspan="5">Fehler beim Laden der Bestenliste.</td>
                 </tr>
             `;
         }

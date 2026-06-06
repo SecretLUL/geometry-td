@@ -150,7 +150,7 @@ export class ProfileController {
                 { id: 'ach-wave-50', reqWave: 50 },
                 { id: 'ach-gold-1000', reqWave: null },
                 { id: 'ach-towers-15', reqWave: null },
-                { id: 'ach-kill-boss', reqWave: 11 },
+                { id: 'ach-kill-boss', reqWave: 21 },
                 { id: 'ach-no-lives-lost', reqWave: null },
                 { id: 'ach-tesla-5', reqWave: null }
             ];

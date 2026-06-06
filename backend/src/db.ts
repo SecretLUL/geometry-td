@@ -46,6 +46,7 @@ export async function initDatabaseSchema() {
       CREATE TABLE IF NOT EXISTS progress (
         user_id INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         highest_wave INTEGER DEFAULT 0,
+        highest_wave_map VARCHAR(100),
         unlocked_skins JSONB DEFAULT '["default"]'::jsonb,
         unlocked_achievements JSONB DEFAULT '[]'::jsonb,
         selected_skin VARCHAR(50) DEFAULT 'default',
@@ -53,6 +54,12 @@ export async function initDatabaseSchema() {
       );
     `);
     console.log('[DATABASE] Table "progress" verified.');
+    
+    // Add the highest_wave_map column if it does not yet exist (idempotent migration)
+    await db.none(`
+      ALTER TABLE progress ADD COLUMN IF NOT EXISTS highest_wave_map VARCHAR(100);
+    `);
+    console.log('[DATABASE] Column "highest_wave_map" in table "progress" verified.');
     
     console.log('[DATABASE] Schema initialization completed successfully.');
   } catch (error) {

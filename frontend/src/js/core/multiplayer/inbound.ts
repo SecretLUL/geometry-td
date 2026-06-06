@@ -208,7 +208,7 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
                                     lastX = enemy.x;
                                     lastY = enemy.y;
 
-                                    enemy.flashTime = 5;
+                                    enemy.triggerFlash?.(5);
                                     createExplosion(enemy.x, enemy.y, tower.specialization === 'ricochet' ? '#55efc4' : '#a0d8ef', 3);
 
                                     if (tid === event.targetIds[0]) {
@@ -234,7 +234,7 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
                     for (let tid of event.targetIds) {
                         const enemy = enemiesMap.get(tid);
                         if (enemy) {
-                            enemy.flashTime = 5;
+                            enemy.triggerFlash?.(5);
                             createExplosion(enemy.x, enemy.y, arcColor, 3);
                             
                             // Draw lightning arc from tower to target
@@ -624,6 +624,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                 if (data.mod === 'godMode') state.godMode = data.value;
                 if (data.mod === 'infiniteGold') state.infiniteGold = data.value;
                 if (data.mod === 'waveModified') state.waveModified = data.value;
+                if (data.mod === 'benchmarkActive') state.benchmarkActive = data.value;
                 Multiplayer.updateUI();
             });
 

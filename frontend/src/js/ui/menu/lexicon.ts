@@ -223,7 +223,8 @@ export class LexiconController {
                     width: 180,
                     height: 180,
                     resolution: window.devicePixelRatio || 1,
-                    autoDensity: true
+                    autoDensity: true,
+                    antialias: true
                 });
             } else {
                 this.lexiconApp.stage.removeChildren();

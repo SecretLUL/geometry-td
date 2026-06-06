@@ -21,6 +21,8 @@ export class BaseEnemy implements Enemy {
     public targetWaypointIndex: number;
     public distanceTravelled: number;
     public flashTime: number;
+    public lastFlashTime: number = 0;
+    public customFlash: boolean = false;
     public pulseTime: number;
     public rotation: number;
     public deadMarked: boolean;
@@ -69,6 +71,8 @@ export class BaseEnemy implements Enemy {
         this.targetWaypointIndex = 1;
         this.distanceTravelled = 0;
         this.flashTime = 0;
+        this.lastFlashTime = 0;
+        this.customFlash = false;
         this.pulseTime = 0;
         this.rotation = 0;
         this.deadMarked = false;
@@ -124,6 +128,14 @@ export class BaseEnemy implements Enemy {
         this.hp = this.maxHp;
     }
 
+    public triggerFlash(duration: number): void {
+        const now = state.animTime;
+        if (now - this.lastFlashTime >= 200) {
+            this.flashTime = duration;
+            this.lastFlashTime = now;
+        }
+    }
+
     public takeDamage(amount: number, source?: any): number {
         if (this.shieldActive) {
             this.shieldActive = false;
@@ -132,7 +144,7 @@ export class BaseEnemy implements Enemy {
         }
         const actualDmg = Math.min(amount, Math.max(0, this.hp));
         this.hp -= amount;
-        this.flashTime = 5;
+        this.triggerFlash(5);
 
         if (source) {
             const current = this.damageSources.get(source) || 0;
@@ -245,8 +257,13 @@ export class BaseEnemy implements Enemy {
         // Flash logic - toggle visibility
         if (this.flashTime > 0) {
             this.flashTime--;
-            this.bodyGraphics.visible = false;
-            if (this.flashGraphics) this.flashGraphics.visible = true;
+            if (this.customFlash) {
+                this.bodyGraphics.visible = true;
+                if (this.flashGraphics) this.flashGraphics.visible = false;
+            } else {
+                this.bodyGraphics.visible = false;
+                if (this.flashGraphics) this.flashGraphics.visible = true;
+            }
         } else {
             this.bodyGraphics.visible = true;
             if (this.flashGraphics) this.flashGraphics.visible = false;

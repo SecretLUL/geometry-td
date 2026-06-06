@@ -57,6 +57,7 @@ const newEnemiesBuffer: Enemy[] = [];
 
 // Game loop timing state
 export let lastFrameTime = performance.now();
+export let lastAnimFrameTime = performance.now();
 export let frameCount = 0;
 let speedAccumulator = 0;
 
@@ -120,8 +121,13 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
     // Keep high-brightness HTML DOM FPS overlay hidden (drawn on canvas instead)
     cachedFpsDisplayEl?.classList.add('hidden');
 
+    // Track real elapsed time for visual animations (decoupled from VSync jitter mitigation)
+    let animElapsed = timestamp - lastAnimFrameTime;
+    if (animElapsed > 100) animElapsed = 100;
+    lastAnimFrameTime = timestamp;
+
     if (!state.isPaused && !state.gameOver) {
-        state.animTime = (state.animTime || 0) + elapsed;
+        state.animTime = (state.animTime || 0) + animElapsed;
     }
 
     // Canvas 2D clearing is no longer needed; PixiJS handles clearing on its own tick
@@ -542,11 +548,21 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
 
                             // Splinter Split Ability: Spawns 2 extremely fast triangle fragments on death
                             if (enemy.typeName === 'Splinter') {
+                                const target = waypoints[enemy.targetWaypointIndex] || { x: enemy.x + 1, y: enemy.y };
+                                const dx = target.x - enemy.x;
+                                const dy = target.y - enemy.y;
+                                const len = Math.sqrt(dx * dx + dy * dy) || 1;
+                                const dirX = dx / len;
+                                const dirY = dy / len;
+                                const perpX = -dirY;
+                                const perpY = dirX;
+                                const splitDistance = 25; // split 25px to the left and right (total 50px apart)
+
                                 for (let f = 0; f < 2; f++) {
                                     const fragment = EnemyFactory.createEnemy('SplinterFragment', enemy.waveNumber);
-                                    // Settle position with slight jitter around original coordinates
-                                    fragment.x = enemy.x + (Math.random() - 0.5) * 12;
-                                    fragment.y = enemy.y + (Math.random() - 0.5) * 12;
+                                    const side = f === 0 ? 1 : -1;
+                                    fragment.x = enemy.x + perpX * splitDistance * side;
+                                    fragment.y = enemy.y + perpY * splitDistance * side;
                                     fragment.targetWaypointIndex = enemy.targetWaypointIndex;
                                     fragment.distanceTravelled = enemy.distanceTravelled;
                                     state.enemies.push(fragment);
@@ -675,7 +691,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         cachedBossHpContainer.style.boxShadow = '0 0 25px rgba(0, 245, 212, 0.4)';
                     }
                     if (cachedBossName) {
-                        cachedBossName.textContent = 'D E F R A G M E N T I E R E R';
+                        cachedBossName.textContent = 'd e f r a g m e n t i e r e r';
                         cachedBossName.style.textShadow = '0 0 10px #00f5d4';
                     }
 
@@ -705,7 +721,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                             cachedBossHpContainer.style.boxShadow = '0 0 25px rgba(255, 51, 102, 0.4)';
                         }
                         if (cachedBossName) {
-                            cachedBossName.textContent = 'M U T T E R S C H I F F';
+                            cachedBossName.textContent = 'm u t t e r s c h i f f';
                             cachedBossName.style.textShadow = '0 0 10px #ff3366';
                         }
 
@@ -861,6 +877,8 @@ export function tryStartGame(): void {
         const loadingScreen = document.getElementById('loading-screen');
         setTimeout(() => {
             if (loadingScreen) loadingScreen.classList.add('fade-out');
+            lastFrameTime = performance.now();
+            lastAnimFrameTime = performance.now();
             gameLoop(performance.now(), false);
         }, 800);
     }

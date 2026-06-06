@@ -18,7 +18,7 @@ export const Config = {
         SUPER_FAST: 6.0
     },
 
-    STARTING_GOLD: 250,
+    STARTING_GOLD: 300,
     STARTING_LIVES: 20,
 
     TOWER_MAX_LEVEL: 20,
@@ -32,8 +32,8 @@ export const Config = {
     // Enemy Parameters
     ENEMY_BASE_HP: 20,
     ENEMY_HP_MULTIPLIER: 1.15,
-    ENEMY_REWARD_BASE: 5,
-    ENEMY_REWARD_MULTIPLIER: 1.02, // lowered from 1.05 to prevent extreme gold scaling in later waves
+    ENEMY_REWARD_BASE: 7,
+    ENEMY_REWARD_MULTIPLIER: 1.03, // lowered from 1.05 to prevent extreme gold scaling in later waves
 
     INTEREST_RATE: 0.10,            // interest rate per wave (lowered from 15%)
     DIFFICULTY_LINEAR_FACTOR: 0.8,  // linear coefficient for wave health scaling (increased from 0.5)
@@ -49,8 +49,8 @@ export const Config = {
     SPAWN_RATE: 80,
     WAVE_BASE_ENEMIES: 12,
     WAVE_ENEMIES_MULTIPLIER: 2.2,
-    WAVE_BONUS_BASE: 20,
-    WAVE_BONUS_PER_WAVE: 5,
+    WAVE_BONUS_BASE: 30,
+    WAVE_BONUS_PER_WAVE: 6,
 
     // Derived (kept for backward compat, updated by viewport scaler)
     get CANVAS_WIDTH() { return this.TILE_SIZE * this.CANVAS_COLS; },
@@ -293,7 +293,7 @@ export const EnemyData: Record<string, EnemyConfig> = {
         icon: '⏩',
         color: '#ccff00',
         description: 'Erhöht das Bewegungstempo aller Gegner im Umkreis um 40%.',
-        hp: 30,
+        hp: 36,
         speed: 15,
         reward: 20,
         difficulty: 4,
