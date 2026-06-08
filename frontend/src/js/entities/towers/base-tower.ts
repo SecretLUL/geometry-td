@@ -50,6 +50,7 @@ export class Tower {
     public constructionDuration: number;
 
     public pixiSprite?: PIXI.Container;
+    public pixiBoostGraphics?: PIXI.Graphics;
     public pixiBaseGraphics?: PIXI.Graphics;
     public pixiTurretGraphics?: PIXI.Graphics;
     public pixiLevelText?: PIXI.Text;
@@ -79,7 +80,7 @@ export class Tower {
         this.angle = 0;
         this.recoil = 0;
         this.totalSpent = data.baseCost;
-        this.upgradeCost = data.baseCost * 2;
+        this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
         this.specialization = null;
         this.masteryUnlocked = false;
 
@@ -100,6 +101,9 @@ export class Tower {
         if (!this.pixiSprite) {
             this.pixiSprite = new PIXI.Container();
             entitiesContainer.addChild(this.pixiSprite);
+            
+            this.pixiBoostGraphics = new PIXI.Graphics();
+            this.pixiSprite.addChild(this.pixiBoostGraphics);
             
             this.pixiBaseGraphics = new PIXI.Graphics();
             this.pixiSprite.addChild(this.pixiBaseGraphics);
@@ -126,6 +130,18 @@ export class Tower {
         if (!this.pixiSprite || !this.pixiTurretGraphics || !this.pixiBaseGraphics) return;
 
         this.pixiSprite.position.set(this.x, this.y);
+
+        if (this.pixiBoostGraphics) {
+            this.pixiBoostGraphics.clear();
+            if (this.constructionTimer <= 0 && this.isBoosted()) {
+                const pulse = 0.5 + 0.5 * Math.sin(state.animTime * 0.0025);
+                const alpha = 0.15 + 0.15 * pulse;
+                const radius = Config.TILE_SIZE / 2 - 2 + pulse * 2;
+                
+                this.pixiBoostGraphics.circle(0, 0, radius).fill({ color: 0xffa801, alpha: alpha });
+                this.pixiBoostGraphics.circle(0, 0, radius + 2).stroke({ color: 0xffa801, alpha: alpha * 2, width: 1.5 });
+            }
+        }
 
         if (state.isHost && this.recoil > 0) {
             this.recoil--;
@@ -163,7 +179,29 @@ export class Tower {
         return getNearbyEnemies(x, y, radius);
     }
 
-    public getDisplayDamage(): number | string {
+    public getEffectiveRange(): number {
+        let multiplier = 1;
+        if (state.towers) {
+            for (const t of state.towers) {
+                if (t.type === 'Booster' && t !== this && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+                    const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
+                    const boosterRange = t.range;
+                    if (distSq <= boosterRange * boosterRange) {
+                        if (t.specialization === 'amplitude') {
+                            const spec = TowerData['Booster'].specializations['amplitude'];
+                            const rangeBoost = t.masteryUnlocked ? spec.values!.masteryRangeBoost : spec.values!.normalRangeBoost;
+                            multiplier += rangeBoost;
+                        } else {
+                            multiplier += 0.10; // +10% base range buff
+                        }
+                    }
+                }
+            }
+        }
+        return this.range * multiplier;
+    }
+
+    public getDamageWithSpecialization(): number {
         let dmg = this.damage;
         if (this.specialization === 'heavy') {
             const spec = TowerData[this.type].specializations['heavy'];
@@ -173,8 +211,69 @@ export class Tower {
         return dmg;
     }
 
+    public getEffectiveDamage(): number {
+        let multiplier = 1;
+        if (state.towers) {
+            for (const t of state.towers) {
+                if (t.type === 'Booster' && t !== this && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+                    const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
+                    const boosterRange = t.range;
+                    if (distSq <= boosterRange * boosterRange) {
+                        if (t.specialization === 'amplitude') {
+                            const spec = TowerData['Booster'].specializations['amplitude'];
+                            const dmgBoost = t.masteryUnlocked ? spec.values!.masteryDmgBoost : spec.values!.normalDmgBoost;
+                            multiplier += dmgBoost;
+                        } else {
+                            multiplier += 0.15; // +15% base damage buff
+                        }
+                    }
+                }
+            }
+        }
+        return Math.floor(this.getDamageWithSpecialization() * multiplier);
+    }
+
+    public getEffectiveFireRate(): number {
+        let multiplier = 1;
+        if (state.towers) {
+            for (const t of state.towers) {
+                if (t.type === 'Booster' && t !== this && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+                    const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
+                    const boosterRange = t.range;
+                    if (distSq <= boosterRange * boosterRange) {
+                        if (t.specialization === 'frequency') {
+                            const spec = TowerData['Booster'].specializations['frequency'];
+                            const speedBoost = t.masteryUnlocked ? spec.values!.masteryBoost : spec.values!.normalBoost;
+                            multiplier += speedBoost;
+                        }
+                    }
+                }
+            }
+        }
+        return Math.max(Config.TOWER_MIN_FIRE_RATE, Math.round(this.fireRate / multiplier));
+    }
+
+    public isBoosted(): boolean {
+        if (state.towers) {
+            for (const t of state.towers) {
+                if (t.type === 'Booster' && t !== this && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+                    const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
+                    const boosterRange = t.range;
+                    if (distSq <= boosterRange * boosterRange) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public getDisplayDamage(): number | string {
+        return this.getEffectiveDamage();
+    }
+
     public getDisplayFireRate(): string {
-        return (60 / this.fireRate).toFixed(1);
+        return (60 / this.getEffectiveFireRate()).toFixed(1);
     }
 
     public rescale(): void {
@@ -406,7 +505,7 @@ export class Tower {
         if (this.fireCooldown > 0) this.fireCooldown--;
         if (this.missileCooldown > 0) this.missileCooldown--;
         
-        const rangeSq = this.range * this.range;
+        const rangeSq = this.getEffectiveRange() * this.getEffectiveRange();
         const needsTarget = !this.target || 
                             this.target.hp <= 0 || 
                             this.target.deadMarked || 
@@ -423,8 +522,9 @@ export class Tower {
 
 
     public findOptimalTarget(): Enemy | null {
-        const rangeSq = this.range * this.range;
-        const nearby = getNearbyEnemies(this.x, this.y, this.range);
+        const effRange = this.getEffectiveRange();
+        const rangeSq = effRange * effRange;
+        const nearby = getNearbyEnemies(this.x, this.y, effRange);
         
         let bestViableEnemy: Enemy | null = null;
         let bestViableDist = -1;
@@ -469,13 +569,8 @@ export class Tower {
             this.angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
             
             if (this.fireCooldown <= 0) {
-                let dmg = this.damage;
-                const fr = this.fireRate;
-                if (this.specialization === 'heavy') {
-                    const spec = TowerData[this.type].specializations['heavy'];
-                    const mult = this.masteryUnlocked ? spec.multipliers!.masteryDmg : spec.multipliers!.normalDmg;
-                    dmg = Math.floor(dmg * mult);
-                }
+                let dmg = this.getEffectiveDamage();
+                const fr = this.getEffectiveFireRate();
                 
                 const aoe = this.aoeRadius || 0;
                 PoolManager.getProjectile(this.x, this.y, this.target, dmg, this, aoe, this.projectileSpeed);

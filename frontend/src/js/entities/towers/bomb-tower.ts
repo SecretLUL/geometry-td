@@ -27,7 +27,7 @@ export class BombTower extends Tower {
         this.damage = data.baseDamage;
         this.fireRate = data.baseFireRate;
         this.totalSpent = data.baseCost;
-        this.upgradeCost = data.baseCost * 2;
+        this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
         this.aoeRadius = data.aoeRadius;
         this.projectileSpeed = data.projectileSpeed || 3;
         this.colors = data.colors;
@@ -342,7 +342,7 @@ export class BombTower extends Tower {
         }));
     }
 
-    public override getDisplayDamage(): number | string {
+    public override getDamageWithSpecialization(): number {
         let dmg = this.damage;
         if (this.specialization === 'nuke') {
             const spec = TowerData[this.type].specializations['nuke'];
@@ -350,6 +350,10 @@ export class BombTower extends Tower {
             dmg = Math.floor(dmg * mult);
         }
         return dmg;
+    }
+
+    public override getDisplayDamage(): number | string {
+        return this.getEffectiveDamage();
     }
 
     public getDisplayAoe(): number {
@@ -384,7 +388,8 @@ export class BombTower extends Tower {
     }
 
     public override findOptimalTarget(): Enemy | null {
-        const rangeSq = this.range * this.range;
+        const effRange = this.getEffectiveRange();
+        const rangeSq = effRange * effRange;
         
         // Use static buffers to avoid GC array allocations
         if (!this._enemiesInRangeBuffer) this._enemiesInRangeBuffer = [];
@@ -393,7 +398,7 @@ export class BombTower extends Tower {
         const enemiesInRange = this._enemiesInRangeBuffer;
         enemiesInRange.length = 0;
 
-        const nearbyEnemies = this.getNearbyEnemies(this.x, this.y, this.range);
+        const nearbyEnemies = this.getNearbyEnemies(this.x, this.y, effRange);
         for (let i = 0; i < nearbyEnemies.length; i++) {
             const e = nearbyEnemies[i];
             if (e.hp <= 0 || e.deadMarked) continue;
@@ -474,12 +479,7 @@ export class BombTower extends Tower {
                 const aoe = this.getDisplayAoe();
                 const isCluster = this.specialization === 'cluster';
                 
-                let dmg = this.damage;
-                if (this.specialization === 'nuke') {
-                    const spec = TowerData[this.type].specializations['nuke'];
-                    const mult = this.masteryUnlocked ? spec.multipliers!.masteryDmg : spec.multipliers!.normalDmg;
-                    dmg = Math.floor(dmg * mult);
-                }
+                let dmg = this.getEffectiveDamage();
                 
                 PoolManager.getProjectile(this.x, this.y, this.target, dmg, this, aoe, this.projectileSpeed, 0, isCluster);
 
@@ -497,7 +497,7 @@ export class BombTower extends Tower {
                     isCluster: isCluster
                 });
 
-                this.fireCooldown = this.fireRate;
+                this.fireCooldown = this.getEffectiveFireRate();
                 this.recoil = 6;
             }
         }

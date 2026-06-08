@@ -24,7 +24,7 @@ export class SniperTower extends Tower {
         this.fireRate = data.baseFireRate;
         this.projectileSpeed = data.projectileSpeed || 40;
         this.totalSpent = data.baseCost;
-        this.upgradeCost = data.baseCost * 2;
+        this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
         this.colors = data.colors;
         this.currentColor = this.colors[0];
 
@@ -325,7 +325,7 @@ export class SniperTower extends Tower {
         }));
     }
 
-    public override getDisplayDamage(): number {
+    public override getDamageWithSpecialization(): number {
         let dmg = this.damage;
         if (this.specialization === 'bounty') {
             const spec = TowerData[this.type].specializations['bounty'];
@@ -335,11 +335,15 @@ export class SniperTower extends Tower {
         return Math.floor(dmg);
     }
 
+    public override getDisplayDamage(): number {
+        return this.getEffectiveDamage();
+    }
+
     public override _acquireAndFire(): void {
         const needsNewTarget = !this.target || 
                                this.target.hp <= 0 || 
                                this.target.deadMarked ||
-                               getDistanceSq(this.target.x, this.target.y, this.x, this.y) > (this.range * this.range);
+                               getDistanceSq(this.target.x, this.target.y, this.x, this.y) > (this.getEffectiveRange() * this.getEffectiveRange());
 
         if (needsNewTarget || this.fireCooldown <= 0) {
             this.target = this.findOptimalTarget();
@@ -348,7 +352,7 @@ export class SniperTower extends Tower {
         if (this.target) {
             this.angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
             if (this.fireCooldown <= 0) {
-                this.fireCooldown = this.fireRate;
+                this.fireCooldown = this.getEffectiveFireRate();
                 this.recoil = 12;
 
                 const muzzleX = this.x + Math.cos(this.angle) * 26;
@@ -445,8 +449,9 @@ export class SniperTower extends Tower {
     }
 
     public override findOptimalTarget(): Enemy | null {
-        const rangeSq = this.range * this.range;
-        const nearby = this.getNearbyEnemies(this.x, this.y, this.range);
+        const effRange = this.getEffectiveRange();
+        const rangeSq = effRange * effRange;
+        const nearby = this.getNearbyEnemies(this.x, this.y, effRange);
         
         let bestViable: Enemy | null = null;
         let bestBackup: Enemy | null = null;

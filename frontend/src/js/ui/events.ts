@@ -5,7 +5,7 @@
  * @last_update: 2026-05-29 / v1.9.1 - Reset originalWave and waveModified in game resets.
  */
 import { state } from '../core/state';
-import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../entities/towers/index';
+import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower, BoosterTower } from '../entities/towers/index';
 import { Config, TowerData } from '../core/config';
 import { Multiplayer, socket } from '../core/multiplayer/context';
 import { PoolManager } from '../core/pool';
@@ -29,6 +29,7 @@ export function buildTowerAt(type: string, col: number, row: number): boolean {
             else if (type === 'Bomb') TowerClass = BombTower;
             else if (type === 'Tesla') TowerClass = TeslaTower;
             else if (type === 'Prisma') TowerClass = PrismaTower;
+            else if (type === 'Booster') TowerClass = BoosterTower;
 
             const predTower = new TowerClass(col, row);
             predTower.isPredicted = true;

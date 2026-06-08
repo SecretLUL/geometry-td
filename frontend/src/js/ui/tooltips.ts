@@ -76,17 +76,30 @@ export function updateTooltip(): void {
             }
         }
 
+        let buffDesc = '';
+        if (hoveredTower.type === 'Booster') {
+            if (hoveredTower.specialization === 'frequency') {
+                buffDesc = hoveredTower.masteryUnlocked ? '+75% Angriffsgeschwindigkeit' : '+40% Angriffsgeschwindigkeit';
+            } else if (hoveredTower.specialization === 'amplitude') {
+                buffDesc = hoveredTower.masteryUnlocked ? '+80% DMG, +35% Reichweite' : '+40% DMG, +20% Reichweite';
+            } else {
+                buffDesc = '+15% DMG, +10% Reichweite';
+            }
+        }
+
         tooltip.innerHTML = `
             <h3 style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px;">${hoveredTower.type} Tower</h3>
             <p>Level: <span>${hoveredTower.level}${maxLvl ? ' <em style="color:#fca311">(MAX)</em>' : ''}</span></p>
             <p>Spezial: <span style="color:#ffb703">${specName}</span></p>
             ${hoveredTower.type === 'Prisma' ? `
                 <p>DPS: <span>${hoveredTower.getDisplayDamage ? hoveredTower.getDisplayDamage() : hoveredTower.damage}/s</span></p>
+            ` : hoveredTower.type === 'Booster' ? `
+                <p>Buff: <span style="color:#ff9f43">${buffDesc}</span></p>
             ` : `
                 <p>Schaden: <span>${hoveredTower.getDisplayDamage ? hoveredTower.getDisplayDamage() : hoveredTower.damage}</span></p>
                 <p>Speed: <span>${hoveredTower.getDisplayFireRate ? hoveredTower.getDisplayFireRate() : (60 / hoveredTower.fireRate).toFixed(1)}/s</span></p>
             `}
-            <p>Reichweite: <span>${hoveredTower.range >= 9999 ? '∞' : (hoveredTower.getDisplayRange ? hoveredTower.getDisplayRange() : hoveredTower.range)}</span></p>
+            <p>Reichweite: <span>${hoveredTower.range >= 9999 ? '∞' : (hoveredTower.getEffectiveRange ? Math.round(hoveredTower.getEffectiveRange()) : hoveredTower.range)}</span></p>
             ${hoveredTower.type === 'Bomb' ? `<p>AoE: <span>${hoveredTower.getDisplayAoe ? hoveredTower.getDisplayAoe() : hoveredTower.aoeRadius}</span></p>` : ''}
             ${!maxLvl ? `<p>Upgrade: <span style="${(!state.infiniteGold && state.gold < hoveredTower.upgradeCost) ? 'color:#ff3366' : 'color:#4cc9f0'}">${hoveredTower.upgradeCost}g</span></p>` : ''}
             <div style="margin-top:8px; padding-top:4px; border-top:1px dashed rgba(255,255,255,0.2); font-size:0.85em;">
@@ -181,6 +194,12 @@ export function updateTooltip(): void {
                 <p>DPS: <span>${minDps}-${maxDps}/s</span></p>
                 <p>Reichweite: <span>${data.baseRange}</span></p>
                 <p>Typ: <span>Kontinuierlicher Laser</span></p>
+            `;
+        } else if (name === 'Booster') {
+            stats = `
+                <p>Buffs: <span style="color:#ff9f43">+15% DMG, +10% Reichweite</span></p>
+                <p>Reichweite: <span>${data.baseRange}</span></p>
+                <p>Typ: <span>Unterstützungs-Aura</span></p>
             `;
         }
 

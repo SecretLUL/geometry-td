@@ -27,7 +27,7 @@ export class TeslaTower extends Tower {
         this.damage = data.baseDamage;
         this.fireRate = data.baseFireRate;
         this.totalSpent = data.baseCost;
-        this.upgradeCost = data.baseCost * 2;
+        this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
         this.colors = data.colors;
         this.currentColor = this.colors[0];
         this.auraTime = 0;
@@ -313,7 +313,7 @@ export class TeslaTower extends Tower {
         }));
     }
 
-    public override getDisplayDamage(): number {
+    public override getDamageWithSpecialization(): number {
         let dmg = this.damage;
         if (this.specialization === 'highvolt') {
             const spec = TowerData[this.type].specializations['highvolt'];
@@ -323,15 +323,20 @@ export class TeslaTower extends Tower {
         return dmg;
     }
 
+    public override getDisplayDamage(): number {
+        return this.getEffectiveDamage();
+    }
+
     public override _acquireAndFire(): void {
         if (this.fireCooldown <= 0) {
-            const rangeSq = this.range * this.range;
+            const effRange = this.getEffectiveRange();
+            const rangeSq = effRange * effRange;
             
             if (!this._enemiesInRangeBuffer) this._enemiesInRangeBuffer = [];
             const enemiesInRange = this._enemiesInRangeBuffer;
             enemiesInRange.length = 0;
 
-            const nearby = this.getNearbyEnemies(this.x, this.y, this.range);
+            const nearby = this.getNearbyEnemies(this.x, this.y, effRange);
             for (let i = 0; i < nearby.length; i++) {
                 const enemy = nearby[i];
                 if (enemy.hp <= 0 || enemy.deadMarked) continue;
@@ -341,14 +346,10 @@ export class TeslaTower extends Tower {
             }
 
             if (enemiesInRange.length > 0) {
-                let dmg = this.damage;
+                let dmg = this.getEffectiveDamage();
                 let stunDuration = 0;
 
-                if (this.specialization === 'highvolt') {
-                    const spec = TowerData[this.type].specializations['highvolt'];
-                    const mult = this.masteryUnlocked ? spec.multipliers!.masteryDmg : spec.multipliers!.normalDmg;
-                    dmg *= mult;
-                } else if (this.specialization === 'stun') {
+                if (this.specialization === 'stun') {
                     const spec = TowerData[this.type].specializations['stun'];
                     stunDuration = this.masteryUnlocked ? spec.values!.masteryDuration : spec.values!.normalDuration;
                 }
@@ -407,7 +408,7 @@ export class TeslaTower extends Tower {
                     }
                 }
                 
-                let fr = this.fireRate;
+                let fr = this.getEffectiveFireRate();
                 if (this.specialization === 'stun') fr = Math.floor(fr * 1.3);
                 
                 this.fireCooldown = fr;

@@ -11,6 +11,7 @@ import { SniperTower } from './sniper-tower';
 import { BombTower } from './bomb-tower';
 import { TeslaTower } from './tesla-tower';
 import { PrismaTower } from './prisma-tower';
+import { BoosterTower } from './booster-tower';
 import * as PIXI from 'pixi.js';
 
 // ─── Ghost Tower (placement preview) ─────────────────────────────────────────
@@ -54,6 +55,8 @@ export function drawGhostTower(g: PIXI.Graphics): void {
         towerColor = 0x00ffff;
     } else if (type === 'Prisma') {
         towerColor = 0xffd700;
+    } else if (type === 'Booster') {
+        towerColor = 0xff9f43;
     } else {
         towerColor = 0x4299e1;
     }
@@ -76,6 +79,7 @@ export function drawGhostTower(g: PIXI.Graphics): void {
         else if (type === 'Bomb') tmp = new BombTower(col, row);
         else if (type === 'Tesla') tmp = new TeslaTower(col, row);
         else if (type === 'Prisma') tmp = new PrismaTower(col, row);
+        else if (type === 'Booster') tmp = new BoosterTower(col, row);
         else tmp = new Tower(col, row);
         
         tmp.constructionTimer = 0; // Show as fully built

@@ -9,7 +9,7 @@ import { Config } from '../core/config';
 import { Multiplayer } from '../core/multiplayer/context';
 import { PoolManager } from '../core/pool';
 import { EnemyFactory } from '../entities/enemies';
-import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../entities/towers/index';
+import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower, BoosterTower } from '../entities/towers/index';
 import { map } from '../core/map';
 import { updateUI, showGameNotification } from './ui';
 
@@ -164,13 +164,14 @@ export function setupModMenu() {
         });
         state.towers = [];
 
-        const towerTypes = ['Base', 'Sniper', 'Bomb', 'Tesla', 'Prisma'];
+        const towerTypes = ['Base', 'Sniper', 'Bomb', 'Tesla', 'Prisma', 'Booster'];
         const typeClasses: Record<string, any> = {
             'Base': Tower,
             'Sniper': SniperTower,
             'Bomb': BombTower,
             'Tesla': TeslaTower,
-            'Prisma': PrismaTower
+            'Prisma': PrismaTower,
+            'Booster': BoosterTower
         };
 
         const rows = map.length;
@@ -256,7 +257,8 @@ export function setupModMenu() {
             'Sniper': SniperTower,
             'Bomb': BombTower,
             'Tesla': TeslaTower,
-            'Prisma': PrismaTower
+            'Prisma': PrismaTower,
+            'Booster': BoosterTower
         };
 
         const wasInfinite = state.infiniteGold;

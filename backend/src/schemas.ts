@@ -51,7 +51,7 @@ export const RejectPlaceTowerSchema = z.object({
 export const ConfirmUpgradeTowerSchema = z.object({
   col: z.number().int().nonnegative(),
   row: z.number().int().nonnegative(),
-  specId: z.string().min(1).max(50).optional(),
+  specId: z.string().min(1).max(50).nullable().optional(),
   level: z.number().int().positive().optional(),
 }).passthrough();
 

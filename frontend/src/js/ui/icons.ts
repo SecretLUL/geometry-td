@@ -57,5 +57,19 @@ export const ICONS: Record<string, string> = {
         <path d="M11 16 L21 16" stroke="#ffffff" stroke-width="0.5"/>
         <!-- Glow accents -->
         <circle cx="16" cy="16" r="3" fill="#ffffff" opacity="0.8"/>
+    </svg>`,
+
+    Booster: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+        <!-- Orbiting ring -->
+        <circle cx="16" cy="16" r="11" stroke="#ff9f43" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/>
+        <!-- Central Octahedron / Diamond -->
+        <path d="M16 6 L24 16 L16 26 L8 16 Z" fill="#ff9f43" stroke="#fff" stroke-width="1.5"/>
+        <!-- Inner Core -->
+        <path d="M16 11 L20 16 L16 21 L12 16 Z" fill="#fff"/>
+        <!-- Connection energy lines / arrows -->
+        <line x1="16" y1="3" x2="16" y2="6" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
+        <line x1="16" y1="26" x2="16" y2="29" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
+        <line x1="6" y1="16" x2="8" y2="16" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
+        <line x1="24" y1="16" x2="26" y2="16" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
     </svg>`
 };

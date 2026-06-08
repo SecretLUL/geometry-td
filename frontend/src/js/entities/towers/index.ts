@@ -10,3 +10,4 @@ export * from './bomb-tower';
 export * from './tesla-tower';
 export * from './prisma-tower';
 export * from './ghost-tower';
+export * from './booster-tower';

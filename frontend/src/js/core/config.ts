@@ -35,9 +35,9 @@ export const Config = {
     ENEMY_REWARD_BASE: 7,
     ENEMY_REWARD_MULTIPLIER: 1.03, // lowered from 1.05 to prevent extreme gold scaling in later waves
 
-    INTEREST_RATE: 0.10,            // interest rate per wave (lowered from 15%)
-    DIFFICULTY_LINEAR_FACTOR: 0.8,  // linear coefficient for wave health scaling (increased from 0.5)
-    DIFFICULTY_QUADRATIC_FACTOR: 0.05, // quadratic coefficient for wave health scaling
+    INTEREST_RATE: 0.05,            // interest rate per wave (lowered from 10%)
+    DIFFICULTY_LINEAR_FACTOR: 1.0,  // linear coefficient for wave health scaling (increased from 0.5)
+    DIFFICULTY_QUADRATIC_FACTOR: 0.08, // quadratic coefficient for wave health scaling
 
     /** Computes the HP multiplier for a given wave using a linear-quadratic curve */
     getHpMultiplier(wave: number): number {
@@ -343,14 +343,14 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         baseCost: 50,
         baseDamage: 10,
         damagePerLevel: 5,
-        baseRange: 180,
+        baseRange: 140,
         rangePerLevel: 10,
         baseFireRate: 60,
         fireRateDecrease: 10,
         projectileSpeed: 15,
         colors: ['#0f3460', '#123e75', '#1a508b', '#205e9e', '#2b6cb0', '#3182ce', '#4299e1', '#63b3ed', '#90cdf4', '#cbd5e0', '#d6bcfa', '#b794f4', '#9f7aea', '#805ad5', '#ecc94b', '#ecc94b', '#ecc94b', '#f6ad55', '#f687b3', '#ffffff'],
         costScaling: {
-            earlyMultiplier: 2.0,
+            earlyMultiplier: 1.5,
             lateMultiplier: 1.4,
             thresholdLevel: 5
         },
@@ -396,7 +396,7 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         projectileSpeed: 40,
         colors: ['#2b2b2b', '#333333', '#3d3d3d', '#444444', '#4f4f4f', '#5a5a5a', '#666666', '#717171', '#808080', '#8c8c8c', '#999999', '#a6a6a6', '#b3b3b3', '#c0c0c0', '#cccccccc', '#d9d9d9', '#e6e6e6', '#f2f2f2', '#fbfbfb', '#ffffff'],
         costScaling: {
-            earlyMultiplier: 2.0,
+            earlyMultiplier: 1.5,
             lateMultiplier: 1.4,
             thresholdLevel: 5
         },
@@ -446,7 +446,7 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         aoeRadiusPerLevel: 4,
         colors: ['#4a0e0e', '#530f0f', '#5e1212', '#691414', '#731616', '#7f1818', '#8c1a1a', '#991c1c', '#a61e1e', '#b32020', '#bf2222', '#cc2424', '#d92626', '#e62828', '#f22b2b', '#ff3333', '#ff4040', '#ff5050', '#ff6060', '#ffffff'],
         costScaling: {
-            earlyMultiplier: 2.0,
+            earlyMultiplier: 1.5,
             lateMultiplier: 1.4,
             thresholdLevel: 5
         },
@@ -486,7 +486,7 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         fireRateDecrease: 10,
         colors: ['#002244', '#003366', '#003c77', '#004080', '#004c99', '#0059b3', '#0066cc', '#0073e6', '#0080ff', '#1a8cff', '#3399ff', '#4db8ff', '#66c2ff', '#80d4ff', '#99e0ff', '#b3e6ff', '#ccf2ff', '#e6f7ff', '#f2faff', '#ffffff'],
         costScaling: {
-            earlyMultiplier: 2.0,
+            earlyMultiplier: 1.5,
             lateMultiplier: 1.4,
             thresholdLevel: 5
         },
@@ -525,7 +525,7 @@ export const TowerData: Record<string, TowerStatsConfig> = {
         fireRateDecrease: 0,
         colors: ['#9c6f00', '#b8860b', '#c7960c', '#d4af37', '#e3bf3b', '#ffd700', '#ffe01a', '#ffea00', '#fff033', '#ffff00', '#ffff4d', '#ffff66', '#ffff80', '#ffff99', '#ffffb3', '#ffffcc', '#ffffe6', '#fffacd', '#fff8dc', '#ffffff'],
         costScaling: {
-            earlyMultiplier: 2.0,
+            earlyMultiplier: 1.5,
             lateMultiplier: 1.4,
             thresholdLevel: 5
         },
@@ -554,6 +554,46 @@ export const TowerData: Record<string, TowerStatsConfig> = {
                     normalSplits: 4,
                     masterySplits: 8,
                     damageMultiplier: 0.75
+                }
+            }
+        }
+    },
+    'Booster': {
+        type: 'Booster',
+        baseCost: 220,
+        baseDamage: 0,
+        damagePerLevel: 0,
+        baseRange: 160,
+        rangePerLevel: 8,
+        baseFireRate: 60,
+        fireRateDecrease: 0,
+        colors: ['#b85c00', '#cc6600', '#e67300', '#ff8000', '#ff8c1a', '#ff9933', '#ffa64d', '#ffb366', '#ffc080', '#ffcd99', '#ffd9b3', '#ffe6cc', '#fff2e6', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'],
+        costScaling: {
+            earlyMultiplier: 1.5,
+            lateMultiplier: 1.4,
+            thresholdLevel: 5
+        },
+        specializations: {
+            'frequency': {
+                name: 'Frequency Modulation',
+                desc: '+40% Angriffsgeschwindigkeit',
+                masteryDesc: '+75% Angriffsgeschwindigkeit',
+                color: '#ff9f43',
+                values: {
+                    normalBoost: 0.40,
+                    masteryBoost: 0.75
+                }
+            },
+            'amplitude': {
+                name: 'Amplitude Amplifier',
+                desc: '+40% DMG, +20% Reichweite',
+                masteryDesc: '+80% DMG, +35% Reichweite',
+                color: '#ee5253',
+                values: {
+                    normalDmgBoost: 0.40,
+                    normalRangeBoost: 0.20,
+                    masteryDmgBoost: 0.80,
+                    masteryRangeBoost: 0.35
                 }
             }
         }

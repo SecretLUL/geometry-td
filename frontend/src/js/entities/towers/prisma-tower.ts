@@ -27,7 +27,7 @@ export class PrismaTower extends Tower {
         this.damage = data.baseDamage;
         this.fireRate = data.baseFireRate;
         this.totalSpent = data.baseCost;
-        this.upgradeCost = data.baseCost * 2;
+        this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
         
         this.colors = data.colors;
         this.currentColor = this.colors[0];
@@ -96,7 +96,7 @@ export class PrismaTower extends Tower {
         if (this.fireCooldown > 0) this.fireCooldown--;
         if (this.missileCooldown > 0) this.missileCooldown--;
 
-        const rangeSq = this.range * this.range;
+        const rangeSq = this.getEffectiveRange() * this.getEffectiveRange();
         const needsTarget = !this.target || 
                             this.target.hp <= 0 || 
                             this.target.deadMarked || 
@@ -138,8 +138,9 @@ export class PrismaTower extends Tower {
     }
 
     public override findOptimalTarget(): Enemy | null {
-        const rangeSq = this.range * this.range;
-        const nearby = this.getNearbyEnemies(this.x, this.y, this.range);
+        const effRange = this.getEffectiveRange();
+        const rangeSq = effRange * effRange;
+        const nearby = this.getNearbyEnemies(this.x, this.y, effRange);
         
         let bestEnemy: Enemy | null = null;
         const checked = new Set<number>();
@@ -187,7 +188,7 @@ export class PrismaTower extends Tower {
     }
 
     public override getDisplayDamage(): string {
-        let baseDps = this.damage * 60;
+        let baseDps = this.getEffectiveDamage() * 60;
         const data = TowerData['Prisma'];
         const minDps = Math.floor(baseDps * data.prismaMinMultiplier!);
         const maxDps = Math.floor(baseDps * data.prismaMaxMultiplier!);
@@ -961,10 +962,11 @@ export class PrismaTower extends Tower {
             const data = TowerData['Prisma'];
             const progress = Math.min(1.0, this.lockTimer / data.prismaChargeFrames!);
             const multiplier = data.prismaMinMultiplier! + (data.prismaMaxMultiplier! - data.prismaMinMultiplier!) * (progress * progress);
-            const finalDmg = this.damage * multiplier;
+            const finalDmg = this.getEffectiveDamage() * multiplier;
 
-            const rangeSq = this.range * this.range;
-            const nearby = this.getNearbyEnemies(this.x, this.y, this.range);
+            const effRange = this.getEffectiveRange();
+            const rangeSq = effRange * effRange;
+            const nearby = this.getNearbyEnemies(this.x, this.y, effRange);
             let splits = 0;
             const spec = TowerData[this.type].specializations['refraction'];
             const maxSplits = this.masteryUnlocked ? spec.values!.masterySplits : spec.values!.normalSplits;
@@ -1012,7 +1014,7 @@ export class PrismaTower extends Tower {
             const data = TowerData['Prisma'];
             const progress = Math.min(1.0, this.lockTimer / data.prismaChargeFrames!);
             const multiplier = data.prismaMinMultiplier! + (data.prismaMaxMultiplier! - data.prismaMinMultiplier!) * (progress * progress);
-            const finalDmg = this.damage * multiplier;
+            const finalDmg = this.getEffectiveDamage() * multiplier;
 
             const actualDmg = this.target.takeDamage(finalDmg, this);
             this.damageDealt += actualDmg;

@@ -137,8 +137,8 @@ export interface Enemy {
 
 // ─── TOWER ENTITY TYPES ───────────────────────────────────────────────────────
 
-export type TowerType = 'Base' | 'Sniper' | 'Bomb' | 'Tesla' | 'Prisma';
-export type TowerSpecialization = 'heavy' | 'missiles' | 'ricochet' | 'bounty' | 'cluster' | 'nuke' | 'highvolt' | 'stun' | 'meltdown' | 'refraction';
+export type TowerType = 'Base' | 'Sniper' | 'Bomb' | 'Tesla' | 'Prisma' | 'Booster';
+export type TowerSpecialization = 'heavy' | 'missiles' | 'ricochet' | 'bounty' | 'cluster' | 'nuke' | 'highvolt' | 'stun' | 'meltdown' | 'refraction' | 'frequency' | 'amplitude';
 
 export interface Tower {
     col: number;
@@ -179,6 +179,10 @@ export interface Tower {
     pixiSprite?: any;
 
     // Instance Methods
+    getEffectiveRange(): number;
+    getEffectiveDamage(): number;
+    getEffectiveFireRate(): number;
+    isBoosted(): boolean;
     getNearbyEnemies(x: number, y: number, radius: number): Enemy[];
     getDisplayDamage(): number | string;
     getDisplayFireRate(): string;

@@ -4,6 +4,110 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.17.3",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Fehlerhafte Initialisierung der Verbindungs-Laserstrahlen des Booster-Turms korrigiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.17.2",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Laserstrahlen des Booster-Turms hinter andere Entitäten verschoben und Diagnose-Linien entfernt."
+      }
+    ]
+  },
+  {
+    "version": "v2.17.1",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Fehlende Instanziierung des Booster-Towers bei der Netzwerk-Synchronisierung behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.17.0",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Neuen Booster-Turm als reinen Unterstützungs-Turm eingeführt."
+      },
+      {
+        "type": "feature",
+        "desc": "Unterstützungs-Buff-System für Schaden, Reichweite und Feuerrate naher Türme implementiert."
+      },
+      {
+        "type": "feature",
+        "desc": "Verbindungs-Laserstrahlen des Booster-Turms in globalen Canvas-Koordinaten stabilisiert."
+      },
+      {
+        "type": "feature",
+        "desc": "Pulsierender orangefarbener Aura-Glow-Effekt hinter allen geboosteten Türmen zur Visualisierung hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "Rotations- und Pulsierungsgeschwindigkeiten des Booster-Turms sowie des Buff-Aura-Effekts für eine harmonische Ästhetik verlangsamt."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.25",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Basis-Reichweite des Basis-Turms von 180 auf 140 verringert."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.24",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Zinssatz pro Welle von 10% auf 5% gesenkt."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.23",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Lebenspunkte-Skalierung der Gegner ab Welle 2 moderat angehoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.16.22",
+    "date": "6. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Upgrade-Kosten für alle Türme im frühen Spielverlauf spürbar verringert."
+      }
+    ]
+  },
+  {
     "version": "v2.16.21",
     "date": "6. Juni 2026",
     "status": "active",

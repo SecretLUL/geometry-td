@@ -299,7 +299,8 @@ const PAUSE_TIPS = [
     "Regenerierende Gegner heilen sich mit der Zeit. Konzentriere dein Feuer auf sie!",
     "Das Mutterschiff stutzt deine Türme kurzzeitig. Platziere deine Verteidigung klug verteilt.",
     "Gold-Interesse erhöht sich am Ende jeder Welle. Spare etwas Gold an, um reich zu werden!",
-    "Im Baumodus kannst du keine Türme verkaufen oder upgraden – brich ihn vorher per Rechtsklick ab!"
+    "Im Baumodus kannst du keine Türme verkaufen oder upgraden – brich ihn vorher per Rechtsklick ab!",
+    "Booster-Türme greifen nicht selbst an, sondern verstärken Schaden, Reichweite oder Feuerrate naher Türme!"
 ];
 
 export function setPauseState(paused: boolean): void {

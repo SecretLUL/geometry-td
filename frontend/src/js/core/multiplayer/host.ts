@@ -7,7 +7,7 @@
  */
 import { state } from '../state';
 import { Config, TowerData } from '../config';
-import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower } from '../../entities/towers/index';
+import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower, BoosterTower } from '../../entities/towers/index';
 import { createExplosion } from '../../fx/fx';
 import { TowerSpecialization } from '../../types';
 import { Multiplayer, socket } from './context';
@@ -34,6 +34,7 @@ export function processPlaceTower(type: any, col: number, row: number): boolean 
         else if (type === 'Bomb') TowerClass = BombTower;
         else if (type === 'Tesla') TowerClass = TeslaTower;
         else if (type === 'Prisma') TowerClass = PrismaTower;
+        else if (type === 'Booster') TowerClass = BoosterTower;
 
         const newTower = new TowerClass(col, row);
         state.towers.push(newTower);
