@@ -426,6 +426,16 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                         if (tower.fireCooldown > 0) tower.fireCooldown--;
                         if (tower.missileCooldown > 0) tower.missileCooldown--;
 
+                        if (!state.enemies || state.enemies.length === 0) {
+                            tower.target = null;
+                            if (tower.type === 'Prisma') {
+                                (tower as any).beamTarget = null;
+                                (tower as any).lockTimer = 0;
+                            }
+                            tower.updatePixi();
+                            continue;
+                        }
+
                         if (tower.type === 'Prisma' && tower.fireCooldown > 0) {
                             // During any cooldown (like target switch cooldown), keep looking at target if we still have one
                             if (tower.target) {

@@ -504,6 +504,12 @@ export class Tower {
         }
         if (this.fireCooldown > 0) this.fireCooldown--;
         if (this.missileCooldown > 0) this.missileCooldown--;
+
+        if (!state.enemies || state.enemies.length === 0) {
+            this.target = null;
+            this.updatePixi();
+            return;
+        }
         
         const rangeSq = this.getEffectiveRange() * this.getEffectiveRange();
         const needsTarget = !this.target || 

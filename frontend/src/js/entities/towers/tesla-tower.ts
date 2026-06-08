@@ -327,6 +327,29 @@ export class TeslaTower extends Tower {
         return this.getEffectiveDamage();
     }
 
+    public override update(): void {
+        if (this.constructionTimer > 0) {
+            super.update();
+            return;
+        }
+
+        if (this.stunTimer > 0) {
+            this.stunTimer--;
+            this.updatePixi();
+            return;
+        }
+        if (this.fireCooldown > 0) this.fireCooldown--;
+        if (this.missileCooldown > 0) this.missileCooldown--;
+
+        if (!state.enemies || state.enemies.length === 0) {
+            this.updatePixi();
+            return;
+        }
+
+        this._acquireAndFire();
+        this.updatePixi();
+    }
+
     public override _acquireAndFire(): void {
         if (this.fireCooldown <= 0) {
             const effRange = this.getEffectiveRange();

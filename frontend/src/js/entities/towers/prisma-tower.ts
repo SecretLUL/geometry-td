@@ -96,6 +96,14 @@ export class PrismaTower extends Tower {
         if (this.fireCooldown > 0) this.fireCooldown--;
         if (this.missileCooldown > 0) this.missileCooldown--;
 
+        if (!state.enemies || state.enemies.length === 0) {
+            this.target = null;
+            this.beamTarget = null;
+            this.lockTimer = 0;
+            this.updatePixi();
+            return;
+        }
+
         const rangeSq = this.getEffectiveRange() * this.getEffectiveRange();
         const needsTarget = !this.target || 
                             this.target.hp <= 0 || 

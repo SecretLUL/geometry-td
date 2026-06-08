@@ -379,6 +379,12 @@ export class BombTower extends Tower {
         }
         if (this.fireCooldown > 0) this.fireCooldown--;
         if (this.missileCooldown > 0) this.missileCooldown--;
+
+        if (!state.enemies || state.enemies.length === 0) {
+            this.target = null;
+            this.updatePixi();
+            return;
+        }
         
         // Bomb Tower logic: Always re-calculate best cluster to track it
         this.target = this.findOptimalTarget();

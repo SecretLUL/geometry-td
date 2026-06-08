@@ -41,14 +41,30 @@ let bufferIndex = 0;
  */
 export function getNearbyEnemies(x: number, y: number, radius: number): Enemy[] {
     if (!stateRef || !stateRef.enemyGrid) return stateRef ? stateRef.enemies : [];
-    const CELL_SIZE = 100;
-    const cx = Math.floor(x / CELL_SIZE);
-    const cy = Math.floor(y / CELL_SIZE);
-    const radiusCells = Math.ceil(radius / CELL_SIZE);
     
     const nearby = nearbyBuffers[bufferIndex];
     bufferIndex = (bufferIndex + 1) % nearbyBuffers.length;
     nearby.length = 0;
+
+    const enemyCount = stateRef.enemies.length;
+    if (enemyCount === 0) {
+        return nearby;
+    }
+
+    const CELL_SIZE = 100;
+    const cx = Math.floor(x / CELL_SIZE);
+    const cy = Math.floor(y / CELL_SIZE);
+    const radiusCells = Math.ceil(radius / CELL_SIZE);
+    const cellsToSearch = (radiusCells * 2 + 1) * (radiusCells * 2 + 1);
+
+    // If the number of enemies is small, or the search grid area is much larger
+    // than the number of active enemies, skip grid cell lookups entirely.
+    if (enemyCount <= 15 || cellsToSearch > enemyCount * 1.5) {
+        for (let i = 0; i < enemyCount; i++) {
+            nearby.push(stateRef.enemies[i]);
+        }
+        return nearby;
+    }
 
     for (let ix = -radiusCells; ix <= radiusCells; ix++) {
         for (let iy = -radiusCells; iy <= radiusCells; iy++) {

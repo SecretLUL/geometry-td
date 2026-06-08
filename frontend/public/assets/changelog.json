@@ -4,6 +4,29 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.18.1",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Extremes Laggen im Leerlauf nach Wellenende behoben."
+      },
+      {
+        "type": "perf",
+        "desc": "Zielsuche bei leeren Wellen für alle Türme deaktiviert."
+      },
+      {
+        "type": "perf",
+        "desc": "Redundante Zielsuche für Booster- und Tesla-Türme entfernt."
+      },
+      {
+        "type": "perf",
+        "desc": "Gegnersuche für große Radien (Sniper-Türme) optimiert."
+      }
+    ]
+  },
+  {
     "version": "v2.18.0",
     "date": "8. Juni 2026",
     "status": "active",

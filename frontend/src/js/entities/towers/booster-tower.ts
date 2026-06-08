@@ -278,6 +278,35 @@ export class BoosterTower extends Tower {
         }
     }
 
+    public override update(): void {
+        if (this.constructionTimer > 0) {
+            this.constructionTimer--;
+            if (this.constructionTimer === 0) {
+                this.redrawPixiBase();
+                this.redrawPixiTurret();
+            } else {
+                if (Math.random() < 0.25) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = Math.random() * 16;
+                    const px = this.x + Math.cos(angle) * dist;
+                    const py = this.y + Math.sin(angle) * dist;
+                    const color = this.currentColor || '#ff9f43';
+                    PoolManager.getParticle(px, py, color, Math.random() * 1.5 + 0.5, Math.random() * 2 + 1);
+                }
+                this.updatePixi();
+            }
+            return;
+        }
+
+        if (this.stunTimer > 0) {
+            this.stunTimer--;
+            this.updatePixi();
+            return;
+        }
+
+        this.updatePixi();
+    }
+
     public override _acquireAndFire(): void {
         // Booster Tower doesn't shoot or acquire targets directly.
         // It passive-buffs nearby towers inside getEffectiveRange/Damage/FireRate.
