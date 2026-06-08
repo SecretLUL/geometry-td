@@ -4,6 +4,29 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.18.0",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Zinsen am Wellenende vollständig entfernt."
+      },
+      {
+        "type": "feature",
+        "desc": "Neuen Generator-Turm zur Erzeugung von Gold hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "Spezialisierung 'Industrial Production' für erhöhtes Takt-Einkommen implementiert."
+      },
+      {
+        "type": "feature",
+        "desc": "Spezialisierung 'Investment Bank' für Einmal-Auszahlungen am Wellenende implementiert."
+      }
+    ]
+  },
+  {
     "version": "v2.17.3",
     "date": "8. Juni 2026",
     "status": "active",

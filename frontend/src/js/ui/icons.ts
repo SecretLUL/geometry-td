@@ -71,5 +71,14 @@ export const ICONS: Record<string, string> = {
         <line x1="16" y1="26" x2="16" y2="29" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
         <line x1="6" y1="16" x2="8" y2="16" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
         <line x1="24" y1="16" x2="26" y2="16" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
+    </svg>`,
+
+    Generator: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+        <!-- Outer Glowing Gear / Ring -->
+        <circle cx="16" cy="16" r="11" stroke="#26de81" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/>
+        <!-- Gold Coin Body -->
+        <circle cx="16" cy="16" r="9" fill="#00b894" stroke="#ffd700" stroke-width="2"/>
+        <!-- Inner Details: Dollar Sign -->
+        <path d="M16 10 L16 22 M13 13 C13 11, 19 11, 19 13.5 C19 16, 13 16, 13 18.5 C13 21, 19 21, 19 19" fill="none" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round"/>
     </svg>`
 };

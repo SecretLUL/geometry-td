@@ -35,7 +35,7 @@ export const Config = {
     ENEMY_REWARD_BASE: 7,
     ENEMY_REWARD_MULTIPLIER: 1.03, // lowered from 1.05 to prevent extreme gold scaling in later waves
 
-    INTEREST_RATE: 0.05,            // interest rate per wave (lowered from 10%)
+    INTEREST_RATE: 0.0,            // interest rate per wave (disabled, set to 0.0)
     DIFFICULTY_LINEAR_FACTOR: 1.0,  // linear coefficient for wave health scaling (increased from 0.5)
     DIFFICULTY_QUADRATIC_FACTOR: 0.08, // quadratic coefficient for wave health scaling
 
@@ -594,6 +594,44 @@ export const TowerData: Record<string, TowerStatsConfig> = {
                     normalRangeBoost: 0.20,
                     masteryDmgBoost: 0.80,
                     masteryRangeBoost: 0.35
+                }
+            }
+        }
+    },
+    'Generator': {
+        type: 'Generator',
+        baseCost: 150,
+        baseDamage: 0,
+        damagePerLevel: 0,
+        baseRange: 0,
+        rangePerLevel: 0,
+        baseFireRate: 300, // Cooldown of 5 seconds between gold ticks at 60 FPS
+        fireRateDecrease: 10,
+        colors: ['#20bf6b', '#26de81', '#00b894', '#55efc4', '#ffeaa7', '#ffd32a', '#ffb8b8', '#ff7675', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'],
+        costScaling: {
+            earlyMultiplier: 1.5,
+            lateMultiplier: 1.4,
+            thresholdLevel: 5
+        },
+        specializations: {
+            'bank': {
+                name: 'Investment Bank',
+                desc: '+150g am Wellenende',
+                masteryDesc: '+800g am Wellenende',
+                color: '#ffeaa7',
+                values: {
+                    normalGold: 150,
+                    masteryGold: 800
+                }
+            },
+            'industrial': {
+                name: 'Industrial Production',
+                desc: '2.0x Gold-Einkommen',
+                masteryDesc: '5.0x Gold-Einkommen',
+                color: '#26de81',
+                multipliers: {
+                    normalIncome: 2.0,
+                    masteryIncome: 5.0
                 }
             }
         }

@@ -7,7 +7,7 @@
  * @last_update: 2026-06-01 / v1.10.3 - Synchronize shieldHp and maxShieldHp in processIncomingGameState.
  */
 import { state } from '../state';
-import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower, BoosterTower } from '../../entities/towers/index';
+import { Tower, SniperTower, BombTower, TeslaTower, PrismaTower, BoosterTower, GeneratorTower } from '../../entities/towers/index';
 import { EnemyFactory } from '../../entities/enemies';
 import { Config } from '../config';
 import { createExplosion, createCoinBurst } from '../../fx/fx';
@@ -324,6 +324,7 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
                 else if (tData.type === 'Tesla') TowerClass = TeslaTower;
                 else if (tData.type === 'Prisma') TowerClass = PrismaTower;
                 else if (tData.type === 'Booster') TowerClass = BoosterTower;
+                else if (tData.type === 'Generator') TowerClass = GeneratorTower;
 
                 tower = new TowerClass(tData.col, tData.row);
                 tower.constructionTimer = 0;
@@ -448,6 +449,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                     else if (tData.type === 'Tesla') TowerClass = TeslaTower;
                     else if (tData.type === 'Prisma') TowerClass = PrismaTower;
                     else if (tData.type === 'Booster') TowerClass = BoosterTower;
+                    else if (tData.type === 'Generator') TowerClass = GeneratorTower;
 
                     const newTower = new TowerClass(tData.col, tData.row);
                     const targetLevel = tData.level || 1;
@@ -686,6 +688,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                     else if (tData.type === 'Tesla') TowerClass = TeslaTower;
                     else if (tData.type === 'Prisma') TowerClass = PrismaTower;
                     else if (tData.type === 'Booster') TowerClass = BoosterTower;
+                    else if (tData.type === 'Generator') TowerClass = GeneratorTower;
 
                     const newTower = new TowerClass(tData.col, tData.row);
                     const targetLevel = tData.level || 1;
@@ -750,6 +753,7 @@ export function bindInboundEvents(startWaveCallback: (data?: { wave: number; tic
                 else if (type === 'Tesla') TowerClass = TeslaTower;
                 else if (type === 'Prisma') TowerClass = PrismaTower;
                 else if (type === 'Booster') TowerClass = BoosterTower;
+                else if (type === 'Generator') TowerClass = GeneratorTower;
 
                 const newTower = new TowerClass(col, row);
                 state.towers.push(newTower);

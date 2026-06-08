@@ -137,8 +137,8 @@ export interface Enemy {
 
 // ─── TOWER ENTITY TYPES ───────────────────────────────────────────────────────
 
-export type TowerType = 'Base' | 'Sniper' | 'Bomb' | 'Tesla' | 'Prisma' | 'Booster';
-export type TowerSpecialization = 'heavy' | 'missiles' | 'ricochet' | 'bounty' | 'cluster' | 'nuke' | 'highvolt' | 'stun' | 'meltdown' | 'refraction' | 'frequency' | 'amplitude';
+export type TowerType = 'Base' | 'Sniper' | 'Bomb' | 'Tesla' | 'Prisma' | 'Booster' | 'Generator';
+export type TowerSpecialization = 'heavy' | 'missiles' | 'ricochet' | 'bounty' | 'cluster' | 'nuke' | 'highvolt' | 'stun' | 'meltdown' | 'refraction' | 'frequency' | 'amplitude' | 'bank' | 'industrial';
 
 export interface Tower {
     col: number;

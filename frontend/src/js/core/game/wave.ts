@@ -6,13 +6,14 @@
  * @last_update: 2026-06-01 / v1.4.0 - Added Accelerator to new geometry unlock warning descriptions.
  */
 import { state } from '../state';
-import { Config, EnemyData } from '../config';
+import { Config, EnemyData, TowerData } from '../config';
 import { EnemyFactory } from '../../entities/enemies';
 import { createCoinBurst } from '../../fx/fx';
 import { updateUI, showGameNotification } from '../../ui/ui';
 import { Multiplayer } from '../multiplayer/index';
 import { logger } from '../logger';
 import { app } from './viewport';
+import { PoolManager } from '../pool';
 
 export function generateEnemyPool(wave: number): string[] {
     let enemiesToSpawn = Config.WAVE_BASE_ENEMIES + Math.floor(wave * Config.WAVE_ENEMIES_MULTIPLIER);
@@ -228,16 +229,30 @@ export function handleWaveLogic(): void {
         // Interest earned on current gold
         const interest = Math.floor(state.gold * Config.INTEREST_RATE);
 
-        state.gold += waveBonus + interest;
-        state.totalGoldEarned += waveBonus + interest;
-        state.totalGoldFromInterest += interest;
+        // Calculate Investment Bank payout
+        let bankGold = 0;
+        for (const t of state.towers) {
+            if (t.type === 'Generator' && t.specialization === 'bank' && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+                const spec = TowerData['Generator'].specializations['bank'];
+                const amount = t.masteryUnlocked ? spec.values!.masteryGold : spec.values!.normalGold;
+                bankGold += amount;
+                
+                // Visual coin burst and floating text at the bank tower location
+                PoolManager.getFloatingText(t.x, t.y - 25, `+${amount}g Bank`, '#ffd700');
+                createCoinBurst(t.x, t.y, 6);
+            }
+        }
+
+        state.gold += waveBonus + interest + bankGold;
+        state.totalGoldEarned += waveBonus + interest + bankGold;
+        state.totalGoldFromInterest += interest + bankGold; // reuse to track bank gold
 
         // High-Tech DOM Alert Notification replaces ugly canvas texts
         showGameNotification(
             'wave',
             `🌊 WELLE ${state.wave - 1} ABGEWEHRT!`,
             `Sektor gesichert. Die nächste Welle formiert sich bereits.`,
-            { bonus: waveBonus, interest: interest }
+            { bonus: waveBonus, interest: bankGold }
         );
         createCoinBurst((app.canvas.clientWidth || app.canvas.width) / 2, (app.canvas.clientHeight || app.canvas.height) / 2, 20);
         updateUI();

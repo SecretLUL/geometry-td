@@ -253,7 +253,8 @@ export function showContextShop(x: number, y: number, col: number, row: number):
         { type: 'Bomb', cost: TowerData['Bomb'].baseCost },
         { type: 'Tesla', cost: TowerData['Tesla'].baseCost },
         { type: 'Prisma', cost: TowerData['Prisma'].baseCost },
-        { type: 'Booster', cost: TowerData['Booster'].baseCost }
+        { type: 'Booster', cost: TowerData['Booster'].baseCost },
+        { type: 'Generator', cost: TowerData['Generator'].baseCost }
     ];
 
     shopItems.forEach(item => {

@@ -27,8 +27,8 @@ export function showGameNotification(type: 'wave' | 'warning' | 'info', title: s
         if (meta.bonus !== undefined) {
             metaHtml += `<span class="alert-gold-bonus">💰 +${meta.bonus}g Bonus</span>`;
         }
-        if (meta.interest !== undefined) {
-            metaHtml += `<span class="alert-gold-interest">📈 +${meta.interest}g Zinsen</span>`;
+        if (meta.interest !== undefined && meta.interest > 0) {
+            metaHtml += `<span class="alert-gold-interest">📈 +${meta.interest}g Banken</span>`;
         }
         metaHtml += `</div>`;
     }
