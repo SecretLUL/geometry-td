@@ -1,489 +1,706 @@
-import { MenuController } from '../menu';
-import { state } from '../../core/state';
+import { MenuController } from "../menu";
+import { state } from "../../core/state";
 
 export class ProfileController {
-    private main: MenuController;
+  private main: MenuController;
 
-    constructor(main: MenuController) {
-        this.main = main;
-        this.initProfile();
-    }
+  constructor(main: MenuController) {
+    this.main = main;
+    this.initProfile();
+  }
 
-    private initProfile(): void {
-        const authSection = document.getElementById('profile-auth-section');
-        const dashboardSection = document.getElementById('profile-dashboard-section');
+  private initProfile(): void {
+    const authSection = document.getElementById("profile-auth-section");
+    const dashboardSection = document.getElementById("profile-dashboard-section");
 
-        const loginForm = document.getElementById('auth-login-form');
-        const registerForm = document.getElementById('auth-register-form');
-        const gotoRegister = document.getElementById('goto-register');
-        const gotoLogin = document.getElementById('goto-login');
+    const loginForm = document.getElementById("auth-login-form");
+    const registerForm = document.getElementById("auth-register-form");
+    const gotoRegister = document.getElementById("goto-register");
+    const gotoLogin = document.getElementById("goto-login");
 
-        const loginUser = document.getElementById('login-username') as HTMLInputElement | null;
-        const loginPass = document.getElementById('login-password') as HTMLInputElement | null;
-        const loginBtn = document.getElementById('login-submit-btn');
-        const loginError = document.getElementById('login-error-msg');
+    const loginUser = document.getElementById("login-username") as HTMLInputElement | null;
+    const loginPass = document.getElementById("login-password") as HTMLInputElement | null;
+    const loginBtn = document.getElementById("login-submit-btn");
+    const loginError = document.getElementById("login-error-msg");
 
-        const regUser = document.getElementById('register-username') as HTMLInputElement | null;
-        const regPass = document.getElementById('register-password') as HTMLInputElement | null;
-        const regBtn = document.getElementById('register-submit-btn');
-        const regError = document.getElementById('register-error-msg');
-        const regSuccess = document.getElementById('register-success-msg');
+    const regUser = document.getElementById("register-username") as HTMLInputElement | null;
+    const regPass = document.getElementById("register-password") as HTMLInputElement | null;
+    const regBtn = document.getElementById("register-submit-btn");
+    const regError = document.getElementById("register-error-msg");
+    const regSuccess = document.getElementById("register-success-msg");
 
-        const logoutBtn = document.getElementById('logout-btn');
+    const logoutBtn = document.getElementById("logout-btn");
 
-        const getBaseUrl = () => {
-            return '';
-        };
+    const getBaseUrl = () => {
+      return "";
+    };
 
-        gotoRegister?.addEventListener('click', () => {
-            if (loginForm) { loginForm.style.display = 'none'; loginForm.classList.add('hidden'); }
-            if (registerForm) { registerForm.style.display = 'block'; registerForm.classList.remove('hidden'); }
-            if (loginError) loginError.style.display = 'none';
-        });
+    gotoRegister?.addEventListener("click", () => {
+      if (loginForm) {
+        loginForm.style.display = "none";
+        loginForm.classList.add("hidden");
+      }
+      if (registerForm) {
+        registerForm.style.display = "block";
+        registerForm.classList.remove("hidden");
+      }
+      if (loginError) loginError.style.display = "none";
+    });
 
-        gotoLogin?.addEventListener('click', () => {
-            if (registerForm) { registerForm.style.display = 'none'; registerForm.classList.add('hidden'); }
-            if (loginForm) { loginForm.style.display = 'block'; loginForm.classList.remove('hidden'); }
-            if (regError) regError.style.display = 'none';
-            if (regSuccess) regSuccess.style.display = 'none';
-        });
+    gotoLogin?.addEventListener("click", () => {
+      if (registerForm) {
+        registerForm.style.display = "none";
+        registerForm.classList.add("hidden");
+      }
+      if (loginForm) {
+        loginForm.style.display = "block";
+        loginForm.classList.remove("hidden");
+      }
+      if (regError) regError.style.display = "none";
+      if (regSuccess) regSuccess.style.display = "none";
+    });
 
-        const checkSession = async () => {
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/auth/me`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.user) {
-                        showDashboard(data.user);
-                    } else {
-                        showAuth();
-                    }
-                } else {
-                    showAuth();
-                }
-            } catch (err) {
-                console.warn('Session check failed:', err);
-                showAuth();
+    const checkSession = async () => {
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/auth/me`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user) {
+            showDashboard(data.user);
+          } else {
+            showAuth();
+          }
+        } else {
+          showAuth();
+        }
+      } catch (err) {
+        console.warn("Session check failed:", err);
+        showAuth();
+      }
+    };
+
+    const showAuth = () => {
+      sessionStorage.setItem("td_logged_in", "false");
+      state.isGuest = true;
+      state.recordWave = parseInt(sessionStorage.getItem("td_record_wave") || "0");
+      this.main.currentUsername = null;
+      if (authSection) {
+        authSection.style.display = "block";
+        authSection.classList.remove("hidden");
+      }
+      if (dashboardSection) {
+        dashboardSection.style.display = "none";
+        dashboardSection.classList.add("hidden");
+      }
+      this.main.lexicon.initLexicon();
+    };
+
+    const showDashboard = async (user: {
+      username: string;
+      avatar?: string | null;
+      created_at?: string | Date | null;
+    }) => {
+      sessionStorage.setItem("td_logged_in", "true");
+      state.isGuest = false;
+      state.recordWave = parseInt(localStorage.getItem("td_record_wave") || "0");
+      this.main.currentUsername = user.username;
+      if (authSection) {
+        authSection.style.display = "none";
+        authSection.classList.add("hidden");
+      }
+      if (dashboardSection) {
+        dashboardSection.style.display = "grid";
+        dashboardSection.classList.remove("hidden");
+      }
+
+      const userEl = document.getElementById("dashboard-username");
+      if (userEl) userEl.textContent = user.username;
+
+      const avatarDisplay = document.getElementById("profile-avatar-display");
+      if (avatarDisplay) {
+        avatarDisplay.replaceChildren();
+        if (user.avatar) {
+          const img = document.createElement("img");
+          img.src = user.avatar;
+          img.alt = "Profile Picture";
+          avatarDisplay.appendChild(img);
+        } else {
+          avatarDisplay.textContent = "👤";
+        }
+      }
+
+      const joinedEl = document.getElementById("dashboard-joined");
+      if (joinedEl) {
+        if (user.created_at) {
+          const date = new Date(user.created_at);
+          const formattedDate = date.toLocaleDateString("de-DE", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+          joinedEl.textContent = `Mitglied seit: ${formattedDate}`;
+        } else {
+          joinedEl.textContent = "Mitglied seit: --.--.----";
+        }
+      }
+
+      this.main.lexicon.initLexicon();
+
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/user/progress`);
+        if (response.ok) {
+          const data = await response.json();
+          const progress = data.progress;
+          if (progress) {
+            const highestWaveEl = document.getElementById("dashboard-highest-wave");
+            if (highestWaveEl) highestWaveEl.textContent = String(progress.highest_wave || 0);
+
+            if (progress.highest_wave) {
+              localStorage.setItem("td_record_wave", String(progress.highest_wave));
+              state.recordWave = progress.highest_wave;
             }
-        };
 
-        const showAuth = () => {
-            sessionStorage.setItem('td_logged_in', 'false');
-            state.isGuest = true;
-            state.recordWave = parseInt(sessionStorage.getItem('td_record_wave') || '0');
-            this.main.currentUsername = null;
-            if (authSection) { authSection.style.display = 'block'; authSection.classList.remove('hidden'); }
-            if (dashboardSection) { dashboardSection.style.display = 'none'; dashboardSection.classList.add('hidden'); }
+            updateAchievementsUI(progress.unlocked_achievements || [], progress.highest_wave || 0);
+            updateSkinsUI(
+              progress.unlocked_skins || ["default"],
+              progress.selected_skin || "default"
+            );
+
             this.main.lexicon.initLexicon();
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching progress:", err);
+      }
+    };
+
+    const updateAchievementsUI = (unlockedAchievements: string[], highestWave: number) => {
+      const achievements = [
+        { id: "ach-first-wave", reqWave: 5 },
+        { id: "ach-wave-20", reqWave: 20 },
+        { id: "ach-wave-50", reqWave: 50 },
+        { id: "ach-gold-1000", reqWave: null },
+        { id: "ach-towers-15", reqWave: null },
+        { id: "ach-kill-boss", reqWave: 21 },
+        { id: "ach-no-lives-lost", reqWave: null },
+        { id: "ach-tesla-5", reqWave: null },
+      ];
+
+      achievements.forEach((ach) => {
+        const item = document.getElementById(ach.id);
+        if (item) {
+          const statusEl = item.querySelector(".achievement-status");
+          const unlockedByDb = unlockedAchievements.includes(ach.id);
+          const unlockedByWave = ach.reqWave !== null && highestWave >= ach.reqWave;
+
+          if (unlockedByDb || unlockedByWave) {
+            item.classList.add("unlocked");
+            if (statusEl) statusEl.textContent = "Freigeschaltet";
+
+            if (unlockedByWave && !unlockedByDb) {
+              fetch(`${getBaseUrl()}/api/user/unlock-achievement`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ achievementId: ach.id }),
+              }).catch(() => {});
+            }
+          } else {
+            item.classList.remove("unlocked");
+            if (statusEl) statusEl.textContent = "Gesperrt";
+          }
+        }
+      });
+    };
+
+    const updateSkinsUI = (unlockedSkins: string[], selectedSkin: string) => {
+      const skinCards = document.querySelectorAll(".skin-card");
+      skinCards.forEach((card) => {
+        const htmlCard = card as HTMLElement;
+        const skinKey = htmlCard.dataset.skin;
+        if (!skinKey) return;
+
+        const statusEl = htmlCard.querySelector(".skin-status");
+
+        htmlCard.classList.remove("selected", "skin-locked");
+
+        const isUnlocked = unlockedSkins.includes(skinKey);
+        if (isUnlocked) {
+          if (skinKey === selectedSkin) {
+            htmlCard.classList.add("selected");
+            if (statusEl) statusEl.textContent = "Ausgerüstet";
+          } else {
+            if (statusEl) statusEl.textContent = "Auswählen";
+          }
+
+          htmlCard.onclick = async () => {
+            try {
+              const response = await fetch(`${getBaseUrl()}/api/user/progress`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ selected_skin: skinKey }),
+              });
+              if (response.ok) {
+                updateSkinsUI(unlockedSkins, skinKey);
+              }
+            } catch (err) {
+              console.error("Error equipping skin:", err);
+            }
+          };
+        } else {
+          htmlCard.classList.add("skin-locked");
+          if (statusEl) statusEl.textContent = "Gesperrt";
+          htmlCard.onclick = null;
+        }
+      });
+    };
+
+    const loginRemember = document.getElementById("login-remember") as HTMLInputElement | null;
+
+    const handleLoginEnter = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        loginBtn?.click();
+      }
+    };
+    loginUser?.addEventListener("keydown", handleLoginEnter);
+    loginPass?.addEventListener("keydown", handleLoginEnter);
+
+    const avatarContainer = document.getElementById("profile-avatar-container");
+    const avatarInput = document.getElementById("profile-avatar-input") as HTMLInputElement | null;
+
+    const avatarCropModal = document.getElementById("avatarCropModal");
+    const closeCropModal = document.getElementById("closeCropModal");
+    const cancelCropBtn = document.getElementById("cancelCropBtn");
+    const confirmCropBtn = document.getElementById("confirmCropBtn");
+    const cropCanvas = document.getElementById("cropCanvas") as HTMLCanvasElement | null;
+    const cropZoomSlider = document.getElementById("cropZoomSlider") as HTMLInputElement | null;
+
+    avatarContainer?.addEventListener("click", () => {
+      avatarInput?.click();
+    });
+
+    const openCropper = (imgSrc: string) => {
+      if (!avatarCropModal || !cropCanvas || !cropZoomSlider) return;
+
+      const ctx = cropCanvas.getContext("2d");
+      if (!ctx) return;
+
+      let sourceImg: HTMLImageElement | null = new Image();
+      sourceImg.src = imgSrc;
+      sourceImg.onload = () => {
+        if (!sourceImg) return;
+        const imgW = sourceImg.width;
+        const imgH = sourceImg.height;
+
+        // Min scale to fully cover 200px crop circle (centered in 300x300 canvas)
+        const minScale = Math.max(200 / imgW, 200 / imgH);
+        let scale = minScale;
+        const maxScale = minScale * 4;
+
+        cropZoomSlider.min = String(minScale);
+        cropZoomSlider.max = String(maxScale);
+        cropZoomSlider.step = "0.001";
+        cropZoomSlider.value = String(scale);
+
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+
+        const clampOffsets = () => {
+          if (!sourceImg) return;
+          const limitX = Math.max(0, (sourceImg.width * scale) / 2 - 100);
+          offsetX = Math.max(-limitX, Math.min(limitX, offsetX));
+
+          const limitY = Math.max(0, (sourceImg.height * scale) / 2 - 100);
+          offsetY = Math.max(-limitY, Math.min(limitY, offsetY));
         };
 
-        const showDashboard = async (user: { username: string, avatar?: string | null, created_at?: string | Date | null }) => {
-            sessionStorage.setItem('td_logged_in', 'true');
-            state.isGuest = false;
-            state.recordWave = parseInt(localStorage.getItem('td_record_wave') || '0');
-            this.main.currentUsername = user.username;
-            if (authSection) { authSection.style.display = 'none'; authSection.classList.add('hidden'); }
-            if (dashboardSection) { dashboardSection.style.display = 'grid'; dashboardSection.classList.remove('hidden'); }
+        const render = () => {
+          if (!sourceImg || !ctx) return;
+          ctx.clearRect(0, 0, 300, 300);
 
-            const userEl = document.getElementById('dashboard-username');
-            if (userEl) userEl.textContent = user.username;
+          // Draw image
+          ctx.save();
+          ctx.translate(150 + offsetX, 150 + offsetY);
+          ctx.scale(scale, scale);
+          ctx.drawImage(sourceImg, -sourceImg.width / 2, -sourceImg.height / 2);
+          ctx.restore();
 
-            const avatarDisplay = document.getElementById('profile-avatar-display');
-            if (avatarDisplay) {
-                avatarDisplay.replaceChildren();
-                if (user.avatar) {
-                    const img = document.createElement('img');
-                    img.src = user.avatar;
-                    img.alt = 'Profile Picture';
-                    avatarDisplay.appendChild(img);
-                } else {
-                    avatarDisplay.textContent = '👤';
-                }
-            }
+          // Draw circular mask (semi-transparent black overlay outside the circle)
+          ctx.save();
+          ctx.fillStyle = "rgba(5, 5, 16, 0.65)";
+          ctx.beginPath();
+          ctx.rect(0, 0, 300, 300);
+          ctx.arc(150, 150, 100, 0, Math.PI * 2);
+          ctx.fill("evenodd");
+          ctx.restore();
 
-            const joinedEl = document.getElementById('dashboard-joined');
-            if (joinedEl) {
-                if (user.created_at) {
-                    const date = new Date(user.created_at);
-                    const formattedDate = date.toLocaleDateString('de-DE', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                    joinedEl.textContent = `Mitglied seit: ${formattedDate}`;
-                } else {
-                    joinedEl.textContent = 'Mitglied seit: --.--.----';
-                }
-            }
+          // Draw glowing cyber border
+          ctx.save();
+          ctx.strokeStyle = "rgba(76, 201, 240, 0.8)";
+          ctx.lineWidth = 2;
+          ctx.shadowColor = "rgba(76, 201, 240, 0.5)";
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(150, 150, 100, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        };
 
-            this.main.lexicon.initLexicon();
+        const handleMouseDown = (e: MouseEvent) => {
+          isDragging = true;
+          startX = e.clientX - offsetX;
+          startY = e.clientY - offsetY;
+        };
+
+        const handleMouseMove = (e: MouseEvent) => {
+          if (!isDragging) return;
+          offsetX = e.clientX - startX;
+          offsetY = e.clientY - startY;
+          clampOffsets();
+          render();
+        };
+
+        const handleMouseUp = () => {
+          isDragging = false;
+        };
+
+        const handleTouchStart = (e: TouchEvent) => {
+          if (e.touches.length !== 1) return;
+          isDragging = true;
+          startX = e.touches[0].clientX - offsetX;
+          startY = e.touches[0].clientY - offsetY;
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+          if (!isDragging || e.touches.length !== 1) return;
+          offsetX = e.touches[0].clientX - startX;
+          offsetY = e.touches[0].clientY - startY;
+          clampOffsets();
+          render();
+        };
+
+        const handleTouchEnd = () => {
+          isDragging = false;
+        };
+
+        const handleSliderInput = () => {
+          scale = parseFloat(cropZoomSlider.value);
+          clampOffsets();
+          render();
+        };
+
+        cropCanvas.addEventListener("mousedown", handleMouseDown);
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+        cropCanvas.addEventListener("touchstart", handleTouchStart, { passive: true });
+        cropCanvas.addEventListener("touchmove", handleTouchMove, { passive: true });
+        window.addEventListener("touchend", handleTouchEnd);
+        cropZoomSlider.addEventListener("input", handleSliderInput);
+
+        const handleOutsideClick = (e: MouseEvent) => {
+          if (e.target === avatarCropModal) {
+            handleCancel();
+          }
+        };
+        avatarCropModal.addEventListener("click", handleOutsideClick);
+
+        const cleanup = () => {
+          cropCanvas.removeEventListener("mousedown", handleMouseDown);
+          window.removeEventListener("mousemove", handleMouseMove);
+          window.removeEventListener("mouseup", handleMouseUp);
+          cropCanvas.removeEventListener("touchstart", handleTouchStart);
+          cropCanvas.removeEventListener("touchmove", handleTouchMove);
+          window.removeEventListener("touchend", handleTouchEnd);
+          cropZoomSlider.removeEventListener("input", handleSliderInput);
+          avatarCropModal.removeEventListener("click", handleOutsideClick);
+
+          if (confirmCropBtn) confirmCropBtn.onclick = null;
+          if (cancelCropBtn) cancelCropBtn.onclick = null;
+          if (closeCropModal) closeCropModal.onclick = null;
+
+          avatarCropModal.classList.add("hidden");
+          if (avatarInput) avatarInput.value = "";
+          sourceImg = null;
+        };
+
+        const handleConfirm = async () => {
+          if (!sourceImg) return;
+
+          const exportCanvas = document.createElement("canvas");
+          exportCanvas.width = 128;
+          exportCanvas.height = 128;
+          const exportCtx = exportCanvas.getContext("2d");
+          if (exportCtx) {
+            exportCtx.save();
+            // Transform 200px crop circle space centered at 150 to 128px space centered at 64 (ratio 0.64)
+            exportCtx.translate(64 + offsetX * 0.64, 64 + offsetY * 0.64);
+            exportCtx.scale(scale * 0.64, scale * 0.64);
+            exportCtx.drawImage(sourceImg, -sourceImg.width / 2, -sourceImg.height / 2);
+            exportCtx.restore();
+
+            const resizedBase64 = exportCanvas.toDataURL("image/jpeg", 0.8);
 
             try {
-                const response = await fetch(`${getBaseUrl()}/api/user/progress`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const progress = data.progress;
-                    if (progress) {
-                        const highestWaveEl = document.getElementById('dashboard-highest-wave');
-                        if (highestWaveEl) highestWaveEl.textContent = String(progress.highest_wave || 0);
-
-                        if (progress.highest_wave) {
-                            localStorage.setItem('td_record_wave', String(progress.highest_wave));
-                            state.recordWave = progress.highest_wave;
-                        }
-
-                        updateAchievementsUI(progress.unlocked_achievements || [], progress.highest_wave || 0);
-                        updateSkinsUI(progress.unlocked_skins || ['default'], progress.selected_skin || 'default');
-
-                        this.main.lexicon.initLexicon();
-                    }
+              const response = await fetch(`${getBaseUrl()}/api/user/profile`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ avatar: resizedBase64 }),
+              });
+              const result = await response.json();
+              if (response.ok && result.success) {
+                const avatarDisplay = document.getElementById("profile-avatar-display");
+                if (avatarDisplay) {
+                  avatarDisplay.replaceChildren();
+                  const newImg = document.createElement("img");
+                  newImg.src = resizedBase64;
+                  newImg.alt = "Profile Picture";
+                  avatarDisplay.appendChild(newImg);
                 }
+                cleanup();
+              } else {
+                alert(result.error || "Fehler beim Hochladen des Profilbildes.");
+              }
             } catch (err) {
-                console.error('Error fetching progress:', err);
+              console.error("Error uploading avatar:", err);
+              alert("Verbindungsfehler beim Hochladen.");
             }
+          }
         };
 
-        const updateAchievementsUI = (unlockedAchievements: string[], highestWave: number) => {
-            const achievements = [
-                { id: 'ach-first-wave', reqWave: 5 },
-                { id: 'ach-wave-20', reqWave: 20 },
-                { id: 'ach-wave-50', reqWave: 50 },
-                { id: 'ach-gold-1000', reqWave: null },
-                { id: 'ach-towers-15', reqWave: null },
-                { id: 'ach-kill-boss', reqWave: 21 },
-                { id: 'ach-no-lives-lost', reqWave: null },
-                { id: 'ach-tesla-5', reqWave: null }
-            ];
-
-            achievements.forEach(ach => {
-                const item = document.getElementById(ach.id);
-                if (item) {
-                    const statusEl = item.querySelector('.achievement-status');
-                    const unlockedByDb = unlockedAchievements.includes(ach.id);
-                    const unlockedByWave = ach.reqWave !== null && highestWave >= ach.reqWave;
-
-                    if (unlockedByDb || unlockedByWave) {
-                        item.classList.add('unlocked');
-                        if (statusEl) statusEl.textContent = 'Freigeschaltet';
-
-                        if (unlockedByWave && !unlockedByDb) {
-                            fetch(`${getBaseUrl()}/api/user/unlock-achievement`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ achievementId: ach.id })
-                            }).catch(() => { });
-                        }
-                    } else {
-                        item.classList.remove('unlocked');
-                        if (statusEl) statusEl.textContent = 'Gesperrt';
-                    }
-                }
-            });
+        const handleCancel = () => {
+          cleanup();
         };
 
-        const updateSkinsUI = (unlockedSkins: string[], selectedSkin: string) => {
-            const skinCards = document.querySelectorAll('.skin-card');
-            skinCards.forEach(card => {
-                const htmlCard = card as HTMLElement;
-                const skinKey = htmlCard.dataset.skin;
-                if (!skinKey) return;
+        if (confirmCropBtn) confirmCropBtn.onclick = handleConfirm;
+        if (cancelCropBtn) cancelCropBtn.onclick = handleCancel;
+        if (closeCropModal) closeCropModal.onclick = handleCancel;
 
-                const statusEl = htmlCard.querySelector('.skin-status');
+        render();
+        avatarCropModal.classList.remove("hidden");
+      };
+    };
 
-                htmlCard.classList.remove('selected', 'skin-locked');
+    avatarInput?.addEventListener("change", () => {
+      if (!avatarInput.files || avatarInput.files.length === 0) return;
+      const file = avatarInput.files[0];
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Das ausgewählte Bild ist zu groß (maximal 2 MB).");
+        return;
+      }
 
-                const isUnlocked = unlockedSkins.includes(skinKey);
-                if (isUnlocked) {
-                    if (skinKey === selectedSkin) {
-                        htmlCard.classList.add('selected');
-                        if (statusEl) statusEl.textContent = 'Ausgerüstet';
-                    } else {
-                        if (statusEl) statusEl.textContent = 'Auswählen';
-                    }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result;
+        if (typeof result === "string") {
+          openCropper(result);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
 
-                    htmlCard.onclick = async () => {
-                        try {
-                            const response = await fetch(`${getBaseUrl()}/api/user/progress`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ selected_skin: skinKey })
-                            });
-                            if (response.ok) {
-                                updateSkinsUI(unlockedSkins, skinKey);
-                            }
-                        } catch (err) {
-                            console.error('Error equipping skin:', err);
-                        }
-                    };
-                } else {
-                    htmlCard.classList.add('skin-locked');
-                    if (statusEl) statusEl.textContent = 'Gesperrt';
-                    htmlCard.onclick = null;
-                }
-            });
-        };
+    const editUsernameBtn = document.getElementById("edit-username-btn");
+    const usernameWrapper = document.getElementById("profile-username-wrapper");
+    const usernameEditContainer = document.getElementById("username-edit-container");
+    const usernameEditInput = document.getElementById(
+      "username-edit-input"
+    ) as HTMLInputElement | null;
+    const saveUsernameBtn = document.getElementById("save-username-btn");
+    const cancelUsernameBtn = document.getElementById("cancel-username-btn");
+    const usernameEditError = document.getElementById("username-edit-error");
 
-        const loginRemember = document.getElementById('login-remember') as HTMLInputElement | null;
+    editUsernameBtn?.addEventListener("click", () => {
+      const currentUsername = document.getElementById("dashboard-username")?.textContent || "";
+      if (usernameEditInput) {
+        usernameEditInput.value = currentUsername;
+      }
+      if (usernameWrapper) {
+        usernameWrapper.style.display = "none";
+        usernameWrapper.classList.add("hidden");
+      }
+      if (usernameEditContainer) {
+        usernameEditContainer.style.display = "flex";
+        usernameEditContainer.classList.remove("hidden");
+      }
+      if (usernameEditError) {
+        usernameEditError.style.display = "none";
+        usernameEditError.classList.add("hidden");
+      }
+    });
 
-        const handleLoginEnter = (e: KeyboardEvent) => {
-            if (e.key === 'Enter') {
-                loginBtn?.click();
-            }
-        };
-        loginUser?.addEventListener('keydown', handleLoginEnter);
-        loginPass?.addEventListener('keydown', handleLoginEnter);
+    const closeUsernameEdit = () => {
+      if (usernameWrapper) {
+        usernameWrapper.style.display = "flex";
+        usernameWrapper.classList.remove("hidden");
+      }
+      if (usernameEditContainer) {
+        usernameEditContainer.style.display = "none";
+        usernameEditContainer.classList.add("hidden");
+      }
+    };
 
-        const avatarContainer = document.getElementById('profile-avatar-container');
-        const avatarInput = document.getElementById('profile-avatar-input') as HTMLInputElement | null;
+    cancelUsernameBtn?.addEventListener("click", closeUsernameEdit);
 
-        avatarContainer?.addEventListener('click', () => {
-            avatarInput?.click();
+    saveUsernameBtn?.addEventListener("click", async () => {
+      const newUsername = usernameEditInput?.value.trim();
+      if (!newUsername) {
+        if (usernameEditError) {
+          usernameEditError.textContent = "Name darf nicht leer sein.";
+          usernameEditError.style.display = "block";
+          usernameEditError.classList.remove("hidden");
+        }
+        return;
+      }
+      if (
+        newUsername.length < 4 ||
+        newUsername.length > 20 ||
+        !/^[a-zA-Z0-9_-]+$/.test(newUsername)
+      ) {
+        if (usernameEditError) {
+          usernameEditError.textContent =
+            "Name muss zwischen 4 und 20 Zeichen lang sein und darf nur Buchstaben, Zahlen, _ und - enthalten.";
+          usernameEditError.style.display = "block";
+          usernameEditError.classList.remove("hidden");
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/user/profile`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: newUsername }),
+        });
+        const result = await response.json();
+        if (response.ok && result.success) {
+          const userEl = document.getElementById("dashboard-username");
+          if (userEl) userEl.textContent = newUsername;
+          this.main.currentUsername = newUsername;
+          closeUsernameEdit();
+        } else {
+          if (usernameEditError) {
+            usernameEditError.textContent = result.error || "Fehler beim Ändern des Namens.";
+            usernameEditError.style.display = "block";
+            usernameEditError.classList.remove("hidden");
+          }
+        }
+      } catch (err) {
+        if (usernameEditError) {
+          usernameEditError.textContent = "Verbindungsfehler zum Server.";
+          usernameEditError.style.display = "block";
+          usernameEditError.classList.remove("hidden");
+        }
+      }
+    });
+
+    loginBtn?.addEventListener("click", async () => {
+      const username = loginUser?.value.trim();
+      const password = loginPass?.value;
+      const remember = loginRemember?.checked || false;
+
+      if (!username || !password) {
+        if (loginError) {
+          loginError.textContent = "Bitte fülle alle Felder aus.";
+          loginError.style.display = "block";
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, remember }),
         });
 
-        avatarInput?.addEventListener('change', () => {
-            if (!avatarInput.files || avatarInput.files.length === 0) return;
-            const file = avatarInput.files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                alert('Das ausgewählte Bild ist zu groß (maximal 2 MB).');
-                return;
-            }
+        const data = await response.json();
+        if (response.ok && data.success) {
+          if (loginUser) loginUser.value = "";
+          if (loginPass) loginPass.value = "";
+          if (loginError) loginError.style.display = "none";
+          showDashboard(data.user);
+        } else {
+          if (loginError) {
+            loginError.textContent = data.error || "Fehler beim Einloggen.";
+            loginError.style.display = "block";
+          }
+        }
+      } catch (err) {
+        if (loginError) {
+          loginError.textContent = "Verbindungsfehler zum Server.";
+          loginError.style.display = "block";
+        }
+      }
+    });
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = async () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 128;
-                    canvas.height = 128;
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                        ctx.drawImage(img, 0, 0, 128, 128);
-                        const resizedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+    regBtn?.addEventListener("click", async () => {
+      const username = regUser?.value.trim();
+      const password = regPass?.value;
 
-                        try {
-                            const response = await fetch(`${getBaseUrl()}/api/user/profile`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ avatar: resizedBase64 })
-                            });
-                            const result = await response.json();
-                            if (response.ok && result.success) {
-                                const avatarDisplay = document.getElementById('profile-avatar-display');
-                                if (avatarDisplay) {
-                                    avatarDisplay.replaceChildren();
-                                    const newImg = document.createElement('img');
-                                    newImg.src = resizedBase64;
-                                    newImg.alt = 'Profile Picture';
-                                    avatarDisplay.appendChild(newImg);
-                                }
-                            } else {
-                                alert(result.error || 'Fehler beim Hochladen des Profilbildes.');
-                            }
-                        } catch (err) {
-                            console.error('Error uploading avatar:', err);
-                            alert('Verbindungsfehler beim Hochladen.');
-                        }
-                    }
-                };
-                img.src = e.target?.result as string;
-            };
-            reader.readAsDataURL(file);
+      if (!username || !password) {
+        if (regError) {
+          regError.textContent = "Bitte fülle alle Felder aus.";
+          regError.style.display = "block";
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
         });
 
-        const editUsernameBtn = document.getElementById('edit-username-btn');
-        const usernameWrapper = document.getElementById('profile-username-wrapper');
-        const usernameEditContainer = document.getElementById('username-edit-container');
-        const usernameEditInput = document.getElementById('username-edit-input') as HTMLInputElement | null;
-        const saveUsernameBtn = document.getElementById('save-username-btn');
-        const cancelUsernameBtn = document.getElementById('cancel-username-btn');
-        const usernameEditError = document.getElementById('username-edit-error');
+        const data = await response.json();
+        if (response.ok && data.success) {
+          localStorage.removeItem("td_discovered_enemies");
+          localStorage.removeItem("td_record_wave");
+          sessionStorage.removeItem("td_discovered_enemies");
+          sessionStorage.removeItem("td_record_wave");
+          this.main.lexicon.initLexicon();
 
-        editUsernameBtn?.addEventListener('click', () => {
-            const currentUsername = document.getElementById('dashboard-username')?.textContent || '';
-            if (usernameEditInput) {
-                usernameEditInput.value = currentUsername;
-            }
-            if (usernameWrapper) {
-                usernameWrapper.style.display = 'none';
-                usernameWrapper.classList.add('hidden');
-            }
-            if (usernameEditContainer) {
-                usernameEditContainer.style.display = 'flex';
-                usernameEditContainer.classList.remove('hidden');
-            }
-            if (usernameEditError) {
-                usernameEditError.style.display = 'none';
-                usernameEditError.classList.add('hidden');
-            }
-        });
+          if (regUser) regUser.value = "";
+          if (regPass) regPass.value = "";
+          if (regError) regError.style.display = "none";
+          if (regSuccess) {
+            regSuccess.textContent = "Registrierung erfolgreich! Bitte logge dich ein.";
+            regSuccess.style.display = "block";
+          }
+          setTimeout(() => {
+            gotoLogin?.click();
+          }, 1500);
+        } else {
+          if (regError) {
+            regError.textContent = data.error || "Fehler bei der Registrierung.";
+            regError.style.display = "block";
+          }
+        }
+      } catch (err) {
+        if (regError) {
+          regError.textContent = "Verbindungsfehler zum Server.";
+          regError.style.display = "block";
+        }
+      }
+    });
 
-        const closeUsernameEdit = () => {
-            if (usernameWrapper) {
-                usernameWrapper.style.display = 'flex';
-                usernameWrapper.classList.remove('hidden');
-            }
-            if (usernameEditContainer) {
-                usernameEditContainer.style.display = 'none';
-                usernameEditContainer.classList.add('hidden');
-            }
-        };
+    logoutBtn?.addEventListener("click", async () => {
+      try {
+        const response = await fetch(`${getBaseUrl()}/api/auth/logout`, { method: "POST" });
+        if (response.ok) {
+          sessionStorage.removeItem("td_discovered_enemies");
+          sessionStorage.removeItem("td_record_wave");
+          showAuth();
+        }
+      } catch (err) {
+        console.error("Logout error:", err);
+        sessionStorage.removeItem("td_discovered_enemies");
+        sessionStorage.removeItem("td_record_wave");
+        showAuth();
+      }
+    });
 
-        cancelUsernameBtn?.addEventListener('click', closeUsernameEdit);
-
-        saveUsernameBtn?.addEventListener('click', async () => {
-            const newUsername = usernameEditInput?.value.trim();
-            if (!newUsername) {
-                if (usernameEditError) {
-                    usernameEditError.textContent = 'Name darf nicht leer sein.';
-                    usernameEditError.style.display = 'block';
-                    usernameEditError.classList.remove('hidden');
-                }
-                return;
-            }
-            if (newUsername.length < 4 || newUsername.length > 20 || !/^[a-zA-Z0-9_-]+$/.test(newUsername)) {
-                if (usernameEditError) {
-                    usernameEditError.textContent = 'Name muss zwischen 4 und 20 Zeichen lang sein und darf nur Buchstaben, Zahlen, _ und - enthalten.';
-                    usernameEditError.style.display = 'block';
-                    usernameEditError.classList.remove('hidden');
-                }
-                return;
-            }
-
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/user/profile`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: newUsername })
-                });
-                const result = await response.json();
-                if (response.ok && result.success) {
-                    const userEl = document.getElementById('dashboard-username');
-                    if (userEl) userEl.textContent = newUsername;
-                    this.main.currentUsername = newUsername;
-                    closeUsernameEdit();
-                } else {
-                    if (usernameEditError) {
-                        usernameEditError.textContent = result.error || 'Fehler beim Ändern des Namens.';
-                        usernameEditError.style.display = 'block';
-                        usernameEditError.classList.remove('hidden');
-                    }
-                }
-            } catch (err) {
-                if (usernameEditError) {
-                    usernameEditError.textContent = 'Verbindungsfehler zum Server.';
-                    usernameEditError.style.display = 'block';
-                    usernameEditError.classList.remove('hidden');
-                }
-            }
-        });
-
-        loginBtn?.addEventListener('click', async () => {
-            const username = loginUser?.value.trim();
-            const password = loginPass?.value;
-            const remember = loginRemember?.checked || false;
-
-            if (!username || !password) {
-                if (loginError) {
-                    loginError.textContent = 'Bitte fülle alle Felder aus.';
-                    loginError.style.display = 'block';
-                }
-                return;
-            }
-
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, remember })
-                });
-
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    if (loginUser) loginUser.value = '';
-                    if (loginPass) loginPass.value = '';
-                    if (loginError) loginError.style.display = 'none';
-                    showDashboard(data.user);
-                } else {
-                    if (loginError) {
-                        loginError.textContent = data.error || 'Fehler beim Einloggen.';
-                        loginError.style.display = 'block';
-                    }
-                }
-            } catch (err) {
-                if (loginError) {
-                    loginError.textContent = 'Verbindungsfehler zum Server.';
-                    loginError.style.display = 'block';
-                }
-            }
-        });
-
-        regBtn?.addEventListener('click', async () => {
-            const username = regUser?.value.trim();
-            const password = regPass?.value;
-
-            if (!username || !password) {
-                if (regError) {
-                    regError.textContent = 'Bitte fülle alle Felder aus.';
-                    regError.style.display = 'block';
-                }
-                return;
-            }
-
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
-                if (response.ok && data.success) {
-                    localStorage.removeItem('td_discovered_enemies');
-                    localStorage.removeItem('td_record_wave');
-                    sessionStorage.removeItem('td_discovered_enemies');
-                    sessionStorage.removeItem('td_record_wave');
-                    this.main.lexicon.initLexicon();
-
-                    if (regUser) regUser.value = '';
-                    if (regPass) regPass.value = '';
-                    if (regError) regError.style.display = 'none';
-                    if (regSuccess) {
-                        regSuccess.textContent = 'Registrierung erfolgreich! Bitte logge dich ein.';
-                        regSuccess.style.display = 'block';
-                    }
-                    setTimeout(() => {
-                        gotoLogin?.click();
-                    }, 1500);
-                } else {
-                    if (regError) {
-                        regError.textContent = data.error || 'Fehler bei der Registrierung.';
-                        regError.style.display = 'block';
-                    }
-                }
-            } catch (err) {
-                if (regError) {
-                    regError.textContent = 'Verbindungsfehler zum Server.';
-                    regError.style.display = 'block';
-                }
-            }
-        });
-
-        logoutBtn?.addEventListener('click', async () => {
-            try {
-                const response = await fetch(`${getBaseUrl()}/api/auth/logout`, { method: 'POST' });
-                if (response.ok) {
-                    sessionStorage.removeItem('td_discovered_enemies');
-                    sessionStorage.removeItem('td_record_wave');
-                    showAuth();
-                }
-            } catch (err) {
-                console.error('Logout error:', err);
-                sessionStorage.removeItem('td_discovered_enemies');
-                sessionStorage.removeItem('td_record_wave');
-                showAuth();
-            }
-        });
-
-        checkSession();
-    }
+    checkSession();
+  }
 }

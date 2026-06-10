@@ -4,36 +4,41 @@
  * @dependencies: None
  * @last_update: 2026-05-20 / v1.0.0
  */
-export function showGameNotification(type: 'wave' | 'warning' | 'info', title: string, description: string, meta: any = null): void {
-    const container = document.getElementById('game-notifications');
-    if (!container) return;
+export function showGameNotification(
+  type: "wave" | "warning" | "info",
+  title: string,
+  description: string,
+  meta: any = null
+): void {
+  const container = document.getElementById("game-notifications");
+  if (!container) return;
 
-    const alert = document.createElement('div');
-    alert.className = `game-alert theme-${type}`;
+  const alert = document.createElement("div");
+  alert.className = `game-alert theme-${type}`;
 
-    let headerIcon = 'ℹ️';
-    let headerText = 'System';
-    if (type === 'wave') {
-        headerIcon = '🏆';
-        headerText = 'Erfolg';
-    } else if (type === 'warning') {
-        headerIcon = '🚨';
-        headerText = 'Achtung';
+  let headerIcon = "ℹ️";
+  let headerText = "System";
+  if (type === "wave") {
+    headerIcon = "🏆";
+    headerText = "Erfolg";
+  } else if (type === "warning") {
+    headerIcon = "🚨";
+    headerText = "Achtung";
+  }
+
+  let metaHtml = "";
+  if (meta) {
+    metaHtml = `<div class="alert-meta">`;
+    if (meta.bonus !== undefined) {
+      metaHtml += `<span class="alert-gold-bonus">💰 +${meta.bonus}g Bonus</span>`;
     }
-
-    let metaHtml = '';
-    if (meta) {
-        metaHtml = `<div class="alert-meta">`;
-        if (meta.bonus !== undefined) {
-            metaHtml += `<span class="alert-gold-bonus">💰 +${meta.bonus}g Bonus</span>`;
-        }
-        if (meta.interest !== undefined && meta.interest > 0) {
-            metaHtml += `<span class="alert-gold-interest">📈 +${meta.interest}g Banken</span>`;
-        }
-        metaHtml += `</div>`;
+    if (meta.interest !== undefined && meta.interest > 0) {
+      metaHtml += `<span class="alert-gold-interest">📈 +${meta.interest}g Banken</span>`;
     }
+    metaHtml += `</div>`;
+  }
 
-    alert.innerHTML = `
+  alert.innerHTML = `
         <div class="alert-header">
             <span>${headerIcon}</span>
             <span>${headerText}</span>
@@ -43,23 +48,22 @@ export function showGameNotification(type: 'wave' | 'warning' | 'info', title: s
         ${metaHtml}
     `;
 
-    // Click to dismiss early with smooth transition
-    alert.addEventListener('click', () => {
-        alert.style.animation = 'alert-fade-out 0.25s ease forwards';
-        setTimeout(() => alert.remove(), 250);
-    });
+  // Click to dismiss early with smooth transition
+  alert.addEventListener("click", () => {
+    alert.style.animation = "alert-fade-out 0.25s ease forwards";
+    setTimeout(() => alert.remove(), 250);
+  });
 
-    container.appendChild(alert);
+  container.appendChild(alert);
 
-    // Auto remove from DOM after CSS animation completes
-    const displayDuration = type === 'warning' ? 7000 : 5000;
-    setTimeout(() => {
-        if (alert.parentNode) {
-            alert.style.animation = 'alert-fade-out 0.4s ease forwards';
-            setTimeout(() => {
-                if (alert.parentNode) alert.remove();
-            }, 400);
-        }
-    }, displayDuration);
+  // Auto remove from DOM after CSS animation completes
+  const displayDuration = type === "warning" ? 7000 : 5000;
+  setTimeout(() => {
+    if (alert.parentNode) {
+      alert.style.animation = "alert-fade-out 0.4s ease forwards";
+      setTimeout(() => {
+        if (alert.parentNode) alert.remove();
+      }, 400);
+    }
+  }, displayDuration);
 }
-

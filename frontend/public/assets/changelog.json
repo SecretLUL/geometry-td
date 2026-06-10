@@ -4,6 +4,278 @@
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
   {
+    "version": "v2.18.21",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Zentralisiertes npm-Check-System und automatische Code-Formatierung mit Prettier und ESLint eingerichtet."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.20",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Event-Driven Booster Caching implementiert, um CPU-Überlastung zu beheben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.19",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Performance der activeAccelerators massiv durch event-basierte Aktualisierung verbessert."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.18",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Geometrie-Neuzeichnungen der Spawner zur massiven CPU-Entlastung auf performante Matrix-Transformationen umgestellt."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.17",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Object Pooling für Splitter- und Defragmentierer-Fragmente implementiert, um Ruckler zu beheben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.16",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Booster-Turm Performance massiv optimiert und O(n²)-Komplexität behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.15",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Balancing auf Klasse statt Masse umgestellt."
+      },
+      {
+        "type": "balance",
+        "desc": "Gegneranzahl pro Welle drastisch reduziert bei stark erhöhten Lebenspunkten."
+      },
+      {
+        "type": "balance",
+        "desc": "Baukosten und Upgrade-Kosten für alle Türme spürbar angehoben."
+      },
+      {
+        "type": "balance",
+        "desc": "Schadenswerte aller Türme massiv angehoben."
+      },
+      {
+        "type": "feature",
+        "desc": "Kamera-Erschütterungen bei Bombeneinschlägen hinzugefügt."
+      },
+      {
+        "type": "balance",
+        "desc": "Golderträge angepasst und Baukosten-Steigerung für Generatoren verdoppelt."
+      },
+      {
+        "type": "balance",
+        "desc": "Lebenspunkte-Multiplikator für alle Bosse und deren Fragmente aus Balancing-Gründen reduziert."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.14",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Dynamische Umgebungsanzeige für Startbildschirm und Changelog implementiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.13",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Performance der HP-Leisten-Berechnung für Schwarm-Gegner optimiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.12",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Gold-Anzeigen-Merging komplett überarbeitet und visuell optimiert."
+      },
+      {
+        "type": "feature",
+        "desc": "Sprungfederskalierung und Farbverläufe für Goldtexte hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "Goldschimmernde Partikeleffekte beim Zusammenführen von Beträgen integriert."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.11",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Anzeigefehler der Generator-Turmkosten bei aktivem unendlichem Gold behoben."
+      },
+      {
+        "type": "fix",
+        "desc": "Anzeige des Zins-Indikators bei deaktivierten Zinsen im unendlichen Goldmodus ausgeblendet."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.10",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Exponentielles Gold-Wachstum bei besiegten Gegnern reduziert."
+      },
+      {
+        "type": "balance",
+        "desc": "Baukosten für neue Generatoren steigen nun mit der Anzahl bereits gebauter Generatoren."
+      },
+      {
+        "type": "balance",
+        "desc": "Goldertrag von Generatoren pro Level erhöht, um Upgrades attraktiver zu machen."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.9",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Verbleibende Verbindungsstrahlen beim Verkauf von Booster- und Prisma-Türmen behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.8",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Bau-Animationen für Booster- und Generator-Türme verbessert."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.7",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Generator-Türme erhalten Gold-Boosts durch Booster-Türme."
+      },
+      {
+        "type": "feature",
+        "desc": "Geboostete Werte im Tooltip werden mathematisch korrekt und kursiv dargestellt."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.6",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Vektorgrafik-Neuzeichnungen für fortgeschrittene Türme zur CPU-Entlastung optimiert."
+      },
+      {
+        "type": "fix",
+        "desc": "Initialisierungsfehler bei der Vorschau des Prisma-Turms behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.5",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Negativen Gold-Anzeigefehler bei schnellem Ressourcenzuwachs behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.4",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Diagnose-Logs des Booster-Turms aus der Konsole entfernt."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.3",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Interaktives Zuschneide-Fenster vor dem Profilbild-Upload hinzugefügt."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.2",
+    "date": "8. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Verschiebung des Titels im Startbildschirm bei offenem Changelog behoben."
+      }
+    ]
+  },
+  {
     "version": "v2.18.1",
     "date": "8. Juni 2026",
     "status": "active",

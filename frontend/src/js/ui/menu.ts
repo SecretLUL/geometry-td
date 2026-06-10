@@ -4,54 +4,82 @@
  * @dependencies: config, enemies, background, types
  * @last_update: 2026-06-04 / v2.16.0 - Refactored menu.ts into modular sub-controllers under src/js/ui/menu/
  */
-import { NavigationController } from './menu/navigation';
-import { MusicController } from './menu/music';
-import { SettingsController } from './menu/settings';
-import { LexiconController } from './menu/lexicon';
-import { ChangelogController } from './menu/changelog';
-import { ProfileController } from './menu/profile';
-import { LeaderboardController } from './menu/leaderboard';
-import { MatchmakingController } from './menu/matchmaking';
-import { BackgroundController } from './background';
+import { NavigationController } from "./menu/navigation";
+import { MusicController } from "./menu/music";
+import { SettingsController } from "./menu/settings";
+import { LexiconController } from "./menu/lexicon";
+import { ChangelogController } from "./menu/changelog";
+import { ProfileController } from "./menu/profile";
+import { LeaderboardController } from "./menu/leaderboard";
+import { MatchmakingController } from "./menu/matchmaking";
+import { BackgroundController } from "./background";
 
 export class MenuController {
-    public navigation!: NavigationController;
-    public music!: MusicController;
-    public settings!: SettingsController;
-    public lexicon!: LexiconController;
-    public changelog!: ChangelogController;
-    public profile!: ProfileController;
-    public leaderboard!: LeaderboardController;
-    public matchmaking!: MatchmakingController;
+  public navigation!: NavigationController;
+  public music!: MusicController;
+  public settings!: SettingsController;
+  public lexicon!: LexiconController;
+  public changelog!: ChangelogController;
+  public profile!: ProfileController;
+  public leaderboard!: LeaderboardController;
+  public matchmaking!: MatchmakingController;
 
-    private _currentUsername: string | null = null;
+  private _currentUsername: string | null = null;
 
-    constructor() {
-        new BackgroundController('bgCanvas');
-        this.init();
+  constructor() {
+    new BackgroundController("bgCanvas");
+    this.init();
+  }
+
+  public get currentUsername(): string | null {
+    return this._currentUsername;
+  }
+
+  public set currentUsername(val: string | null) {
+    this._currentUsername = val;
+  }
+
+  private init(): void {
+    this.navigation = new NavigationController(this);
+    this.music = new MusicController();
+    this.settings = new SettingsController(this);
+    this.lexicon = new LexiconController();
+    this.changelog = new ChangelogController();
+    this.profile = new ProfileController(this);
+    this.leaderboard = new LeaderboardController(this);
+    this.matchmaking = new MatchmakingController();
+    this.updateEnvironmentLabels();
+  }
+
+  private updateEnvironmentLabels(): void {
+    const isDevEnv =
+      window.location.hostname.includes("gtd-dev") ||
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+
+    const splashEnvLabel = document.getElementById("splash-env-label");
+    if (splashEnvLabel) {
+      if (isDevEnv) {
+        splashEnvLabel.textContent = "SECURE-CONNECTION // HOST: DEV-ENVIRONMENT";
+      } else {
+        splashEnvLabel.textContent = "SECURE-CONNECTION // HOST: LIVE-UMGEBUNG";
+      }
     }
 
-    public get currentUsername(): string | null {
-        return this._currentUsername;
+    const changelogEnvDesc = document.getElementById("changelog-env-desc");
+    if (changelogEnvDesc) {
+      if (isDevEnv) {
+        changelogEnvDesc.textContent =
+          "Chronologische Aufzeichnung aller Simulationstransfers aus der DEV-Umgebung.";
+      } else {
+        changelogEnvDesc.textContent =
+          "Chronologische Aufzeichnung aller Simulationstransfers aus der Live-Umgebung.";
+      }
     }
-
-    public set currentUsername(val: string | null) {
-        this._currentUsername = val;
-    }
-
-    private init(): void {
-        this.navigation = new NavigationController(this);
-        this.music = new MusicController();
-        this.settings = new SettingsController(this);
-        this.lexicon = new LexiconController();
-        this.changelog = new ChangelogController();
-        this.profile = new ProfileController(this);
-        this.leaderboard = new LeaderboardController(this);
-        this.matchmaking = new MatchmakingController();
-    }
+  }
 }
 
 // Start Controller
-window.addEventListener('DOMContentLoaded', () => {
-    new MenuController();
+window.addEventListener("DOMContentLoaded", () => {
+  new MenuController();
 });

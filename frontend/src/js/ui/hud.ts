@@ -4,8 +4,8 @@
  * @dependencies: state, utils
  * @last_update: 2026-05-27 / v1.1.0 - Use formatNumber utility for HUD gold display.
  */
-import { state } from '../core/state';
-import { getEl, formatNumber } from '../core/utils';
+import { state } from "../core/state";
+import { getEl, formatNumber } from "../core/utils";
 
 let currentDisplayedGold: number | null = null;
 let goldAnimFrameId: number | null = null;
@@ -22,203 +22,209 @@ let livesAnimStartTime: number = 0;
 let livesAnimDuration: number = 0;
 
 export function resetHudDisplay(gold: number, lives: number) {
-    currentDisplayedGold = gold;
-    if (goldAnimFrameId !== null) {
-        cancelAnimationFrame(goldAnimFrameId);
-        goldAnimFrameId = null;
-    }
-    currentDisplayedLives = lives;
-    if (livesAnimFrameId !== null) {
-        cancelAnimationFrame(livesAnimFrameId);
-        livesAnimFrameId = null;
-    }
+  currentDisplayedGold = gold;
+  if (goldAnimFrameId !== null) {
+    cancelAnimationFrame(goldAnimFrameId);
+    goldAnimFrameId = null;
+  }
+  currentDisplayedLives = lives;
+  if (livesAnimFrameId !== null) {
+    cancelAnimationFrame(livesAnimFrameId);
+    livesAnimFrameId = null;
+  }
 }
 
 export function updateHudDisplay(): void {
-
-    const livesDisplay = getEl('livesDisplay');
-    if (livesDisplay) {
-        if (state.godMode) {
-            livesDisplay.innerText = '∞';
-            currentDisplayedLives = null;
-            if (livesAnimFrameId !== null) {
-                cancelAnimationFrame(livesAnimFrameId);
-                livesAnimFrameId = null;
-            }
-            livesDisplay.style.transform = 'scale(1)';
-            livesDisplay.style.color = '';
-            livesDisplay.style.textShadow = '';
-        } else {
-            if (currentDisplayedLives === null) {
-                currentDisplayedLives = state.lives;
-                livesDisplay.innerText = String(state.lives);
-                livesDisplay.style.color = '';
-                livesDisplay.style.textShadow = '';
-            } else if (currentDisplayedLives !== state.lives) {
-                animateLivesDisplay(livesDisplay);
-            }
-        }
+  const livesDisplay = getEl("livesDisplay");
+  if (livesDisplay) {
+    if (state.godMode) {
+      livesDisplay.innerText = "∞";
+      currentDisplayedLives = null;
+      if (livesAnimFrameId !== null) {
+        cancelAnimationFrame(livesAnimFrameId);
+        livesAnimFrameId = null;
+      }
+      livesDisplay.style.transform = "scale(1)";
+      livesDisplay.style.color = "";
+      livesDisplay.style.textShadow = "";
+    } else {
+      if (currentDisplayedLives === null) {
+        currentDisplayedLives = state.lives;
+        livesDisplay.innerText = String(state.lives);
+        livesDisplay.style.color = "";
+        livesDisplay.style.textShadow = "";
+      } else if (currentDisplayedLives !== state.lives) {
+        animateLivesDisplay(livesDisplay);
+      }
     }
+  }
 
-    const goldDisplay = getEl('goldDisplay');
-    if (goldDisplay) {
-        if (state.infiniteGold) {
-            goldDisplay.innerText = '∞';
-            currentDisplayedGold = null;
-            if (goldAnimFrameId !== null) {
-                cancelAnimationFrame(goldAnimFrameId);
-                goldAnimFrameId = null;
-            }
-            goldDisplay.style.transform = 'scale(1)';
-            goldDisplay.style.color = '';
-            goldDisplay.style.textShadow = '';
-        } else {
-            if (currentDisplayedGold === null) {
-                currentDisplayedGold = state.gold;
-                goldDisplay.innerText = formatNumber(state.gold);
-                goldDisplay.style.color = '';
-                goldDisplay.style.textShadow = '';
-            } else if (currentDisplayedGold !== state.gold) {
-                animateGoldDisplay(goldDisplay);
-            }
-        }
+  const goldDisplay = getEl("goldDisplay");
+  if (goldDisplay) {
+    if (state.infiniteGold) {
+      goldDisplay.innerText = "∞";
+      currentDisplayedGold = null;
+      if (goldAnimFrameId !== null) {
+        cancelAnimationFrame(goldAnimFrameId);
+        goldAnimFrameId = null;
+      }
+      goldDisplay.style.transform = "scale(1)";
+      goldDisplay.style.color = "";
+      goldDisplay.style.textShadow = "";
+    } else {
+      if (currentDisplayedGold === null) {
+        currentDisplayedGold = state.gold;
+        goldDisplay.innerText = formatNumber(state.gold);
+        goldDisplay.style.color = "";
+        goldDisplay.style.textShadow = "";
+      } else if (currentDisplayedGold !== state.gold) {
+        animateGoldDisplay(goldDisplay);
+      }
     }
-
-    }
+  }
+}
 
 function animateLivesDisplay(livesDisplay: HTMLElement): void {
-
+  if (livesAnimFrameId !== null) {
     livesAnimTargetVal = state.lives;
-    livesAnimStartVal = currentDisplayedLives !== null ? currentDisplayedLives : state.lives;
-    livesAnimStartTime = performance.now();
+    return;
+  }
 
-    const delta = Math.abs(livesAnimTargetVal - livesAnimStartVal);
-    // Dynamic duration: extremely slow baseline of 800ms for dramatic effect, scales up to 1600ms max
-    livesAnimDuration = 800 + Math.min(delta * 200, 800);
+  livesAnimTargetVal = state.lives;
+  livesAnimStartVal = currentDisplayedLives !== null ? currentDisplayedLives : state.lives;
+  livesAnimStartTime = performance.now();
 
-    // Apply color and glow immediately
-    const isGain = livesAnimTargetVal > livesAnimStartVal;
-    const activeColor = isGain ? '#00f0aa' : '#ff3366';
-    const activeGlow = isGain 
-        ? '0 0 15px rgba(0, 240, 170, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)' 
-        : '0 0 15px rgba(255, 51, 102, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)';
+  const delta = Math.abs(livesAnimTargetVal - livesAnimStartVal);
+  // Dynamic duration: extremely slow baseline of 800ms for dramatic effect, scales up to 1600ms max
+  livesAnimDuration = 800 + Math.min(delta * 200, 800);
 
-    livesDisplay.style.color = activeColor;
-    livesDisplay.style.textShadow = activeGlow;
-    livesDisplay.style.transition = 'color 0.15s ease, text-shadow 0.15s ease, transform 0.05s ease';
+  // Apply color and glow immediately
+  const isGain = livesAnimTargetVal > livesAnimStartVal;
+  const activeColor = isGain ? "#00f0aa" : "#ff3366";
+  const activeGlow = isGain
+    ? "0 0 15px rgba(0, 240, 170, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)"
+    : "0 0 15px rgba(255, 51, 102, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)";
 
-    if (livesAnimFrameId !== null) return;
+  livesDisplay.style.color = activeColor;
+  livesDisplay.style.textShadow = activeGlow;
+  livesDisplay.style.transition = "color 0.15s ease, text-shadow 0.15s ease, transform 0.05s ease";
 
-    const tick = (now: number) => {
-        if (state.godMode) {
-            livesDisplay.innerText = '∞';
-            currentDisplayedLives = null;
-            livesAnimFrameId = null;
-            livesDisplay.style.transform = 'scale(1)';
-            livesDisplay.style.color = '';
-            livesDisplay.style.textShadow = '';
-            return;
-        }
+  if (livesAnimFrameId !== null) return;
 
-        const elapsed = now - livesAnimStartTime;
-        const progress = Math.min(elapsed / livesAnimDuration, 1);
+  const tick = (now: number) => {
+    if (state.godMode) {
+      livesDisplay.innerText = "∞";
+      currentDisplayedLives = null;
+      livesAnimFrameId = null;
+      livesDisplay.style.transform = "scale(1)";
+      livesDisplay.style.color = "";
+      livesDisplay.style.textShadow = "";
+      return;
+    }
 
-        // Cubic ease-out for super smooth deceleration
-        const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-        currentDisplayedLives = livesAnimStartVal + (livesAnimTargetVal - livesAnimStartVal) * easeOutCubic;
+    const elapsed = now - livesAnimStartTime;
+    const progress = Math.min(elapsed / livesAnimDuration, 1);
 
-        livesDisplay.innerText = String(Math.round(currentDisplayedLives));
+    // Cubic ease-out for super smooth deceleration
+    const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+    currentDisplayedLives =
+      livesAnimStartVal + (livesAnimTargetVal - livesAnimStartVal) * easeOutCubic;
 
-        const deltaLeft = Math.abs(livesAnimTargetVal - currentDisplayedLives);
-        if (deltaLeft > 0.5 && progress < 1) {
-            // High intensity pop/shake effect for losing lives
-            const pulseIntensity = isGain ? Math.min(delta * 0.005, 0.08) : Math.min(delta * 0.015, 0.15);
-            const pulseFactor = Math.sin(progress * Math.PI) * pulseIntensity;
-            
-            // If losing lives, let's also add a tiny dramatic translation shake!
-            if (!isGain) {
-                const shakeX = (Math.random() - 0.5) * 4 * Math.sin(progress * Math.PI);
-                livesDisplay.style.transform = `scale(${1 + pulseFactor}) translate(${shakeX}px, 0px)`;
-            } else {
-                livesDisplay.style.transform = `scale(${1 + pulseFactor})`;
-            }
+    livesDisplay.innerText = String(Math.round(currentDisplayedLives));
 
-            livesAnimFrameId = requestAnimationFrame(tick);
-        } else {
-            currentDisplayedLives = state.lives;
-            livesDisplay.innerText = String(state.lives);
-            livesAnimFrameId = null;
-            livesDisplay.style.transform = 'scale(1)';
-            livesDisplay.style.color = '';
-            livesDisplay.style.textShadow = '';
-        }
-    };
+    const deltaLeft = Math.abs(livesAnimTargetVal - currentDisplayedLives);
+    if (deltaLeft > 0.5 && progress < 1) {
+      // High intensity pop/shake effect for losing lives
+      const pulseIntensity = isGain ? Math.min(delta * 0.005, 0.08) : Math.min(delta * 0.015, 0.15);
+      const pulseFactor = Math.sin(progress * Math.PI) * pulseIntensity;
 
-    livesAnimFrameId = requestAnimationFrame(tick);
+      // If losing lives, let's also add a tiny dramatic translation shake!
+      if (!isGain) {
+        const shakeX = (Math.random() - 0.5) * 4 * Math.sin(progress * Math.PI);
+        livesDisplay.style.transform = `scale(${1 + pulseFactor}) translate(${shakeX}px, 0px)`;
+      } else {
+        livesDisplay.style.transform = `scale(${1 + pulseFactor})`;
+      }
+
+      livesAnimFrameId = requestAnimationFrame(tick);
+    } else {
+      currentDisplayedLives = state.lives;
+      livesDisplay.innerText = String(state.lives);
+      livesAnimFrameId = null;
+      livesDisplay.style.transform = "scale(1)";
+      livesDisplay.style.color = "";
+      livesDisplay.style.textShadow = "";
+    }
+  };
+
+  livesAnimFrameId = requestAnimationFrame(tick);
 }
 
 function animateGoldDisplay(goldDisplay: HTMLElement): void {
-
+  if (goldAnimFrameId !== null) {
     goldAnimTargetVal = state.gold;
-    goldAnimStartVal = currentDisplayedGold !== null ? currentDisplayedGold : state.gold;
-    goldAnimStartTime = performance.now();
+    return;
+  }
 
-    const delta = Math.abs(goldAnimTargetVal - goldAnimStartVal);
-    // Dynamic duration: small changes take ~450ms (slower trickle), large changes scale up to 950ms max
-    // This makes counting small sums feel beautifully slow and distinct, while keeping huge payouts highly dynamic.
-    goldAnimDuration = 450 + Math.min(delta * 1.0, 500);
+  goldAnimTargetVal = state.gold;
+  goldAnimStartVal = currentDisplayedGold !== null ? currentDisplayedGold : state.gold;
+  goldAnimStartTime = performance.now();
 
-    // Apply color and glow immediately at the start of the animation
-    const isGain = goldAnimTargetVal > goldAnimStartVal;
-    const activeColor = isGain ? '#00f0aa' : '#ff3366';
-    const activeGlow = isGain 
-        ? '0 0 15px rgba(0, 240, 170, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)' 
-        : '0 0 15px rgba(255, 51, 102, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)';
+  const delta = Math.abs(goldAnimTargetVal - goldAnimStartVal);
+  // Dynamic duration: small changes take ~450ms (slower trickle), large changes scale up to 950ms max
+  // This makes counting small sums feel beautifully slow and distinct, while keeping huge payouts highly dynamic.
+  goldAnimDuration = 450 + Math.min(delta * 1.0, 500);
 
-    goldDisplay.style.color = activeColor;
-    goldDisplay.style.textShadow = activeGlow;
-    goldDisplay.style.transition = 'color 0.15s ease, text-shadow 0.15s ease, transform 0.05s ease';
+  // Apply color and glow immediately at the start of the animation
+  const isGain = goldAnimTargetVal > goldAnimStartVal;
+  const activeColor = isGain ? "#00f0aa" : "#ff3366";
+  const activeGlow = isGain
+    ? "0 0 15px rgba(0, 240, 170, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)"
+    : "0 0 15px rgba(255, 51, 102, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5)";
 
-    if (goldAnimFrameId !== null) return;
+  goldDisplay.style.color = activeColor;
+  goldDisplay.style.textShadow = activeGlow;
+  goldDisplay.style.transition = "color 0.15s ease, text-shadow 0.15s ease, transform 0.05s ease";
 
-    const tick = (now: number) => {
-        if (state.infiniteGold) {
-            goldDisplay.innerText = '∞';
-            currentDisplayedGold = null;
-            goldAnimFrameId = null;
-            goldDisplay.style.transform = 'scale(1)';
-            goldDisplay.style.color = '';
-            goldDisplay.style.textShadow = '';
-            return;
-        }
+  if (goldAnimFrameId !== null) return;
 
-        const elapsed = now - goldAnimStartTime;
-        const progress = Math.min(elapsed / goldAnimDuration, 1);
+  const tick = (now: number) => {
+    if (state.infiniteGold) {
+      goldDisplay.innerText = "∞";
+      currentDisplayedGold = null;
+      goldAnimFrameId = null;
+      goldDisplay.style.transform = "scale(1)";
+      goldDisplay.style.color = "";
+      goldDisplay.style.textShadow = "";
+      return;
+    }
 
-        // Cubic ease-out for a super smooth deceleration
-        const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-        currentDisplayedGold = goldAnimStartVal + (goldAnimTargetVal - goldAnimStartVal) * easeOutCubic;
+    const elapsed = now - goldAnimStartTime;
+    const progress = Math.min(elapsed / goldAnimDuration, 1);
 
-        goldDisplay.innerText = formatNumber(Math.round(currentDisplayedGold));
+    // Cubic ease-out for a super smooth deceleration
+    const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+    currentDisplayedGold = goldAnimStartVal + (goldAnimTargetVal - goldAnimStartVal) * easeOutCubic;
 
-        const deltaLeft = Math.abs(goldAnimTargetVal - currentDisplayedGold);
-        if (deltaLeft > 0.5 && progress < 1) {
-            // Juice effect: HUD item swells in the middle of animation and settles
-            const pulseIntensity = Math.min(delta * 0.0004, 0.07);
-            const pulseFactor = Math.sin(progress * Math.PI) * pulseIntensity;
-            goldDisplay.style.transform = `scale(${1 + pulseFactor})`;
+    goldDisplay.innerText = formatNumber(Math.round(currentDisplayedGold));
 
-            goldAnimFrameId = requestAnimationFrame(tick);
-        } else {
-            currentDisplayedGold = state.gold;
-            goldDisplay.innerText = formatNumber(state.gold);
-            goldAnimFrameId = null;
-            goldDisplay.style.transform = 'scale(1)';
-            goldDisplay.style.color = '';
-            goldDisplay.style.textShadow = '';
-        }
-    };
+    const deltaLeft = Math.abs(goldAnimTargetVal - currentDisplayedGold);
+    if (deltaLeft > 0.5 && progress < 1) {
+      // Juice effect: HUD item swells in the middle of animation and settles
+      const pulseIntensity = Math.min(delta * 0.0004, 0.07);
+      const pulseFactor = Math.sin(progress * Math.PI) * pulseIntensity;
+      goldDisplay.style.transform = `scale(${1 + pulseFactor})`;
 
-    goldAnimFrameId = requestAnimationFrame(tick);
+      goldAnimFrameId = requestAnimationFrame(tick);
+    } else {
+      currentDisplayedGold = state.gold;
+      goldDisplay.innerText = formatNumber(state.gold);
+      goldAnimFrameId = null;
+      goldDisplay.style.transform = "scale(1)";
+      goldDisplay.style.color = "";
+      goldDisplay.style.textShadow = "";
+    }
+  };
+
+  goldAnimFrameId = requestAnimationFrame(tick);
 }
-

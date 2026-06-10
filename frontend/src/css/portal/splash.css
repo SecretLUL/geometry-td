@@ -1,465 +1,475 @@
 .title-block {
-    text-align: center;
-    position: relative;
-    animation: header-float 10s ease-in-out infinite;
-    will-change: transform;
+  text-align: center;
+  position: relative;
+  animation: header-float 10s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes header-float {
-    0% {
-        transform: translate(-3px, -3px) rotate(-0.5deg);
-    }
-    25% {
-        transform: translate(3px, -2px) rotate(0.2deg);
-    }
-    50% {
-        transform: translate(2px, 3px) rotate(0.5deg);
-    }
-    75% {
-        transform: translate(-3px, 2px) rotate(-0.2deg);
-    }
-    100% {
-        transform: translate(-3px, -3px) rotate(-0.5deg);
-    }
+  0% {
+    transform: translate(-3px, -3px) rotate(-0.5deg);
+  }
+  25% {
+    transform: translate(3px, -2px) rotate(0.2deg);
+  }
+  50% {
+    transform: translate(2px, 3px) rotate(0.5deg);
+  }
+  75% {
+    transform: translate(-3px, 2px) rotate(-0.2deg);
+  }
+  100% {
+    transform: translate(-3px, -3px) rotate(-0.5deg);
+  }
 }
 
 .portal-title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0;
-    margin-bottom: 16px;
-    line-height: 1;
-    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-    will-change: transform;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  margin-bottom: 16px;
+  line-height: 1;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
 }
 
 .portal-title.beat {
-    transform: scale(1.02);
-    transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
+  transform: scale(1.02);
+  transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .portal-title .word-1 {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: 14px;
-    padding-left: 14px;
-    /* mathematically offsets letter-spacing of the last character to guarantee exact centering */
-    color: var(--tesla-cyan);
-    text-transform: uppercase;
-    text-shadow: 0 0 8px rgba(76, 201, 240, 0.6);
-    margin-bottom: 8px;
-    animation: title-prefix-entrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  font-family: "Outfit", sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 14px;
+  padding-left: 14px;
+  /* mathematically offsets letter-spacing of the last character to guarantee exact centering */
+  color: var(--tesla-cyan);
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(76, 201, 240, 0.6);
+  margin-bottom: 8px;
+  animation: title-prefix-entrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .portal-title .main-title-row {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 16px;
-    animation: title-entrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 16px;
+  animation: title-entrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .portal-title .word-2,
 .portal-title .word-3 {
-    font-family: 'BladeRunner', sans-serif;
-    font-size: 6.8rem;
-    font-weight: normal;
-    line-height: 0.95;
-    letter-spacing: 4px;
-    position: relative;
-    display: inline-block;
-    animation: neon-flicker 6s infinite ease-in-out alternate;
+  font-family: "BladeRunner", sans-serif;
+  font-size: 6.8rem;
+  font-weight: normal;
+  line-height: 0.95;
+  letter-spacing: 4px;
+  position: relative;
+  display: inline-block;
+  animation: neon-flicker 6s infinite ease-in-out alternate;
 }
 
 .portal-title .word-2 {
-    color: #fff;
-    text-shadow:
-        0 0 8px rgba(255, 255, 255, 0.5),
-        0 0 16px rgba(255, 255, 255, 0.2);
+  color: #fff;
+  text-shadow:
+    0 0 8px rgba(255, 255, 255, 0.5),
+    0 0 16px rgba(255, 255, 255, 0.2);
 }
 
 .portal-title .word-3 {
-    color: var(--bomb-red);
-    text-shadow:
-        0 0 8px rgba(255, 51, 102, 0.8),
-        0 0 16px rgba(255, 51, 102, 0.4);
+  color: var(--bomb-red);
+  text-shadow:
+    0 0 8px rgba(255, 51, 102, 0.8),
+    0 0 16px rgba(255, 51, 102, 0.4);
 }
 
 /* localized chromatic aberrations for word-2 */
 .portal-title .word-2::before {
-    content: attr(data-text);
-    position: absolute;
-    left: -2px;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'BladeRunner', sans-serif;
-    font-weight: normal;
-    color: #00ffff;
-    background: transparent;
-    overflow: hidden;
-    clip-path: inset(0 0 0 0);
-    text-shadow: -2px 0 #00ffff;
-    animation: glitch-layer-1 4s infinite linear alternate-reverse;
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.6;
+  content: attr(data-text);
+  position: absolute;
+  left: -2px;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "BladeRunner", sans-serif;
+  font-weight: normal;
+  color: #00ffff;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  text-shadow: -2px 0 #00ffff;
+  animation: glitch-layer-1 4s infinite linear alternate-reverse;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.6;
 }
 
 .portal-title .word-2::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 2px;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'BladeRunner', sans-serif;
-    font-weight: normal;
-    color: #ff0055;
-    background: transparent;
-    overflow: hidden;
-    clip-path: inset(0 0 0 0);
-    text-shadow: 2px 0 #ff0055;
-    animation: glitch-layer-2 3.3s infinite linear alternate-reverse;
-    pointer-events: none;
-    z-index: -2;
-    opacity: 0.6;
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "BladeRunner", sans-serif;
+  font-weight: normal;
+  color: #ff0055;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  text-shadow: 2px 0 #ff0055;
+  animation: glitch-layer-2 3.3s infinite linear alternate-reverse;
+  pointer-events: none;
+  z-index: -2;
+  opacity: 0.6;
 }
 
 /* localized chromatic aberrations for word-3 */
 .portal-title .word-3::before {
-    content: attr(data-text);
-    position: absolute;
-    left: -2px;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'BladeRunner', sans-serif;
-    font-weight: normal;
-    color: #00ffff;
-    background: transparent;
-    overflow: hidden;
-    clip-path: inset(0 0 0 0);
-    text-shadow: -2px 0 #00ffff;
-    animation: glitch-layer-1 4s infinite linear alternate-reverse;
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.6;
+  content: attr(data-text);
+  position: absolute;
+  left: -2px;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "BladeRunner", sans-serif;
+  font-weight: normal;
+  color: #00ffff;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  text-shadow: -2px 0 #00ffff;
+  animation: glitch-layer-1 4s infinite linear alternate-reverse;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.6;
 }
 
 .portal-title .word-3::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 2px;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    font-family: 'BladeRunner', sans-serif;
-    font-weight: normal;
-    color: #ff0055;
-    background: transparent;
-    overflow: hidden;
-    clip-path: inset(0 0 0 0);
-    text-shadow: 2px 0 #ff0055;
-    animation: glitch-layer-2 3.3s infinite linear alternate-reverse;
-    pointer-events: none;
-    z-index: -2;
-    opacity: 0.6;
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "BladeRunner", sans-serif;
+  font-weight: normal;
+  color: #ff0055;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  text-shadow: 2px 0 #ff0055;
+  animation: glitch-layer-2 3.3s infinite linear alternate-reverse;
+  pointer-events: none;
+  z-index: -2;
+  opacity: 0.6;
 }
 
 @keyframes title-prefix-entrance {
-    from {
-        opacity: 0;
-        letter-spacing: 24px;
-        transform: translateY(-5px);
-    }
+  from {
+    opacity: 0;
+    letter-spacing: 24px;
+    transform: translateY(-5px);
+  }
 
-    to {
-        opacity: 1;
-        letter-spacing: 12px;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    letter-spacing: 12px;
+    transform: translateY(0);
+  }
 }
 
 @keyframes title-entrance {
-    from {
-        opacity: 0;
-        transform: scale(1.03) translateY(5px);
-    }
+  from {
+    opacity: 0;
+    transform: scale(1.03) translateY(5px);
+  }
 
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes neon-flicker {
-    0%,
-    19%,
-    21%,
-    23%,
-    25%,
-    54%,
-    56%,
-    100% {
-        text-shadow:
-            0 0 8px rgba(76, 201, 240, 0.9),
-            0 0 16px rgba(76, 201, 240, 0.6),
-            0 0 32px rgba(76, 201, 240, 0.3);
-        opacity: 1;
-    }
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    text-shadow:
+      0 0 8px rgba(76, 201, 240, 0.9),
+      0 0 16px rgba(76, 201, 240, 0.6),
+      0 0 32px rgba(76, 201, 240, 0.3);
+    opacity: 1;
+  }
 
-    20%,
-    24%,
-    55% {
-        text-shadow:
-            0 0 2px rgba(76, 201, 240, 0.2),
-            0 0 4px rgba(76, 201, 240, 0.1);
-        opacity: 0.8;
-    }
+  20%,
+  24%,
+  55% {
+    text-shadow:
+      0 0 2px rgba(76, 201, 240, 0.2),
+      0 0 4px rgba(76, 201, 240, 0.1);
+    opacity: 0.8;
+  }
 }
 
 @keyframes glitch-layer-1 {
-    0% {
-        clip-path: inset(40% 0 61% 0);
-        transform: skew(0.3deg);
-    }
+  0% {
+    clip-path: inset(40% 0 61% 0);
+    transform: skew(0.3deg);
+  }
 
-    20% {
-        clip-path: inset(92% 0 1% 0);
-        transform: skew(-0.5deg);
-    }
+  20% {
+    clip-path: inset(92% 0 1% 0);
+    transform: skew(-0.5deg);
+  }
 
-    40% {
-        clip-path: inset(15% 0 80% 0);
-        transform: skew(0.5deg);
-    }
+  40% {
+    clip-path: inset(15% 0 80% 0);
+    transform: skew(0.5deg);
+  }
 
-    60% {
-        clip-path: inset(80% 0 5% 0);
-        transform: skew(-0.2deg);
-    }
+  60% {
+    clip-path: inset(80% 0 5% 0);
+    transform: skew(-0.2deg);
+  }
 
-    80% {
-        clip-path: inset(3% 0 92% 0);
-        transform: skew(0.1deg);
-    }
+  80% {
+    clip-path: inset(3% 0 92% 0);
+    transform: skew(0.1deg);
+  }
 
-    100% {
-        clip-path: inset(25% 0 58% 0);
-        transform: skew(-0.4deg);
-    }
+  100% {
+    clip-path: inset(25% 0 58% 0);
+    transform: skew(-0.4deg);
+  }
 }
 
 @keyframes glitch-layer-2 {
-    0% {
-        clip-path: inset(25% 0 58% 0);
-        transform: skew(-0.3deg);
-    }
+  0% {
+    clip-path: inset(25% 0 58% 0);
+    transform: skew(-0.3deg);
+  }
 
-    20% {
-        clip-path: inset(15% 0 80% 0);
-        transform: skew(0.5deg);
-    }
+  20% {
+    clip-path: inset(15% 0 80% 0);
+    transform: skew(0.5deg);
+  }
 
-    40% {
-        clip-path: inset(92% 0 1% 0);
-        transform: skew(-0.1deg);
-    }
+  40% {
+    clip-path: inset(92% 0 1% 0);
+    transform: skew(-0.1deg);
+  }
 
-    60% {
-        clip-path: inset(3% 0 92% 0);
-        transform: skew(0.4deg);
-    }
+  60% {
+    clip-path: inset(3% 0 92% 0);
+    transform: skew(0.4deg);
+  }
 
-    80% {
-        clip-path: inset(80% 0 5% 0);
-        transform: skew(-0.3deg);
-    }
+  80% {
+    clip-path: inset(80% 0 5% 0);
+    transform: skew(-0.3deg);
+  }
 
-    100% {
-        clip-path: inset(40% 0 61% 0);
-        transform: skew(0.2deg);
-    }
+  100% {
+    clip-path: inset(40% 0 61% 0);
+    transform: skew(0.2deg);
+  }
 }
 
 /* ── Splash Screen (Start Screen) ── */
 .splash-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 5; /* Lowered so the wrapper's title is layered on top of it */
-    background: radial-gradient(circle at center, rgba(10, 10, 26, 0.85) 0%, #050510 100%);
-    backdrop-filter: blur(25px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: opacity, transform, filter;
+  position: fixed;
+  inset: 0;
+  z-index: 5; /* Lowered so the wrapper's title is layered on top of it */
+  background: radial-gradient(circle at center, rgba(10, 10, 26, 0.85) 0%, #050510 100%);
+  backdrop-filter: blur(25px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
 }
 
 .splash-screen.fade-out {
-    opacity: 0;
-    transform: scale(1.1); /* Zoom in as we enter the menu */
-    filter: blur(15px);
-    pointer-events: none;
+  opacity: 0;
+  transform: scale(1.1); /* Zoom in as we enter the menu */
+  filter: blur(15px);
+  pointer-events: none;
 }
 
 .splash-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-    max-width: 800px;
-    width: 90%;
-    text-align: center;
-    margin-top: 25vh; /* Pushes the diagnostic/action block down to center under the floating title */
-    animation: splash-entrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  max-width: 800px;
+  width: 90%;
+  text-align: center;
+  margin-top: 25vh; /* Pushes the diagnostic/action block down to center under the floating title */
+  animation: splash-entrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes splash-entrance {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .splash-subtitle {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 800;
-    letter-spacing: 6px;
-    color: var(--tesla-cyan);
-    text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
-    display: block;
-    opacity: 1;
-    max-height: 40px;
-    margin-top: 16px;
-    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--tesla-cyan);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+  display: block;
+  opacity: 1;
+  max-height: 40px;
+  margin-top: 16px;
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
 /* Collapse subtitle when entering the system */
 body:not(.splash-active) .splash-subtitle {
-    opacity: 0 !important;
-    max-height: 0 !important;
-    margin-top: 0 !important;
+  opacity: 0 !important;
+  max-height: 0 !important;
+  margin-top: 0 !important;
 }
 
 /* Floating title destination state in main menu mode */
 body:not(.splash-active) .portal-title-outer-wrapper {
-    top: 15px; /* Settles perfectly at the top of the column inside the placeholder space */
-    transform: translate(-50%, 0) scale(1.0); /* Combined to guarantee correct scale origin relative to translation */
-    z-index: 90; /* Let modals and overlays sit on top */
+  top: 15px; /* Settles perfectly at the top of the column inside the placeholder space */
+  transform: translate(-50%, 0) scale(1); /* Combined to guarantee correct scale origin relative to translation */
+  z-index: 90; /* Let modals and overlays sit on top */
 }
 
 /* Spacer to reserve space for the absolutely floated title in normal document flow */
 .portal-title-placeholder {
-    height: 150px;
-    width: 100%;
-    flex-shrink: 0;
-    transition: height 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 150px;
+  width: 100%;
+  flex-shrink: 0;
+  transition: height 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .splash-status-panel {
-    background: rgba(13, 13, 31, 0.6);
-    border: 1px solid rgba(76, 201, 240, 0.15);
-    border-radius: 16px;
-    padding: 20px 30px;
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: inset 0 0 20px rgba(76, 201, 240, 0.03);
+  background: rgba(13, 13, 31, 0.6);
+  border: 1px solid rgba(76, 201, 240, 0.15);
+  border-radius: 16px;
+  padding: 20px 30px;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: inset 0 0 20px rgba(76, 201, 240, 0.03);
 }
 
 .status-row-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
 }
 
 .status-label {
-    color: #888899;
-    text-transform: uppercase;
+  color: #888899;
+  text-transform: uppercase;
 }
 
 .status-val {
-    font-weight: 700;
+  font-weight: 700;
 }
 
 .status-val.ok {
-    color: #00ff88;
-    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+  color: #00ff88;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
 }
 
 .status-val.ready {
-    color: var(--tesla-cyan);
-    text-shadow: 0 0 8px rgba(76, 201, 240, 0.4);
+  color: var(--tesla-cyan);
+  text-shadow: 0 0 8px rgba(76, 201, 240, 0.4);
 }
 
 .splash-enter-btn {
-    position: relative;
-    background: linear-gradient(135deg, rgba(76, 201, 240, 0.25) 0%, rgba(76, 201, 240, 0.05) 100%);
-    border: 2px solid var(--tesla-cyan);
-    color: #fff;
-    padding: 18px 45px;
-    border-radius: 12px;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: 1.15rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 0 30px rgba(76, 201, 240, 0.2), inset 0 0 15px rgba(76, 201, 240, 0.1);
-    overflow: hidden;
-    pointer-events: auto; /* Explicitly interactive */
+  position: relative;
+  background: linear-gradient(135deg, rgba(76, 201, 240, 0.25) 0%, rgba(76, 201, 240, 0.05) 100%);
+  border: 2px solid var(--tesla-cyan);
+  color: #fff;
+  padding: 18px 45px;
+  border-radius: 12px;
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 0 30px rgba(76, 201, 240, 0.2),
+    inset 0 0 15px rgba(76, 201, 240, 0.1);
+  overflow: hidden;
+  pointer-events: auto; /* Explicitly interactive */
 }
 
 .splash-enter-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: 0.5s;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
 }
 
 .splash-enter-btn:hover::before {
-    left: 100%;
+  left: 100%;
 }
 
 .splash-enter-btn:hover {
-    background: var(--tesla-cyan);
-    color: var(--bg-dark);
-    box-shadow: 0 0 40px var(--tesla-cyan), inset 0 0 10px rgba(255, 255, 255, 0.4);
-    transform: translateY(-2px) scale(1.02);
+  background: var(--tesla-cyan);
+  color: var(--bg-dark);
+  box-shadow:
+    0 0 40px var(--tesla-cyan),
+    inset 0 0 10px rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .splash-enter-btn:active {
-    transform: translateY(1px) scale(0.98);
+  transform: translateY(1px) scale(0.98);
 }
 
 .splash-footer {
-    position: absolute;
-    bottom: 30px;
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 3px;
-    color: rgba(255, 255, 255, 0.2);
-    text-transform: uppercase;
+  position: absolute;
+  bottom: 30px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
 }

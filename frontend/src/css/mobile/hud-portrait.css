@@ -1,253 +1,276 @@
 /* ── Compact & Elegant HUD for Narrow / Portrait Screens (e.g. Split-Screen) ── */
-@media screen and (max-width: 1200px),
-screen and (orientation: portrait) {
-    #game-hud {
-        top: 15px !important;
-        padding: 0 16px !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        pointer-events: none !important;
-    }
+@media screen and (max-width: 1200px), screen and (orientation: portrait) {
+  #game-hud {
+    top: 15px !important;
+    padding: 0 16px !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    pointer-events: none !important;
+  }
 
-    #game-hud::before,
-    #game-hud::after {
-        display: none !important;
-        /* Hide decorative vertical lines */
-    }
+  #game-hud::before,
+  #game-hud::after {
+    display: none !important;
+    /* Hide decorative vertical lines */
+  }
 
-    .hud-group {
-        flex-direction: row !important;
-        gap: 10px !important;
-    }
+  .hud-group {
+    flex-direction: row !important;
+    gap: 10px !important;
+  }
 
-    .hud-group.left {
-        align-items: center !important;
-    }
+  .hud-group.left {
+    align-items: center !important;
+  }
 
-    .hud-group.right {
-        align-items: center !important;
-    }
+  .hud-group.right {
+    align-items: center !important;
+  }
 
-    .hud-item {
-        min-height: auto !important;
-        height: 42px !important;
-        width: auto !important;
-        padding: 0 16px !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 8px !important;
-        background: rgba(13, 13, 31, 0.75) !important;
-        border-radius: 24px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.02) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(16px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-        margin: 0 !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-        pointer-events: auto !important;
-        /* Enable hover states */
-    }
+  .hud-item {
+    min-height: auto !important;
+    height: 42px !important;
+    width: auto !important;
+    padding: 0 16px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: rgba(13, 13, 31, 0.75) !important;
+    border-radius: 24px !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 0 10px rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    margin: 0 !important;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease !important;
+    pointer-events: auto !important;
+    /* Enable hover states */
+  }
 
-    .hud-item:hover {
-        transform: translateY(-1px) !important;
-    }
+  .hud-item:hover {
+    transform: translateY(-1px) !important;
+  }
 
-    /* Specific overrides for host indicator to match other capsules */
-    #hostIndicator {
-        min-height: auto !important;
-        height: 42px !important;
-        width: auto !important;
-        padding: 0 16px !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 8px !important;
-        border-radius: 24px !important;
-        background: rgba(13, 13, 31, 0.75) !important;
-        border: 1px solid rgba(76, 201, 240, 0.3) !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(76, 201, 240, 0.05) !important;
-        backdrop-filter: blur(16px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-        margin: 0 !important;
-        pointer-events: auto !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-    }
+  /* Specific overrides for host indicator to match other capsules */
+  #hostIndicator {
+    min-height: auto !important;
+    height: 42px !important;
+    width: auto !important;
+    padding: 0 16px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    border-radius: 24px !important;
+    background: rgba(13, 13, 31, 0.75) !important;
+    border: 1px solid rgba(76, 201, 240, 0.3) !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 0 10px rgba(76, 201, 240, 0.05) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease !important;
+  }
 
-    #hostIndicator:hover {
-        transform: translateY(-1px) !important;
-    }
+  #hostIndicator:hover {
+    transform: translateY(-1px) !important;
+  }
 
-    .hud-item::before,
-    #hostIndicator::before {
-        display: none !important;
-        /* Hide standard desktop linear gradient */
-    }
+  .hud-item::before,
+  #hostIndicator::before {
+    display: none !important;
+    /* Hide standard desktop linear gradient */
+  }
 
-    /* Left/Right capsule vertical accent lines */
-    .hud-item::after,
-    #hostIndicator::after {
-        display: none !important;
-    }
+  /* Left/Right capsule vertical accent lines */
+  .hud-item::after,
+  #hostIndicator::after {
+    display: none !important;
+  }
 
-    /* Unique Vector Glow effects for each capsule */
-    .hud-item.lives {
-        border-left: 2px solid #ff3366 !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 51, 102, 0.15) !important;
-    }
+  /* Unique Vector Glow effects for each capsule */
+  .hud-item.lives {
+    border-left: 2px solid #ff3366 !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 15px rgba(255, 51, 102, 0.15) !important;
+  }
 
-    .hud-item.lives:hover {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 51, 102, 0.35) !important;
-    }
+  .hud-item.lives:hover {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 25px rgba(255, 51, 102, 0.35) !important;
+  }
 
-    .hud-item.gold {
-        border-left: 2px solid #fca311 !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(252, 163, 17, 0.15) !important;
-    }
+  .hud-item.gold {
+    border-left: 2px solid #fca311 !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 15px rgba(252, 163, 17, 0.15) !important;
+  }
 
-    .hud-item.gold:hover {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(252, 163, 17, 0.35) !important;
-    }
+  .hud-item.gold:hover {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 25px rgba(252, 163, 17, 0.35) !important;
+  }
 
-    .hud-item.wave {
-        border-left: 2px solid #00d4ff !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 212, 255, 0.15) !important;
-    }
+  .hud-item.wave {
+    border-left: 2px solid #00d4ff !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 15px rgba(0, 212, 255, 0.15) !important;
+  }
 
-    .hud-item.wave:hover {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 212, 255, 0.35) !important;
-    }
+  .hud-item.wave:hover {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 25px rgba(0, 212, 255, 0.35) !important;
+  }
 
-    #hostIndicator {
-        border-left: 2px solid #4cc9f0 !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 15px rgba(76, 201, 240, 0.15) !important;
-    }
+  #hostIndicator {
+    border-left: 2px solid #4cc9f0 !important;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 15px rgba(76, 201, 240, 0.15) !important;
+  }
 
-    #hostIndicator:hover {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 25px rgba(76, 201, 240, 0.35) !important;
-    }
+  #hostIndicator:hover {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 25px rgba(76, 201, 240, 0.35) !important;
+  }
 
-    /* Layout structure inside capsules */
-    .hud-content {
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 4px !important;
-        width: auto !important;
-    }
+  /* Layout structure inside capsules */
+  .hud-content {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: auto !important;
+  }
 
-    .hud-label {
-        display: none !important;
-        /* Hide large "LEBEN", "GOLD" labels */
-    }
+  .hud-label {
+    display: none !important;
+    /* Hide large "LEBEN", "GOLD" labels */
+  }
 
-    .hud-value-container {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 6px !important;
-    }
+  .hud-value-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
 
-    .hud-value {
-        font-size: 1.1rem !important;
-        font-weight: 700 !important;
-        line-height: 1 !important;
-        text-shadow: 0 0 8px rgba(255, 255, 255, 0.2) !important;
-    }
+  .hud-value {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.2) !important;
+  }
 
-    #hostIndicatorText {
-        font-size: 0.95rem !important;
-        font-weight: 700 !important;
-        line-height: 1 !important;
-    }
+  #hostIndicatorText {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
 
-    #interestPreview {
-        font-size: 0.85rem !important;
-        margin-left: 2px !important;
-    }
+  #interestPreview {
+    font-size: 0.85rem !important;
+    margin-left: 2px !important;
+  }
 
-    /* Wave Display specific Welle: prefix for context */
-    .hud-item.wave::before {
-        content: 'Welle:';
-        font-weight: 700;
-        color: #00d4ff;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-right: 2px;
-    }
+  /* Wave Display specific Welle: prefix for context */
+  .hud-item.wave::before {
+    content: "Welle:";
+    font-weight: 700;
+    color: #00d4ff;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 2px;
+  }
 
-    /* Scrollable sidebar improvements - no floating overlay overlap */
-    .bottom-controls {
-        position: static !important;
-        width: 100% !important;
-        margin-top: 25px !important;
-        padding-bottom: 10px !important;
-    }
+  /* Scrollable sidebar improvements - no floating overlay overlap */
+  .bottom-controls {
+    position: static !important;
+    width: 100% !important;
+    margin-top: 25px !important;
+    padding-bottom: 10px !important;
+  }
 
-    #ui-panel {
-        padding-bottom: 30px !important;
-    }
+  #ui-panel {
+    padding-bottom: 30px !important;
+  }
 
-    /* ── Responsive adjustments for Alerts and Indicators on Smaller Screens ── */
-    #game-notifications {
-        bottom: 15px !important;
-        left: 15px !important;
-        top: auto !important;
-        transform: none !important;
-        max-width: 280px !important;
-        width: calc(100% - 30px) !important;
-        gap: 6px !important;
-    }
+  /* ── Responsive adjustments for Alerts and Indicators on Smaller Screens ── */
+  #game-notifications {
+    bottom: 15px !important;
+    left: 15px !important;
+    top: auto !important;
+    transform: none !important;
+    max-width: 280px !important;
+    width: calc(100% - 30px) !important;
+    gap: 6px !important;
+  }
 
-    .game-alert {
-        padding: 8px 12px !important;
-        border-radius: 8px !important;
-        gap: 2px !important;
-        width: 100% !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
-    }
+  .game-alert {
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    gap: 2px !important;
+    width: 100% !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5) !important;
+  }
 
-    .alert-header {
-        font-size: 0.65rem !important;
-        gap: 4px !important;
-    }
+  .alert-header {
+    font-size: 0.65rem !important;
+    gap: 4px !important;
+  }
 
-    .alert-title {
-        font-size: 0.85rem !important;
-        margin-bottom: 0px !important;
-    }
+  .alert-title {
+    font-size: 0.85rem !important;
+    margin-bottom: 0px !important;
+  }
 
-    .alert-desc {
-        font-size: 0.75rem !important;
-        line-height: 1.3 !important;
-    }
+  .alert-desc {
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
+  }
 
-    .alert-meta {
-        font-size: 0.75rem !important;
-        gap: 8px !important;
-        margin-top: 2px !important;
-        padding-top: 4px !important;
-    }
+  .alert-meta {
+    font-size: 0.75rem !important;
+    gap: 8px !important;
+    margin-top: 2px !important;
+    padding-top: 4px !important;
+  }
 
-    #cheatIndicator {
-        top: 70px !important;
-        padding: 6px 16px !important;
-        border-radius: 8px !important;
-    }
+  #cheatIndicator {
+    top: 70px !important;
+    padding: 6px 16px !important;
+    border-radius: 8px !important;
+  }
 
-    #cheatIndicatorText {
-        font-size: 0.8rem !important;
-        letter-spacing: 1px !important;
-    }
+  #cheatIndicatorText {
+    font-size: 0.8rem !important;
+    letter-spacing: 1px !important;
+  }
 }
 
 /* Keep buttons fixed at the bottom of the sidebar on desktop/tablet split-screen (width > 800px and height >= 550px) */
 @media screen and (min-width: 801px) and (min-height: 550px) {
-    .bottom-controls {
-        position: fixed !important;
-        bottom: 20px !important;
-        right: 20px !important;
-        width: calc(var(--ui-panel-width) - 40px) !important;
-        margin-top: 0 !important;
-        padding-bottom: 0 !important;
-    }
+  .bottom-controls {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: calc(var(--ui-panel-width) - 40px) !important;
+    margin-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
 }

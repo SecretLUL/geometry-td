@@ -1,126 +1,128 @@
 /* ── Contextual Mobile Shop ── */
 #context-shop {
-    position: fixed;
-    z-index: 2000;
-    background: rgba(10, 10, 26, 0.95);
-    backdrop-filter: blur(15px);
-    border: 2px solid rgba(0, 212, 255, 0.35);
-    border-radius: 16px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 212, 255, 0.15), inset 0 0 15px rgba(0, 212, 255, 0.05);
-    pointer-events: auto;
-    min-width: 130px;
-    max-height: calc(100vh - 20px);
-    overflow-y: auto;
-    animation: context-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: fixed;
+  z-index: 2000;
+  background: rgba(10, 10, 26, 0.95);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(0, 212, 255, 0.35);
+  border-radius: 16px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.85),
+    0 0 20px rgba(0, 212, 255, 0.15),
+    inset 0 0 15px rgba(0, 212, 255, 0.05);
+  pointer-events: auto;
+  min-width: 130px;
+  max-height: calc(100vh - 20px);
+  overflow-y: auto;
+  animation: context-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 #context-shop.hidden {
-    display: none;
+  display: none;
 }
 
 #context-shop.closing {
-    animation: context-pop-out 0.15s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
-    pointer-events: none;
-    /* Disable interaction while fading out */
+  animation: context-pop-out 0.15s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+  pointer-events: none;
+  /* Disable interaction while fading out */
 }
 
 @keyframes context-pop {
-    from {
-        opacity: 0;
-        transform: scale(0.8) translateY(10px);
-    }
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
 
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes context-pop-out {
-    from {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 
-    to {
-        opacity: 0;
-        transform: scale(0.8) translateY(10px);
-    }
+  to {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
 }
 
-
 .context-btn {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: #fff;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    text-align: left;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
 }
 
 .context-btn:hover {
-    background: rgba(0, 212, 255, 0.08);
-    border-color: rgba(0, 212, 255, 0.45);
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
-    transform: translateY(-1px);
+  background: rgba(0, 212, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.45);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .context-btn:active {
-    background: var(--tesla-cyan);
-    color: #05070f;
-    transform: scale(0.95);
+  background: var(--tesla-cyan);
+  color: #05070f;
+  transform: scale(0.95);
 }
 
 .context-btn .cost {
-    font-size: 0.75rem;
-    font-weight: 700;
-    opacity: 0.9;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: var(--gold);
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.9;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--gold);
 }
 
 .context-btn.too-expensive {
-    opacity: 0.4;
-    pointer-events: none;
-    background: rgba(255, 51, 102, 0.02) !important;
-    border-color: rgba(255, 51, 102, 0.08) !important;
+  opacity: 0.4;
+  pointer-events: none;
+  background: rgba(255, 51, 102, 0.02) !important;
+  border-color: rgba(255, 51, 102, 0.08) !important;
 }
 
 .context-btn.too-expensive .cost {
-    color: #ff3366;
+  color: #ff3366;
 }
 
 .context-btn.cancel-btn {
-    background: rgba(255, 51, 102, 0.08) !important;
-    border-color: rgba(255, 51, 102, 0.3) !important;
-    color: #ff3366 !important;
-    justify-content: center !important;
-    margin-top: 5px !important;
+  background: rgba(255, 51, 102, 0.08) !important;
+  border-color: rgba(255, 51, 102, 0.3) !important;
+  color: #ff3366 !important;
+  justify-content: center !important;
+  margin-top: 5px !important;
 }
 
 .context-btn.cancel-btn:hover {
-    background: rgba(255, 51, 102, 0.15) !important;
-    border-color: rgba(255, 51, 102, 0.6) !important;
-    box-shadow: 0 0 10px rgba(255, 51, 102, 0.25);
+  background: rgba(255, 51, 102, 0.15) !important;
+  border-color: rgba(255, 51, 102, 0.6) !important;
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.25);
 }
 
 .context-btn.cancel-btn:active {
-    background: #ff3366 !important;
-    color: #fff !important;
-    transform: scale(0.95) !important;
+  background: #ff3366 !important;
+  color: #fff !important;
+  transform: scale(0.95) !important;
 }

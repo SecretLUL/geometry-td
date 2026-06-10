@@ -5,7 +5,7 @@
  * @last_update: 2026-05-20 / v1.0.0
  */
 export const ICONS: Record<string, string> = {
-    Base: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+  Base: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
         <!-- Cannon barrel -->
         <rect x="16" y="13" width="13" height="6" rx="2" fill="#fff"/>
         <!-- Turret circle -->
@@ -14,7 +14,7 @@ export const ICONS: Record<string, string> = {
         <circle cx="11" cy="13" r="2.5" fill="rgba(255,255,255,0.25)"/>
     </svg>`,
 
-    Sniper: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+  Sniper: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
         <!-- Crosshair rings -->
         <circle cx="16" cy="16" r="10" stroke="#a0d8ef" stroke-width="1.5" fill="none"/>
         <circle cx="16" cy="16" r="5" stroke="#a0d8ef" stroke-width="1.5" fill="none"/>
@@ -25,7 +25,7 @@ export const ICONS: Record<string, string> = {
         <circle cx="16" cy="16" r="2" fill="#fff"/>
     </svg>`,
 
-    Bomb: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+  Bomb: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
         <!-- Bomb body -->
         <circle cx="16" cy="18" r="9" fill="#ff4040"/>
         <!-- Fuse cap -->
@@ -38,7 +38,7 @@ export const ICONS: Record<string, string> = {
         <circle cx="12" cy="14" r="2.5" fill="rgba(255,255,255,0.2)"/>
     </svg>`,
 
-    Tesla: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+  Tesla: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
         <!-- Octagon base -->
         <path d="M10 4 L22 4 L28 10 L28 22 L22 28 L10 28 L4 22 L4 10 Z" fill="#0059b3"/>
         <!-- Core -->
@@ -48,7 +48,7 @@ export const ICONS: Record<string, string> = {
         <path d="M12 12 L8 8 M20 20 L24 24 M12 20 L8 24 M20 12 L24 8" stroke="#00ffff" stroke-width="2" stroke-linecap="round"/>
     </svg>`,
 
-    Prisma: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+  Prisma: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
         <!-- Triangle Base -->
         <path d="M16 4 L28 26 L4 26 Z" fill="#b8860b" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1"/>
         <!-- Floating central diamond crystal -->
@@ -59,7 +59,7 @@ export const ICONS: Record<string, string> = {
         <circle cx="16" cy="16" r="3" fill="#ffffff" opacity="0.8"/>
     </svg>`,
 
-    Booster: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+  Booster: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
         <!-- Orbiting ring -->
         <circle cx="16" cy="16" r="11" stroke="#ff9f43" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/>
         <!-- Central Octahedron / Diamond -->
@@ -73,12 +73,12 @@ export const ICONS: Record<string, string> = {
         <line x1="24" y1="16" x2="26" y2="16" stroke="#ff9f43" stroke-width="2" stroke-linecap="round"/>
     </svg>`,
 
-    Generator: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
+  Generator: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="48" height="48">
         <!-- Outer Glowing Gear / Ring -->
         <circle cx="16" cy="16" r="11" stroke="#26de81" stroke-width="1.5" fill="none" stroke-dasharray="3 2"/>
         <!-- Gold Coin Body -->
         <circle cx="16" cy="16" r="9" fill="#00b894" stroke="#ffd700" stroke-width="2"/>
         <!-- Inner Details: Dollar Sign -->
         <path d="M16 10 L16 22 M13 13 C13 11, 19 11, 19 13.5 C19 16, 13 16, 13 18.5 C13 21, 19 21, 19 19" fill="none" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>`
+    </svg>`,
 };

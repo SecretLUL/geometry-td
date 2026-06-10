@@ -10,12 +10,20 @@
     "type-check": "tsc --noEmit",
     "lint:html": "htmlhint \"*.html\"",
     "lint:css": "stylelint \"src/**/*.css\"",
-    "check-all": "npm run type-check && npm run lint:html && npm run lint:css"
+    "lint:js": "eslint \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.{ts,css,html}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,css,html}\"",
+    "lint": "npm run type-check && npm run lint:html && npm run lint:css && npm run lint:js && npm run format:check",
+    "check-all": "npm run lint && npm run build"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
     "htmlhint": "^1.9.2",
-    "stylelint": "^17.12.0",
-    "stylelint-config-standard": "^40.0.0",
+    "prettier": "^3.8.4",
+    "stylelint": "^16.12.0",
+    "stylelint-config-standard": "^36.0.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
   },

@@ -5,12 +5,12 @@
  * @dependencies: state, types
  * @last_update: 2026-05-29 / v1.3.1 - Removed direct state import and introduced setGameStateRef to resolve circular dependency with Config.
  */
-import { Enemy, GameState } from '../types';
+import { Enemy, GameState } from "../types";
 
 let stateRef: GameState | null = null;
 
 export function setGameStateRef(ref: GameState) {
-    stateRef = ref;
+  stateRef = ref;
 }
 
 /**
@@ -18,18 +18,18 @@ export function setGameStateRef(ref: GameState) {
  * Highly optimized, avoiding slow Math.sqrt calls.
  */
 export function getDistanceSq(x1: number, y1: number, x2: number, y2: number): number {
-    const dx = x1 - x2;
-    const dy = y1 - y2;
-    return dx * dx + dy * dy;
+  const dx = x1 - x2;
+  const dy = y1 - y2;
+  return dx * dx + dy * dy;
 }
 
 /**
  * Calculates the Euclidean distance between two points.
  */
 export function getDistance(x1: number, y1: number, x2: number, y2: number): number {
-    const dx = x1 - x2;
-    const dy = y1 - y2;
-    return Math.sqrt(dx * dx + dy * dy);
+  const dx = x1 - x2;
+  const dy = y1 - y2;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 const nearbyBuffers: Enemy[][] = Array.from({ length: 8 }, () => []);
@@ -40,44 +40,44 @@ let bufferIndex = 0;
  * Avoids any array allocations by rotating through a pre-allocated circular buffer.
  */
 export function getNearbyEnemies(x: number, y: number, radius: number): Enemy[] {
-    if (!stateRef || !stateRef.enemyGrid) return stateRef ? stateRef.enemies : [];
-    
-    const nearby = nearbyBuffers[bufferIndex];
-    bufferIndex = (bufferIndex + 1) % nearbyBuffers.length;
-    nearby.length = 0;
+  if (!stateRef || !stateRef.enemyGrid) return stateRef ? stateRef.enemies : [];
 
-    const enemyCount = stateRef.enemies.length;
-    if (enemyCount === 0) {
-        return nearby;
-    }
+  const nearby = nearbyBuffers[bufferIndex];
+  bufferIndex = (bufferIndex + 1) % nearbyBuffers.length;
+  nearby.length = 0;
 
-    const CELL_SIZE = 100;
-    const cx = Math.floor(x / CELL_SIZE);
-    const cy = Math.floor(y / CELL_SIZE);
-    const radiusCells = Math.ceil(radius / CELL_SIZE);
-    const cellsToSearch = (radiusCells * 2 + 1) * (radiusCells * 2 + 1);
+  const enemyCount = stateRef.enemies.length;
+  if (enemyCount === 0) {
+    return nearby;
+  }
 
-    // If the number of enemies is small, or the search grid area is much larger
-    // than the number of active enemies, skip grid cell lookups entirely.
-    if (enemyCount <= 15 || cellsToSearch > enemyCount * 1.5) {
-        for (let i = 0; i < enemyCount; i++) {
-            nearby.push(stateRef.enemies[i]);
-        }
-        return nearby;
-    }
+  const CELL_SIZE = 100;
+  const cx = Math.floor(x / CELL_SIZE);
+  const cy = Math.floor(y / CELL_SIZE);
+  const radiusCells = Math.ceil(radius / CELL_SIZE);
+  const cellsToSearch = (radiusCells * 2 + 1) * (radiusCells * 2 + 1);
 
-    for (let ix = -radiusCells; ix <= radiusCells; ix++) {
-        for (let iy = -radiusCells; iy <= radiusCells; iy++) {
-            const key = (cx + ix) | ((cy + iy) << 16);
-            const cell = stateRef.enemyGrid.get(key);
-            if (cell) {
-                for (let i = 0; i < cell.length; i++) {
-                    nearby.push(cell[i]);
-                }
-            }
-        }
+  // If the number of enemies is small, or the search grid area is much larger
+  // than the number of active enemies, skip grid cell lookups entirely.
+  if (enemyCount <= 15 || cellsToSearch > enemyCount * 1.5) {
+    for (let i = 0; i < enemyCount; i++) {
+      nearby.push(stateRef.enemies[i]);
     }
     return nearby;
+  }
+
+  for (let ix = -radiusCells; ix <= radiusCells; ix++) {
+    for (let iy = -radiusCells; iy <= radiusCells; iy++) {
+      const key = (cx + ix) | ((cy + iy) << 16);
+      const cell = stateRef.enemyGrid.get(key);
+      if (cell) {
+        for (let i = 0; i < cell.length; i++) {
+          nearby.push(cell[i]);
+        }
+      }
+    }
+  }
+  return nearby;
 }
 
 /**
@@ -86,12 +86,12 @@ export function getNearbyEnemies(x: number, y: number, radius: number): Enemy[] 
 const domCache = new Map<string, HTMLElement | null>();
 
 export function getEl(id: string): HTMLElement | null {
-    let el = domCache.get(id);
-    if (!el) {
-        el = document.getElementById(id);
-        if (el) domCache.set(id, el);
-    }
-    return el;
+  let el = domCache.get(id);
+  if (!el) {
+    el = document.getElementById(id);
+    if (el) domCache.set(id, el);
+  }
+  return el;
 }
 
 /**
@@ -99,13 +99,13 @@ export function getEl(id: string): HTMLElement | null {
  * matching the tower damage efficiency table representation.
  */
 export function formatNumber(val: number): string {
-    if (val >= 1000000) {
-        return (val / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'M';
-    }
-    if (val >= 10000) {
-        return (val / 1000).toFixed(1).replace(/\.?0+$/, '') + 'K';
-    }
-    return Math.floor(val).toLocaleString();
+  if (val >= 1000000) {
+    return (val / 1000000).toFixed(2).replace(/\.?0+$/, "") + "M";
+  }
+  if (val >= 10000) {
+    return (val / 1000).toFixed(1).replace(/\.?0+$/, "") + "K";
+  }
+  return Math.floor(val).toLocaleString();
 }
 
 /**
@@ -113,20 +113,19 @@ export function formatNumber(val: number): string {
  * Prevents awkward values like 115670g and instead rounds them to nice intervals (e.g., 115000g).
  */
 export function roundUpgradeCost(cost: number): number {
-    if (cost < 100) {
-        return Math.round(cost / 5) * 5;
-    } else if (cost < 500) {
-        return Math.round(cost / 10) * 10;
-    } else if (cost < 2000) {
-        return Math.round(cost / 50) * 50;
-    } else if (cost < 10000) {
-        return Math.round(cost / 100) * 100;
-    } else if (cost < 50000) {
-        return Math.round(cost / 500) * 500;
-    } else if (cost < 100000) {
-        return Math.round(cost / 1000) * 1000;
-    } else {
-        return Math.round(cost / 5000) * 5000;
-    }
+  if (cost < 100) {
+    return Math.round(cost / 5) * 5;
+  } else if (cost < 500) {
+    return Math.round(cost / 10) * 10;
+  } else if (cost < 2000) {
+    return Math.round(cost / 50) * 50;
+  } else if (cost < 10000) {
+    return Math.round(cost / 100) * 100;
+  } else if (cost < 50000) {
+    return Math.round(cost / 500) * 500;
+  } else if (cost < 100000) {
+    return Math.round(cost / 1000) * 1000;
+  } else {
+    return Math.round(cost / 5000) * 5000;
+  }
 }
-

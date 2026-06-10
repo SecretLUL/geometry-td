@@ -66,7 +66,7 @@
             </button>
         </div>
         <div class="splash-footer">
-            <span>SECURE-CONNECTION // HOST: DEV-ENVIRONMENT</span>
+            <span id="splash-env-label">SECURE-CONNECTION // HOST: DEV-ENVIRONMENT</span>
         </div>
     </div>
 
@@ -686,7 +686,7 @@
                     <h3>SYSTEM LOG</h3>
                     <span class="changelog-status"><span class="pulse-green"></span> SEC-ONLINE</span>
                 </div>
-                <p class="changelog-desc">Chronologische Aufzeichnung aller Simulationstransfers aus der DEV-Umgebung.
+                <p class="changelog-desc" id="changelog-env-desc">Chronologische Aufzeichnung aller Simulationstransfers aus der DEV-Umgebung.
                 </p>
             </div>
 
@@ -742,6 +742,35 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Profile Picture Crop Modal (Premium, Cyber-Glassmorphic) ── -->
+    <div id="avatarCropModal" class="custom-overlay hidden">
+        <div class="custom-modal-content avatar-crop-modal-content">
+            <button class="custom-modal-close" id="closeCropModal">&times;</button>
+            <div class="custom-modal-header">
+                <div class="custom-modal-header-icon">✂️</div>
+                <h2>BILD ZUSCHNEIDEN</h2>
+            </div>
+            <p class="custom-modal-subtitle">Bewege und zoome das Bild passend in den Kreis</p>
+            
+            <div class="crop-workspace">
+                <div class="crop-container">
+                    <canvas id="cropCanvas" width="300" height="300"></canvas>
+                </div>
+                
+                <div class="crop-zoom-control">
+                    <span class="zoom-icon minus">🔍-</span>
+                    <input type="range" id="cropZoomSlider" class="ig-range-slider" min="1" max="3" step="0.01" value="1">
+                    <span class="zoom-icon plus">🔍+</span>
+                </div>
+            </div>
+            
+            <div class="crop-actions">
+                <button id="cancelCropBtn" class="mode-action-btn solo-btn glitch-hover">Abbrechen</button>
+                <button id="confirmCropBtn" class="mode-action-btn public-btn glitch-hover">Zuschneiden</button>
             </div>
         </div>
     </div>
