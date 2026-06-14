@@ -43,11 +43,11 @@ export function drawGhostTower(g: PIXI.Graphics): void {
   const cy = row * TS + TS / 2;
 
   // Determine which tower prototype to use for range/color
-  let range: number, towerColor: number;
+  let towerColor: number;
   const type = state.selectedTowerType;
   const data = TowerData[type] || TowerData["Base"];
 
-  range = data.baseRange;
+  const range = data.baseRange;
   if (type === "Sniper") {
     towerColor = 0x4cc9f0;
   } else if (type === "Bomb") {

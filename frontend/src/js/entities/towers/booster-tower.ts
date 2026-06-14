@@ -103,6 +103,8 @@ export class BoosterTower extends Tower {
       this.redrawPixiBase();
       this.redrawPixiTurret();
 
+      Tower.recalculateAllBoosts();
+
       if (updateUICallback) updateUICallback();
       return true;
     }

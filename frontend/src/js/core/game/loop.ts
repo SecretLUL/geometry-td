@@ -16,7 +16,7 @@ import { updateUI, updateTooltip } from "../../ui/ui";
 import { logger } from "../logger";
 import { getDistanceSq } from "../utils";
 import { waypoints } from "../map";
-import { Enemy } from "../../types";
+import { Enemy, Tower } from "../../types";
 import { handleWaveLogic } from "./wave";
 import { drawScene } from "./renderer";
 import { checkAchievements } from "../achievements";
@@ -50,7 +50,7 @@ function measureTrueFps(timestamp: number) {
 requestAnimationFrame(measureTrueFps);
 
 // Persistent Map objects to avoid garbage collection thrashing in game loop interpolation
-const state0EnemyMap = new Map<number, any>();
+const state0EnemyMap = new Map<number, unknown>();
 const currentEnemyMap = new Map<number, Enemy>();
 const syncedIds = new Set<number>();
 const newEnemiesBuffer: Enemy[] = [];
@@ -157,7 +157,9 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
         const interpolationDelay = isClientWebRTCOpen() ? 80 : 150;
         const renderTime = now - interpolationDelay;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let state0: any = null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let state1: any = null;
 
         if (Multiplayer.stateBuffer && Multiplayer.stateBuffer.length >= 2) {
@@ -196,16 +198,16 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
           state.activeAccelerators.length = 0;
 
           state0EnemyMap.clear();
-          for (let e of state0.activeEnemies) {
+          for (const e of state0.activeEnemies || []) {
             state0EnemyMap.set(e.id, e);
           }
 
           currentEnemyMap.clear();
-          for (let e of state.enemies) {
+          for (const e of state.enemies) {
             currentEnemyMap.set(e.id, e);
           }
 
-          for (let eData1 of state1.activeEnemies) {
+          for (const eData1 of state1.activeEnemies || []) {
             // Guard: skip entries without a valid ID
             if (!eData1 || eData1.id === undefined || eData1.id === null) {
               continue;
@@ -273,7 +275,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
           }
 
           // Local death detection
-          for (let oldEnemy of state.enemies) {
+          for (const oldEnemy of state.enemies) {
             if (!syncedIds.has(oldEnemy.id)) {
               const lastWaypoint = waypoints[waypoints.length - 1];
               const distToEndSq = lastWaypoint
@@ -300,7 +302,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                 oldEnemy.typeName === "DefragmenterSubfragment"
               ) {
                 if (oldEnemy.typeName === "Boss") {
-                  for (let tw of state.towers) tw.stunTimer = 0;
+                  for (const tw of state.towers) tw.stunTimer = 0;
                 }
                 const hasDefragActive = state.enemies.some(
                   (e) =>
@@ -331,7 +333,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
           // Clients skip enemy.update() entirely, so sprites are never repositioned and become invisible.
           // Fix: call updatePixi() explicitly after each interpolation round.
           for (let i = 0; i < state.enemies.length; i++) {
-            (state.enemies[i] as any).updatePixi?.();
+            (state.enemies[i] as Enemy & { updatePixi?: () => void }).updatePixi?.();
           }
         }
       }
@@ -344,19 +346,33 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
       while (speedAccumulator >= 1) {
         speedAccumulator -= 1;
 
-        // Spatial Hashing Grid for Collision optimization (Optimized Map)
-        if (!state.enemyGrid) state.enemyGrid = new Map();
-        else state.enemyGrid.forEach((arr) => (arr.length = 0));
-
+        // Spatial Hashing Grid for Collision optimization (Zero Allocation Array)
         const CELL_SIZE = 100;
-        for (let enemy of state.enemies) {
-          const cx = Math.floor(enemy.x / CELL_SIZE);
-          const cy = Math.floor(enemy.y / CELL_SIZE);
-          const key = cx | (cy << 16);
-          let cell = state.enemyGrid.get(key);
-          if (!cell) {
-            cell = [];
-            state.enemyGrid.set(key, cell);
+        const GRID_WIDTH = 50;
+        const GRID_HEIGHT = 50;
+
+        if (!state.enemyGrid || !state.activeGridIndices) {
+          state.enemyGrid = Array.from({ length: GRID_WIDTH * GRID_HEIGHT }, () => []);
+          state.activeGridIndices = [];
+        } else {
+          // Zero-allocation clear: only clear cells that had enemies last frame
+          for (let i = 0; i < state.activeGridIndices.length; i++) {
+            const idx = state.activeGridIndices[i];
+            state.enemyGrid[idx].length = 0;
+          }
+          state.activeGridIndices.length = 0;
+        }
+
+        for (let i = 0; i < state.enemies.length; i++) {
+          const enemy = state.enemies[i];
+          // Clamp coordinates to grid bounds to prevent out-of-bounds indexing
+          const cx = Math.max(0, Math.min(GRID_WIDTH - 1, Math.floor(enemy.x / CELL_SIZE)));
+          const cy = Math.max(0, Math.min(GRID_HEIGHT - 1, Math.floor(enemy.y / CELL_SIZE)));
+          const index = cx + cy * GRID_WIDTH;
+
+          const cell = state.enemyGrid[index];
+          if (cell.length === 0) {
+            state.activeGridIndices.push(index);
           }
           cell.push(enemy);
         }
@@ -376,7 +392,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
         }
 
         if (state.isHost) {
-          for (let tower of state.towers) tower.update();
+          for (const tower of state.towers) tower.update();
         } else {
           // Clients: Safety check for prediction timeout
           const nowMs = Date.now();
@@ -408,7 +424,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
           }
 
           // Clients only update visual properties (angle and recoil decay)
-          for (let tower of state.towers) {
+          for (const tower of state.towers) {
             if (tower.constructionTimer !== undefined && tower.constructionTimer > 0) {
               tower.constructionTimer--;
               if (tower.constructionTimer === 0) {
@@ -446,8 +462,9 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
             if (!state.enemies || state.enemies.length === 0) {
               tower.target = null;
               if (tower.type === "Prisma") {
-                (tower as any).beamTarget = null;
-                (tower as any).lockTimer = 0;
+                (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).beamTarget =
+                  null;
+                (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).lockTimer = 0;
               }
               tower.updatePixi();
               continue;
@@ -474,8 +491,9 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
               if (tower.type === "Prisma" && tower.target) {
                 // We just lost a target on the client! Trigger the 30-frame search delay
                 tower.target = null;
-                (tower as any).beamTarget = null;
-                (tower as any).lockTimer = 0;
+                (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).beamTarget =
+                  null;
+                (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).lockTimer = 0;
                 tower.fireCooldown = 30; // 30 frames delay before searching for a new target
                 continue;
               } else {
@@ -486,18 +504,23 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
             if (tower.target) {
               tower.angle = Math.atan2(tower.target.y - tower.y, tower.target.x - tower.x);
               if (tower.type === "Prisma") {
-                if (tower.target === (tower as any).beamTarget) {
-                  (tower as any).lockTimer++;
+                if (
+                  tower.target ===
+                  (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).beamTarget
+                ) {
+                  (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).lockTimer++;
                 } else {
-                  (tower as any).beamTarget = tower.target;
-                  (tower as any).lockTimer = 0;
+                  (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).beamTarget =
+                    tower.target;
+                  (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).lockTimer = 0;
                   tower.fireCooldown = 15; // 15 frames lock-on delay when switching targets
                 }
               }
             } else {
               if (tower.type === "Prisma") {
-                (tower as any).lockTimer = 0;
-                (tower as any).beamTarget = null;
+                (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).lockTimer = 0;
+                (tower as Tower & { beamTarget: Enemy | null; lockTimer: number }).beamTarget =
+                  null;
               }
             }
 
@@ -550,20 +573,27 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
               state.enemies[i] = state.enemies[state.enemies.length - 1];
               state.enemies.pop();
               // Hide the PixiJS sprite immediately so the enemy vanishes from view
-              if ((enemy as any).pixiSprite) (enemy as any).pixiSprite.visible = false;
+              if ((enemy as Enemy & { pixiSprite?: { visible: boolean } }).pixiSprite)
+                (enemy as Enemy & { pixiSprite?: { visible: boolean } }).pixiSprite!.visible =
+                  false;
               createExplosion(enemy.x, enemy.y, enemy.color, 10);
               updateUI();
               // Multiplayer: Sync lives
               Multiplayer.emitSyncLives(state.lives);
             } else if (enemy.hp <= 0) {
               // Check Meltdown Specialization of Prisma Tower if it was the highest damage contributor
-              if ((enemy as any).damageSources && (enemy as any).damageSources.size > 0) {
-                let topContributor: any = null;
+              if (
+                (enemy as Enemy & { damageSources?: Map<Tower, number> }).damageSources &&
+                (enemy as Enemy & { damageSources?: Map<Tower, number> }).damageSources!.size > 0
+              ) {
+                let topContributor: Tower | null = null;
                 let maxDmg = 0;
-                for (const [source, dmg] of (enemy as any).damageSources.entries()) {
+                for (const [source, dmg] of (
+                  enemy as Enemy & { damageSources?: Map<Tower, number> }
+                ).damageSources!.entries()) {
                   if (dmg > maxDmg) {
                     maxDmg = dmg;
-                    topContributor = source;
+                    topContributor = source as Tower;
                   }
                 }
                 if (
@@ -572,7 +602,9 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                   topContributor.type === "Prisma" &&
                   topContributor.specialization === "meltdown"
                 ) {
-                  topContributor.triggerMeltdown(enemy);
+                  (
+                    topContributor as Tower & { triggerMeltdown: (enemy: Enemy) => void }
+                  ).triggerMeltdown(enemy);
                 }
               }
 
@@ -588,7 +620,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                 enemy.typeName === "DefragmenterSubfragment"
               ) {
                 if (enemy.typeName === "Boss") {
-                  for (let t of state.towers) t.stunTimer = 0;
+                  for (const t of state.towers) t.stunTimer = 0;
                 }
                 const hasDefragActive = state.enemies.some(
                   (e) =>
@@ -707,7 +739,9 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
               state.enemies[i] = state.enemies[state.enemies.length - 1];
               state.enemies.pop();
               // Hide the PixiJS sprite immediately so the enemy vanishes from view
-              if ((enemy as any).pixiSprite) (enemy as any).pixiSprite.visible = false;
+              if ((enemy as Enemy & { pixiSprite?: { visible: boolean } }).pixiSprite)
+                (enemy as Enemy & { pixiSprite?: { visible: boolean } }).pixiSprite!.visible =
+                  false;
               updateUI();
 
               if (state.lives <= 0 && !state.gameOver) {
@@ -893,25 +927,17 @@ export function triggerSyncCompleted(): void {
 }
 
 export function prePopulateEnemyGrid(): void {
-  if (!state.enemyGrid) {
-    state.enemyGrid = new Map();
+  const GRID_WIDTH = 50;
+  const GRID_HEIGHT = 50;
+
+  if (!state.enemyGrid || !state.activeGridIndices) {
+    state.enemyGrid = Array.from({ length: GRID_WIDTH * GRID_HEIGHT }, () => []);
+    state.activeGridIndices = [];
   } else {
-    state.enemyGrid.clear();
-  }
-
-  const CELL_SIZE = 100;
-  // Map bounds: Config.CANVAS_COLS * Config.TILE_SIZE
-  // Pre-populate cells across a wide safe area up to 120px tile size
-  const maxW = Config.CANVAS_COLS * 120;
-  const maxH = Config.CANVAS_ROWS * 120;
-
-  for (let x = 0; x < maxW; x += CELL_SIZE) {
-    for (let y = 0; y < maxH; y += CELL_SIZE) {
-      const cx = Math.floor(x / CELL_SIZE);
-      const cy = Math.floor(y / CELL_SIZE);
-      const key = cx | (cy << 16);
-      state.enemyGrid.set(key, []);
+    for (let i = 0; i < state.enemyGrid.length; i++) {
+      state.enemyGrid[i].length = 0;
     }
+    state.activeGridIndices.length = 0;
   }
 }
 

@@ -8,6 +8,7 @@
 import { state } from "../state";
 import { Config, EnemyData } from "../config";
 import { EnemyFactory } from "../../entities/enemies";
+import { Enemy, EnemyType } from "../../types";
 import { createCoinBurst } from "../../fx/fx";
 import { updateUI, showGameNotification } from "../../ui/ui";
 import { Multiplayer } from "../multiplayer/index";
@@ -16,14 +17,15 @@ import { app } from "./viewport";
 import { PoolManager } from "../pool";
 
 export function generateEnemyPool(wave: number): string[] {
-  let enemiesToSpawn = Config.WAVE_BASE_ENEMIES + Math.floor(wave * Config.WAVE_ENEMIES_MULTIPLIER);
+  const enemiesToSpawn =
+    Config.WAVE_BASE_ENEMIES + Math.floor(wave * Config.WAVE_ENEMIES_MULTIPLIER);
   let pool: string[] = [];
 
   const bossInterval = 20;
   if (wave > 0 && wave % bossInterval === 0) {
     const primaryBosses = Object.keys(EnemyData).filter(
       (type) =>
-        EnemyData[type as any].category === "Bosse" &&
+        EnemyData[type as keyof typeof EnemyData].category === "Bosse" &&
         !type.includes("Fragment") &&
         !type.includes("Subfragment")
     );
@@ -31,7 +33,7 @@ export function generateEnemyPool(wave: number): string[] {
     const selectedBoss = primaryBosses[bossIndex % primaryBosses.length] || "Boss";
     return [selectedBoss];
   } else {
-    let availableEnemies = Object.keys(EnemyData).filter((type) => {
+    const availableEnemies = Object.keys(EnemyData).filter((type) => {
       if (EnemyData[type].category === "Bosse" || EnemyData[type].unlockWave > wave) {
         return false;
       }
@@ -43,7 +45,7 @@ export function generateEnemyPool(wave: number): string[] {
       }
       return true;
     });
-    let poolPercentages: Record<string, number> = {};
+    const poolPercentages: Record<string, number> = {};
     let totalWeightOfOthers = 0;
 
     availableEnemies.forEach((type) => {
@@ -58,16 +60,16 @@ export function generateEnemyPool(wave: number): string[] {
     const total = Object.values(poolPercentages).reduce((a, b) => a + b, 0);
     Object.keys(poolPercentages).forEach((k) => (poolPercentages[k] /= total));
 
-    let extraComplexity = Math.min(0.3, Math.floor(wave / 5) * 0.05);
+    const extraComplexity = Math.min(0.3, Math.floor(wave / 5) * 0.05);
     if (availableEnemies.length > 1) {
       poolPercentages["Normal"] = Math.max(0.05, poolPercentages["Normal"] - extraComplexity);
-      let extraPerType = extraComplexity / (availableEnemies.length - 1);
+      const extraPerType = extraComplexity / (availableEnemies.length - 1);
       availableEnemies.forEach((type) => {
         if (type !== "Normal") poolPercentages[type] += extraPerType;
       });
     }
 
-    let counts: Record<string, number> = {};
+    const counts: Record<string, number> = {};
     let totalCount = 0;
     availableEnemies.forEach((type) => {
       let num = Math.floor(enemiesToSpawn * poolPercentages[type]);
@@ -87,8 +89,8 @@ export function generateEnemyPool(wave: number): string[] {
     pool = spaceOutEnemyType(pool, "Accelerator");
 
     // Guarantee newly unlocked enemies spawn first (and are guaranteed to be in the pool)
-    let newlyUnlocked = availableEnemies.filter((type) => EnemyData[type].unlockWave === wave);
-    for (let newType of newlyUnlocked) {
+    const newlyUnlocked = availableEnemies.filter((type) => EnemyData[type].unlockWave === wave);
+    for (const newType of newlyUnlocked) {
       const index = pool.indexOf(newType);
       if (index !== -1) {
         pool.splice(index, 1);
@@ -122,7 +124,7 @@ export function startWave(): void {
 }
 
 // Called by the multiplayer system or locally to start a wave
-export function executeStartWave(data: any): void {
+export function executeStartWave(data: { wave: number; pool?: string[] } | number): void {
   if (state.isWaveActive || state.gameOver) return;
 
   const waveNumber = typeof data === "object" ? data.wave : data;
@@ -143,7 +145,7 @@ export function executeStartWave(data: any): void {
   state.spawnCooldown = 0;
 
   // Check newly unlocked enemies
-  let newlyUnlocked: string[] = [];
+  const newlyUnlocked: string[] = [];
   Object.keys(EnemyData).forEach((type) => {
     if (EnemyData[type].category !== "Bosse" && EnemyData[type].unlockWave === state.wave) {
       newlyUnlocked.push(type);
@@ -159,6 +161,7 @@ export function executeStartWave(data: any): void {
         if (type === "Regrower") return "Heil-Feind 🩹";
         if (type === "Splinter") return "Splitter-Feind 🌀";
         if (type === "Accelerator") return "Beschleuniger ⏩";
+        if (type === "Collector") return "Sammler (Collector) 💰";
         return type;
       })
       .join(", ");
@@ -198,7 +201,11 @@ export function handleWaveLogic(): void {
         const clusterSize = Config.SWARM_CLUSTER_SIZE || 6;
         const swarmGroupId = Math.floor(Math.random() * 1000000000);
         for (let i = 0; i < clusterSize; i++) {
-          const swarmEntity = EnemyFactory.createEnemy("Swarm", state.wave) as any;
+          const swarmEntity = EnemyFactory.createEnemy("Swarm", state.wave) as Enemy & {
+            swarmGroupId?: number;
+            swarmOffsetX?: number;
+            swarmOffsetY?: number;
+          };
           swarmEntity.swarmGroupId = swarmGroupId;
 
           const angle = Math.random() * Math.PI * 2;
@@ -211,7 +218,7 @@ export function handleWaveLogic(): void {
           state.enemies.push(swarmEntity);
         }
       } else {
-        const newEnemy = EnemyFactory.createEnemy(type as any, state.wave);
+        const newEnemy = EnemyFactory.createEnemy(type as EnemyType, state.wave);
         state.enemies.push(newEnemy);
         if (type === "Accelerator") {
           if (!state.activeAccelerators) state.activeAccelerators = [];

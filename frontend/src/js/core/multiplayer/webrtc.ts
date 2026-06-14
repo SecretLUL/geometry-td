@@ -41,9 +41,13 @@ let connectionRetries = 0;
 const MAX_CONNECTION_RETRIES = 3;
 
 // Register incoming message handler
-let onWebRTCMessageReceived: ((payload: any) => void) | null = null;
+let onWebRTCMessageReceived:
+  | ((payload: import("../../types").GameStateSocketPayload) => void)
+  | null = null;
 
-export function registerWebRTCMessageHandler(handler: (payload: any) => void): void {
+export function registerWebRTCMessageHandler(
+  handler: (payload: import("../../types").GameStateSocketPayload) => void
+): void {
   onWebRTCMessageReceived = handler;
 }
 
@@ -52,13 +56,17 @@ export function cleanupClientWebRTC(): void {
   if (clientChannel) {
     try {
       clientChannel.close();
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
     clientChannel = null;
   }
   if (clientConnection) {
     try {
       clientConnection.close();
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
     clientConnection = null;
   }
 }
@@ -68,14 +76,18 @@ export function cleanupHostWebRTC(): void {
   for (const conn of hostConnections.values()) {
     try {
       conn.close();
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
   }
   hostConnections.clear();
 
   for (const chan of hostChannels.values()) {
     try {
       chan.close();
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
   }
   hostChannels.clear();
 }
@@ -97,7 +109,7 @@ export function cleanupAllWebRTC(): void {
 function setupCommonPC(pc: RTCPeerConnection, targetId: string): void {
   pc.onicecandidate = (event: RTCPeerConnectionIceEvent) => {
     if (event.candidate && socket && socket.connected) {
-      socket.emit("webrtc_signal", {
+      socket?.emit("webrtc_signal", {
         targetId: targetId,
         signal: { type: "candidate", candidate: event.candidate },
       });
@@ -138,7 +150,9 @@ function setupCommonPC(pc: RTCPeerConnection, targetId: string): void {
           if (chan) {
             try {
               chan.close();
-            } catch (e) {}
+            } catch (e) {
+              // ignore
+            }
             hostChannels.delete(targetId);
           }
         }
@@ -201,15 +215,16 @@ export function initiateConnectionToHost(hostId: string): void {
   pc.createOffer()
     .then((offer: RTCSessionDescriptionInit) => pc.setLocalDescription(offer))
     .then(() => {
-      socket.emit("webrtc_signal", {
+      socket?.emit("webrtc_signal", {
         targetId: hostId,
         signal: { type: "offer", offer: pc.localDescription },
       });
     })
-    .catch((err: any) => logger.error("[WebRTC] Error creating offer:", { error: err }));
+    .catch((err: unknown) => logger.error("[WebRTC] Error creating offer:", { error: err }));
 }
 
 // Handles incoming WebRTC signaling messages relayed from the server
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function handleWebRTCSignal(senderId: string, signal: any): void {
   if (!socket || !socket.connected) return;
 
@@ -224,14 +239,18 @@ export function handleWebRTCSignal(senderId: string, signal: any): void {
     if (existingPC) {
       try {
         existingPC.close();
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
       hostConnections.delete(senderId);
     }
     const existingChan = hostChannels.get(senderId);
     if (existingChan) {
       try {
         existingChan.close();
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
       hostChannels.delete(senderId);
     }
 
@@ -265,26 +284,28 @@ export function handleWebRTCSignal(senderId: string, signal: any): void {
       .then(() => pc.createAnswer())
       .then((answer: RTCSessionDescriptionInit) => pc.setLocalDescription(answer))
       .then(() => {
-        socket.emit("webrtc_signal", {
+        socket?.emit("webrtc_signal", {
           targetId: senderId,
           signal: { type: "answer", answer: pc.localDescription },
         });
       })
-      .catch((err: any) =>
+      .catch((err: unknown) =>
         logger.error(`[WebRTC] Error handling offer from client ${senderId}:`, { error: err })
       );
   } else if (signal.type === "answer") {
     if (!weAreHost && clientConnection) {
       clientConnection
         .setRemoteDescription(new RTCSessionDescription(signal.answer))
-        .catch((err: any) => logger.error("[WebRTC] Error setting remote answer:", { error: err }));
+        .catch((err: unknown) =>
+          logger.error("[WebRTC] Error setting remote answer:", { error: err })
+        );
     } else if (weAreHost) {
       logger.warn("[WebRTC] Host received an answer packet. Host only processes offers.");
     }
   } else if (signal.type === "candidate") {
     const pc = weAreHost ? hostConnections.get(senderId) : clientConnection;
     if (pc) {
-      pc.addIceCandidate(new RTCIceCandidate(signal.candidate)).catch((err: any) =>
+      pc.addIceCandidate(new RTCIceCandidate(signal.candidate)).catch((err: unknown) =>
         logger.error(`[WebRTC] Error adding ICE candidate from ${senderId}:`, { error: err })
       );
     }
@@ -315,7 +336,11 @@ export function setWebRTCRole(isHost: boolean, hostSocketId: string | null): voi
 
 // Broadcast game state over WebRTC DataChannels.
 // Returns true if sent to ALL active clients, false if a fallback to Socket.io is required for any client.
-export function broadcastGameStateWebRTC(payload: any): boolean {
+export function broadcastGameStateWebRTC(
+  payload:
+    | import("../../types").GameStateSocketPayload
+    | { fullSync?: boolean; delta?: boolean; state: any }
+): boolean {
   if (!weAreHost) return false;
   if (hostChannels.size === 0) return false;
 

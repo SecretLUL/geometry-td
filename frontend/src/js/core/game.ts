@@ -80,9 +80,9 @@ state.centerCameraOnCell = centerCameraOnCell;
 
 // ─── Setup UI and Multiplayer ────────────────────────────────────────────────
 setupUI(startWave, app.canvas);
-Multiplayer.init(executeStartWave, updateUI);
+Multiplayer.init(executeStartWave as (data?: unknown) => void, updateUI);
 updateUI();
-(window as any).state = state;
+(window as unknown as Record<string, unknown>).state = state;
 
 if (!isHeadlessMode) {
   new BackgroundController("bgCanvas");
@@ -103,7 +103,7 @@ loader.onComplete = () => {
   triggerAssetsLoaded();
 };
 
-(window as any).onSyncComplete = () => {
+(window as unknown as Record<string, unknown>).onSyncComplete = () => {
   triggerSyncCompleted();
 };
 

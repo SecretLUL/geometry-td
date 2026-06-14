@@ -92,7 +92,9 @@ export class EnemyFactory {
           discovered[type] = true;
           storage.setItem("td_discovered_enemies", JSON.stringify(discovered));
         }
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
     }
 
     let enemy: Enemy;

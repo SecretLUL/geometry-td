@@ -161,22 +161,22 @@ export function resizeCanvas(): void {
   clampCamera();
 
   // Re-scale tower positions
-  for (let t of state.towers) t.rescale();
+  for (const t of state.towers) t.rescale();
 
   // Re-scale waypoints
   rescaleWaypoints();
 
   // Re-scale enemies and projectiles
-  const oldTile = (Config as any)._oldTile;
+  const oldTile = (Config as { _oldTile?: number })._oldTile;
   if (oldTile && oldTile !== newTile) {
     const scale = newTile / oldTile;
-    for (let enemy of state.enemies) {
+    for (const enemy of state.enemies) {
       enemy.x *= scale;
       enemy.y *= scale;
       enemy.distanceTravelled *= scale;
       enemy.speed *= scale;
     }
-    for (let p of state.projectiles) {
+    for (const p of state.projectiles) {
       p.x *= scale;
       p.y *= scale;
       p.speed *= scale;
@@ -185,7 +185,13 @@ export function resizeCanvas(): void {
         p.trailY[i] *= scale;
       }
     }
-    for (let pt of state.particles) {
+    for (const pt of state.particles as unknown as {
+      active: boolean;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+    }[]) {
       if (pt.active) {
         pt.x *= scale;
         pt.y *= scale;
@@ -194,7 +200,7 @@ export function resizeCanvas(): void {
       }
     }
   }
-  (Config as any)._oldTile = newTile;
+  (Config as { _oldTile?: number })._oldTile = newTile;
 }
 
 export function clampCamera(): void {

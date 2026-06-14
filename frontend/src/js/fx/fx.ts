@@ -843,7 +843,7 @@ export class RadiationArea {
 
     if (state.isHost && Math.floor(this.life * 100) % 10 === 0) {
       const radiusSq = this.radius * this.radius;
-      for (let enemy of state.enemies) {
+      for (const enemy of state.enemies) {
         if (enemy.hp <= 0 || enemy.deadMarked) continue;
         const dx = enemy.x - this.x;
         const dy = enemy.y - this.y;

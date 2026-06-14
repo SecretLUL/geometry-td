@@ -54,6 +54,11 @@ export class NavigationController {
     if (activeTab) {
       activeTab.classList.add("active");
       this.positionTabIndicator();
+    } else {
+      const indicator = document.querySelector(".portal-tab-indicator") as HTMLElement | null;
+      if (indicator) {
+        indicator.style.width = "0px";
+      }
     }
 
     if (currentActive) {

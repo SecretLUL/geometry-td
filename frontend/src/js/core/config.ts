@@ -29,6 +29,13 @@ export const Config = {
   TOWER_FIRE_RATE_DECREASE: 10,
   PROJECTILE_SPEED: 15,
 
+  // Tower cost scaling SSOT (Single Source of Truth)
+  DEFAULT_COST_SCALING: {
+    earlyMultiplier: 1.5,
+    lateMultiplier: 1.5,
+    thresholdLevel: 5,
+  },
+
   // Enemy Parameters
   ENEMY_BASE_HP: 200,
   ENEMY_HP_MULTIPLIER: 1.15,
@@ -241,7 +248,7 @@ export const EnemyData: Record<string, EnemyConfig> = {
   },
   Collector: {
     category: "Special Minions",
-    unlockWave: 5,
+    unlockWave: 15,
     poolWeight: 0.003,
     name: "Collector",
     icon: "💰",
@@ -349,7 +356,7 @@ export interface TowerStatsConfig {
   aoeRadius?: number;
   aoeRadiusPerLevel?: number;
   colors: string[];
-  costScaling: {
+  costScaling?: {
     earlyMultiplier: number;
     lateMultiplier: number;
     thresholdLevel: number;
@@ -393,11 +400,6 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       "#f687b3",
       "#ffffff",
     ],
-    costScaling: {
-      earlyMultiplier: 1.6,
-      lateMultiplier: 1.5,
-      thresholdLevel: 5,
-    },
     specializations: {
       missiles: {
         name: "Homing Missiles",
@@ -460,16 +462,11 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       "#fbfbfb",
       "#ffffff",
     ],
-    costScaling: {
-      earlyMultiplier: 1.6,
-      lateMultiplier: 1.5,
-      thresholdLevel: 5,
-    },
     specializations: {
       ricochet: {
         name: "Ricochet",
-        desc: "4 Hits, 0.4s Speed",
-        masteryDesc: "8 Hits, 0.2s Speed",
+        desc: "4 Hits, 2.5/s Speed",
+        masteryDesc: "8 Hits, 5.0/s Speed",
         color: "#00b894",
         values: {
           normalHits: 4,
@@ -481,8 +478,8 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       },
       bounty: {
         name: "Bounty Hunter",
-        desc: "+80g/Kill, 3.0x DMG, 2.5s Speed",
-        masteryDesc: "+300g/Kill, 6.5x DMG, 1.5s Speed",
+        desc: "+80g/Kill, 3.0x DMG, 0.4/s Speed",
+        masteryDesc: "+300g/Kill, 6.5x DMG, 0.7/s Speed",
         color: "#f1c40f",
         multipliers: {
           normalDmg: 3.0,
@@ -531,11 +528,6 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       "#ff6060",
       "#ffffff",
     ],
-    costScaling: {
-      earlyMultiplier: 1.6,
-      lateMultiplier: 1.5,
-      thresholdLevel: 5,
-    },
     specializations: {
       nuke: {
         name: "Nuke",
@@ -592,11 +584,6 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       "#f2faff",
       "#ffffff",
     ],
-    costScaling: {
-      earlyMultiplier: 1.6,
-      lateMultiplier: 1.5,
-      thresholdLevel: 5,
-    },
     specializations: {
       highvolt: {
         name: "High Voltage",
@@ -652,11 +639,6 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       "#fff8dc",
       "#ffffff",
     ],
-    costScaling: {
-      earlyMultiplier: 1.6,
-      lateMultiplier: 1.5,
-      thresholdLevel: 5,
-    },
     prismaMinMultiplier: 0.25,
     prismaMaxMultiplier: 75.0,
     prismaChargeFrames: 480,
@@ -717,11 +699,6 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       "#ffffff",
       "#ffffff",
     ],
-    costScaling: {
-      earlyMultiplier: 1.6,
-      lateMultiplier: 1.5,
-      thresholdLevel: 5,
-    },
     specializations: {
       frequency: {
         name: "Frequency Modulation",
@@ -778,11 +755,6 @@ export const TowerData: Record<string, TowerStatsConfig> = {
       "#ffffff",
       "#ffffff",
     ],
-    costScaling: {
-      earlyMultiplier: 1.6,
-      lateMultiplier: 1.5,
-      thresholdLevel: 5,
-    },
     specializations: {
       bank: {
         name: "Investment Bank",
@@ -814,7 +786,7 @@ export const TowerBalancer = {
     const stats = TowerData[type];
     if (!stats) return currentCost * 2;
 
-    const scale = stats.costScaling;
+    const scale = stats.costScaling || Config.DEFAULT_COST_SCALING;
     let newCost = currentCost;
     if (level >= scale.thresholdLevel) {
       newCost = Math.floor(currentCost * scale.lateMultiplier);

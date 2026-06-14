@@ -121,7 +121,7 @@ export class BossEnemy extends BaseEnemy {
     } else {
       // Find all towers within range and sort by distance
       const targets: { tower: any; dist: number }[] = [];
-      for (let tower of state.towers) {
+      for (const tower of state.towers) {
         const dx = tower.x - this.x;
         const dy = tower.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);

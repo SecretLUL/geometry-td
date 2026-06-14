@@ -369,3 +369,103 @@
   transform: translateY(15px);
   pointer-events: none;
 }
+
+/* ── Top Profile Widget ── */
+.top-profile-widget {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  background: rgba(13, 13, 31, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(76, 201, 240, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1000;
+}
+
+.top-profile-widget:hover {
+  border-color: rgba(76, 201, 240, 0.5);
+  box-shadow: 0 0 15px rgba(76, 201, 240, 0.3);
+  background: rgba(76, 201, 240, 0.1);
+}
+
+.top-profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(76, 201, 240, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 24px;
+  color: #fff;
+}
+
+.top-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.top-profile-name {
+  font-family: "Outfit", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.widget-tooltip {
+  position: absolute;
+  top: 115%;
+  right: 0;
+  width: 260px;
+  background: rgba(10, 10, 26, 1);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--tesla-cyan);
+  border-radius: 8px;
+  padding: 14px 18px;
+  color: #fff;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.5),
+    0 0 10px rgba(76, 201, 240, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.widget-tooltip::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: rgba(10, 10, 26, 1);
+  border-top: 2px solid var(--tesla-cyan);
+  border-left: 2px solid var(--tesla-cyan);
+  transform: rotate(45deg);
+}
+
+.top-profile-widget:hover .widget-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.widget-tooltip strong {
+  color: var(--tesla-cyan);
+  display: block;
+  margin-bottom: 4px;
+}

@@ -17,7 +17,7 @@ export function updateTooltip(): void {
 
   // Recalculate hovers (important if they moved under a static mouse)
   let hoveredTower: any = null;
-  for (let tower of state.towers) {
+  for (const tower of state.towers) {
     if (tower.checkHover && tower.checkHover(mouseX, mouseY)) {
       hoveredTower = tower;
       break;
@@ -26,7 +26,7 @@ export function updateTooltip(): void {
   state.hoveredTower = hoveredTower;
 
   let hoveredEnemy: any = null;
-  for (let enemy of state.enemies) {
+  for (const enemy of state.enemies) {
     if (enemy.checkHover && enemy.checkHover(mouseX, mouseY)) {
       hoveredEnemy = enemy;
       break;

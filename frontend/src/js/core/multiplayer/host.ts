@@ -17,10 +17,10 @@ import {
   GeneratorTower,
 } from "../../entities/towers/index";
 import { createExplosion } from "../../fx/fx";
-import { TowerSpecialization } from "../../types";
+import { TowerSpecialization, TowerType } from "../../types";
 import { Multiplayer, socket } from "./context";
 
-export function processPlaceTower(type: any, col: number, row: number): boolean {
+export function processPlaceTower(type: TowerType, col: number, row: number): boolean {
   // Check if tower already exists at this position
   if (state.towers.find((t) => t.col === col && t.row === row)) {
     socket?.emit("reject_place_tower", { type, col, row });

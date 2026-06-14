@@ -75,6 +75,8 @@ export class BombTower extends Tower {
       this.redrawPixiBase();
       this.redrawPixiTurret();
 
+      Tower.recalculateAllBoosts();
+
       if (updateUICallback) updateUICallback();
       return true;
     }
@@ -549,7 +551,7 @@ export class BombTower extends Tower {
         const aoe = this.getDisplayAoe();
         const isCluster = this.specialization === "cluster";
 
-        let dmg = this.getEffectiveDamage();
+        const dmg = this.getEffectiveDamage();
 
         PoolManager.getProjectile(
           this.x,

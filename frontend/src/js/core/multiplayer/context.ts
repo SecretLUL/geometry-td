@@ -53,7 +53,7 @@ export class CircularBuffer<T> {
     this.head = 0;
     this.tail = 0;
     this.isFull = false;
-    this.buffer.fill(undefined as any);
+    this.buffer.fill(undefined as unknown as T);
   }
 }
 
@@ -78,15 +78,16 @@ export interface IMultiplayer {
   }>;
   latestServerTimestamp: number;
   lastPlayerCount: number | null;
-  syncInterval: any;
+  syncInterval: ReturnType<typeof setInterval> | null;
   updateUI: () => void;
   currentTick: number;
   lastSyncState: SyncFullGameStatePayload | null;
   lastReceivedState: SyncFullGameStatePayload | null;
   activeMode?: "singleplayer" | "public" | "private";
   activeRoomId?: string;
+  startWaveCallback?: (data?: any) => void;
 
-  init(startWaveCallback: (data?: any) => void, updateUICallback: () => void): void;
+  init(startWaveCallback: (data?: unknown) => void, updateUICallback: () => void): void;
   updatePlayerCountUI(count: number): void;
 
   processPlaceTower(type: TowerType, col: number, row: number): boolean;
@@ -117,16 +118,26 @@ export interface IMultiplayer {
   emitHostEndedWave(): void;
 }
 
-export let socket: any = null;
-export function setSocket(s: any) {
+export interface SocketInstance {
+  emit(ev: string, ...args: unknown[]): this;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on(ev: string, listener: (...args: any[]) => void): this;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  off(ev: string, listener?: (...args: any[]) => void): this;
+  id?: string;
+  connected?: boolean;
+}
+
+export let socket: SocketInstance | null = null;
+export function setSocket(s: SocketInstance | null) {
   socket = s;
 }
 
 export const Multiplayer = {
-  stateBuffer: new CircularBuffer(20) as any,
+  stateBuffer: new CircularBuffer(20) as IMultiplayer["stateBuffer"],
   latestServerTimestamp: 0,
   lastPlayerCount: null as number | null,
-  syncInterval: null as any,
+  syncInterval: null as ReturnType<typeof setInterval> | null,
   updateUI: (() => {}) as () => void,
   currentTick: 0,
   lastSyncState: null as SyncFullGameStatePayload | null,

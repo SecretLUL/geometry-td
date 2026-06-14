@@ -31,8 +31,8 @@ interface LogContext {
   l?: number | string;
   stack?: string;
   r?: string;
-  error?: any;
-  [key: string]: any;
+  error?: unknown;
+  [key: string]: unknown;
 }
 
 interface LogEntry {
@@ -154,7 +154,7 @@ class Logger {
    */
   generateLogEntry(entry: LogEntry): string {
     const s = entry.context;
-    const compact: any = {
+    const compact: Record<string, unknown> = {
       t: entry.timestamp,
       l: entry.level[0],
       m: entry.message,
@@ -193,7 +193,7 @@ class Logger {
     return JSON.stringify(compact);
   }
 
-  private _log(level: string, message: string, extra: Record<string, any> = {}): void {
+  private _log(level: string, message: string, extra: Record<string, unknown> = {}): void {
     const cheatInfo = this._getActiveCheats();
     const logEntry: LogEntry = {
       timestamp: this._getTimestamp(),
@@ -239,7 +239,9 @@ class Logger {
       logs.push(entry);
       if (logs.length > this.MAX_LOGS) logs.shift();
       localStorage.setItem(this.LOG_KEY, JSON.stringify(logs));
-    } catch (e) {}
+    } catch (e) {
+      // ignore
+    }
   }
 
   /**
@@ -267,16 +269,16 @@ class Logger {
     URL.revokeObjectURL(url);
   }
 
-  debug(msg: string, extra?: Record<string, any>): void {
+  debug(msg: string, extra?: Record<string, unknown>): void {
     this._log(this.levels.DEBUG, msg, extra);
   }
-  info(msg: string, extra?: Record<string, any>): void {
+  info(msg: string, extra?: Record<string, unknown>): void {
     this._log(this.levels.INFO, msg, extra);
   }
-  warn(msg: string, extra?: Record<string, any>): void {
+  warn(msg: string, extra?: Record<string, unknown>): void {
     this._log(this.levels.WARN, msg, extra);
   }
-  error(msg: string, extra?: Record<string, any>): void {
+  error(msg: string, extra?: Record<string, unknown>): void {
     this._log(this.levels.ERROR, msg, extra);
   }
 

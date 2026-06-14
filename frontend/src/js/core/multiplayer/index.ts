@@ -31,10 +31,11 @@ import { logger } from "../logger";
 
 // Setup/initialize the Multiplayer object methods
 Multiplayer.init = function (
-  startWaveCallback: (data?: any) => void,
+  startWaveCallback: (data?: unknown) => void,
   updateUICallback: () => void
 ): void {
   this.updateUI = updateUICallback;
+  this.startWaveCallback = startWaveCallback;
 
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -56,7 +57,7 @@ Multiplayer.init = function (
     }
 
     const roomIdParam = urlParams.get("roomId");
-    const queryParams: any = {
+    const queryParams: Record<string, string> = {
       headless: isHeadless ? "true" : "false",
       wantHost: wantHost ? "true" : "false",
     };
@@ -64,10 +65,10 @@ Multiplayer.init = function (
       queryParams.roomId = roomIdParam;
     }
 
-    const ioSocket = (window as any).io
-      ? (window as any).io({
+    const ioSocket = (window as unknown as { io?: (opts?: unknown) => unknown }).io
+      ? ((window as unknown as { io: (opts?: unknown) => unknown }).io({
           query: queryParams,
-        })
+        }) as import("./context").SocketInstance)
       : null;
     setSocket(ioSocket);
   } catch (e) {
@@ -113,7 +114,8 @@ Multiplayer.init = function (
       }
 
       if (!skipSync) {
-        const payload: any = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const payload: Record<string, any> = {
           hostTileSize: Config.TILE_SIZE,
           activeEnemies: state.enemies.map((e) => ({
             id: e.id,
@@ -158,7 +160,7 @@ Multiplayer.init = function (
           payload.projectileEvents = [];
         }
 
-        this.emitSyncGameState(payload);
+        this.emitSyncGameState(payload as import("../../types").SyncFullGameStatePayload);
       }
 
       this.syncInterval = setTimeout(runSyncLoop, intervalDuration);

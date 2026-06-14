@@ -103,6 +103,8 @@ export class TeslaTower extends Tower {
       this.redrawPixiBase();
       this.redrawPixiTurret();
 
+      Tower.recalculateAllBoosts();
+
       if (updateUICallback) updateUICallback();
       return true;
     }
@@ -450,7 +452,7 @@ export class TeslaTower extends Tower {
       }
 
       if (enemiesInRange.length > 0) {
-        let dmg = this.getEffectiveDamage();
+        const dmg = this.getEffectiveDamage();
         let stunDuration = 0;
 
         if (this.specialization === "stun") {

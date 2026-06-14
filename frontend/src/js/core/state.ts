@@ -46,11 +46,11 @@ export const state: GameState = {
   enemies: [],
   activeAccelerators: [],
   towers: [],
-  projectiles: [] as any[], // Populated by PoolManager.init() in game.ts after initPixi()
-  particles: [] as any[], // Populated by PoolManager.init() in game.ts after initPixi()
-  floatingTexts: [] as any[], // Populated by PoolManager.init() in game.ts after initPixi()
-  stunEffects: [] as any[], // Populated by PoolManager.init() in game.ts after initPixi()
-  groundEffects: [] as any[], // Populated by PoolManager.init() in game.ts after initPixi()
+  projectiles: [], // Populated by PoolManager.init() in game.ts after initPixi()
+  particles: [], // Populated by PoolManager.init() in game.ts after initPixi()
+  floatingTexts: [], // Populated by PoolManager.init() in game.ts after initPixi()
+  stunEffects: [], // Populated by PoolManager.init() in game.ts after initPixi()
+  groundEffects: [], // Populated by PoolManager.init() in game.ts after initPixi()
 
   enemiesToSpawn: 0,
   spawnCooldown: 0,

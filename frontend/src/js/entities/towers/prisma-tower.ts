@@ -131,6 +131,8 @@ export class PrismaTower extends Tower {
       this.redrawPixiBase();
       this.redrawPixiTurret();
 
+      Tower.recalculateAllBoosts();
+
       if (updateUICallback) updateUICallback();
       return true;
     }
@@ -302,7 +304,7 @@ export class PrismaTower extends Tower {
   }
 
   public override getDisplayDamage(): string {
-    let baseDps = this.getEffectiveDamage() * 60;
+    const baseDps = this.getEffectiveDamage() * 60;
     const data = TowerData["Prisma"];
     const minDps = Math.floor(baseDps * data.prismaMinMultiplier!);
     const maxDps = Math.floor(baseDps * data.prismaMaxMultiplier!);

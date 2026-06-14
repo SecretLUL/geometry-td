@@ -90,11 +90,11 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
     reconstructedState.timestamp = delta.timestamp;
     if (delta.hostTileSize) reconstructedState.hostTileSize = delta.hostTileSize;
     const reconstructedEnemiesMap = new Map<number, SyncEnemyState>();
-    for (let e of reconstructedState.activeEnemies) {
+    for (const e of reconstructedState.activeEnemies) {
       reconstructedEnemiesMap.set(e.id, e);
     }
 
-    for (let d of delta.enemyDelta) {
+    for (const d of delta.enemyDelta) {
       const existing = reconstructedEnemiesMap.get(d.id);
       if (existing) {
         Object.assign(existing, d);
@@ -121,8 +121,9 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
       "benchmarkActive",
       "towers",
     ];
-    for (let key of otherFields) {
+    for (const key of otherFields) {
       if (delta[key] !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (reconstructedState as any)[key] = delta[key];
       }
     }
@@ -166,16 +167,17 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
   // Reconstruct visual projectiles/beams
   if (projectileEvents && projectileEvents.length > 0) {
     const enemiesMap = new Map<number, Enemy>();
-    for (let e of state.enemies) {
+    for (const e of state.enemies) {
       enemiesMap.set(e.id, e);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const towersMap = new Map<string, any>();
-    for (let t of state.towers) {
+    for (const t of state.towers) {
       towersMap.set(`${t.col},${t.row}`, t);
     }
 
-    for (let event of projectileEvents) {
+    for (const event of projectileEvents) {
       const tower = towersMap.get(`${event.col},${event.row}`);
       if (event.type === "projectile") {
         let projTarget: Enemy | Vector2D | null = null;
@@ -246,7 +248,7 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
             );
 
             if (event.targetIds) {
-              for (let tid of event.targetIds) {
+              for (const tid of event.targetIds) {
                 const enemy = enemiesMap.get(tid);
                 if (enemy) {
                   PoolManager.getSniperBeam(
@@ -282,12 +284,13 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
           if (tower.specialization === "highvolt") arcColor = "#a29bfe";
           else if (tower.specialization === "stun") arcColor = "#81ecec";
 
-          tower.auraTime = 35;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (tower as any).auraTime = 35;
           createExplosion(tower.x, tower.y, arcColor, 5);
         }
 
         if (event.targetIds) {
-          for (let tid of event.targetIds) {
+          for (const tid of event.targetIds) {
             const enemy = enemiesMap.get(tid);
             if (enemy) {
               enemy.triggerFlash?.(5);
@@ -447,32 +450,34 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
 export function bindInboundEvents(
   startWaveCallback: (data?: { wave: number; tick?: number; timestamp?: number }) => void
 ): void {
+  if (!socket) return;
   try {
+    const s = socket!;
     const onConnect = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const mapName = urlParams.get("map") || "Unknown Map";
       const mode = urlParams.get("mode") || "public";
       const roomId = urlParams.get("roomId") || undefined;
       const action = urlParams.get("action") || undefined;
-      socket.emit("join_mission", { mapName, mode, roomId, action });
+      s.emit("join_mission", { mapName, mode, roomId, action });
     };
 
-    if (socket.connected) {
+    if (s.connected) {
       onConnect();
     }
-    socket.on("connect", onConnect);
+    s.on("connect", onConnect);
 
-    socket.on("disconnect", () => {
+    s.on("disconnect", () => {
       cleanupAllWebRTC();
     });
 
-    socket.on("room_error", (msg: string) => {
+    s.on("room_error", (msg: string) => {
       console.error("Room error:", msg);
       alert("Sector connection error: " + msg);
       window.location.href = "index.html?error=" + encodeURIComponent(msg);
     });
 
-    socket.on("role_assigned", (data: SocketEventMap["role_assigned"]) => {
+    s.on("role_assigned", (data: SocketEventMap["role_assigned"]) => {
       state.isHost = data.isHost;
       if (data.iceServers) {
         setIceServers(data.iceServers);
@@ -486,11 +491,11 @@ export function bindInboundEvents(
       }
     });
 
-    socket.on("webrtc_signal", (data: { senderId: string; signal: any }) => {
+    s.on("webrtc_signal", (data: { senderId: string; signal: unknown }) => {
       handleWebRTCSignal(data.senderId, data.signal);
     });
 
-    socket.on("connect_error", () => {
+    s.on("connect_error", () => {
       console.warn("Connection to server failed. Switching to local host mode.");
       state.isHost = true;
     });
@@ -499,7 +504,7 @@ export function bindInboundEvents(
     registerWebRTCMessageHandler(processIncomingGameState);
 
     // Initial state for late-joining clients
-    socket.on("full_game_state", (data: SocketEventMap["full_game_state"]) => {
+    s.on("full_game_state", (data: SocketEventMap["full_game_state"]) => {
       if (!state.isHost) {
         if (data.wave) state.wave = data.wave;
         if (data.lives !== undefined) state.lives = data.lives;
@@ -615,8 +620,8 @@ export function bindInboundEvents(
           if (eData.speed) newEnemy.speed = eData.speed * scale;
           if (eData.shieldActive !== undefined) newEnemy.shieldActive = eData.shieldActive;
           if (eData.maxHp) newEnemy.maxHp = eData.maxHp;
-          (newEnemy as any).targetX = eData.x * scale;
-          (newEnemy as any).targetY = eData.y * scale;
+          (newEnemy as Enemy & { targetX?: number }).targetX = eData.x * scale;
+          (newEnemy as Enemy & { targetY?: number }).targetY = eData.y * scale;
           return newEnemy;
         });
       }
@@ -697,24 +702,25 @@ export function bindInboundEvents(
       };
 
       Multiplayer.updateUI();
-      socket.emit("ready_to_play");
+      s.emit("ready_to_play");
     });
 
-    socket.on("sync_complete", () => {
-      if ((window as any).onSyncComplete) (window as any).onSyncComplete();
+    s.on("sync_complete", () => {
+      const globalWindow = window as unknown as { onSyncComplete?: () => void };
+      if (globalWindow.onSyncComplete) globalWindow.onSyncComplete();
     });
 
-    socket.on("sync_game_state", (payload: GameStateSocketPayload) => {
+    s.on("sync_game_state", (payload: GameStateSocketPayload) => {
       processIncomingGameState(payload);
     });
 
     // Toggle Pause
-    socket.on("toggle_pause", (isPaused: boolean) => {
+    s.on("toggle_pause", (isPaused: boolean) => {
       setPauseState(isPaused);
     });
 
     // Change Speed
-    socket.on("change_speed", (speed: number) => {
+    s.on("change_speed", (speed: number) => {
       state.gameSpeed = speed;
       const speedBtn = document.getElementById("speedBtn");
       if (speedBtn) {
@@ -735,7 +741,7 @@ export function bindInboundEvents(
     });
 
     // Toggle Mod
-    socket.on("toggle_mod", (data: SocketEventMap["toggle_mod"]) => {
+    s.on("toggle_mod", (data: SocketEventMap["toggle_mod"]) => {
       if (data.mod === "godMode") state.godMode = data.value;
       if (data.mod === "infiniteGold") state.infiniteGold = data.value;
       if (data.mod === "waveModified") state.waveModified = data.value;
@@ -744,7 +750,7 @@ export function bindInboundEvents(
     });
 
     // Toggle Auto
-    socket.on("toggle_auto", (isActive: boolean) => {
+    s.on("toggle_auto", (isActive: boolean) => {
       state.autoStartActive = isActive;
       Multiplayer.updateUI();
 
@@ -754,7 +760,7 @@ export function bindInboundEvents(
     });
 
     // Player Count Update
-    socket.on("player_count_update", (count: number) => {
+    s.on("player_count_update", (count: number) => {
       if (Multiplayer.lastPlayerCount !== undefined && Multiplayer.lastPlayerCount !== null) {
         if (count > Multiplayer.lastPlayerCount) {
           showGameNotification(
@@ -780,7 +786,7 @@ export function bindInboundEvents(
     });
 
     // Sync Towers
-    socket.on("sync_towers", (towersList: SyncTowerState[]) => {
+    s.on("sync_towers", (towersList: SyncTowerState[]) => {
       if (state.isHost) return; // Only clients process this
 
       if (state.towers) {
@@ -826,23 +832,23 @@ export function bindInboundEvents(
     });
 
     // Host Validation Listeners
-    socket.on("request_place_tower", (data: SocketEventMap["request_place_tower"]) => {
+    s.on("request_place_tower", (data: SocketEventMap["request_place_tower"]) => {
       if (!state.isHost) return;
       Multiplayer.processPlaceTower(data.type, data.col, data.row);
     });
 
-    socket.on("request_upgrade_tower", (data: SocketEventMap["request_upgrade_tower"]) => {
+    s.on("request_upgrade_tower", (data: SocketEventMap["request_upgrade_tower"]) => {
       if (!state.isHost) return;
       Multiplayer.processUpgradeTower(data.col, data.row, data.specId, true);
     });
 
-    socket.on("request_sell_tower", (data: SocketEventMap["request_sell_tower"]) => {
+    s.on("request_sell_tower", (data: SocketEventMap["request_sell_tower"]) => {
       if (!state.isHost) return;
       Multiplayer.processSellTower(data.col, data.row);
     });
 
     // Client Confirms
-    socket.on("confirm_place_tower", (data: SocketEventMap["confirm_place_tower"]) => {
+    s.on("confirm_place_tower", (data: SocketEventMap["confirm_place_tower"]) => {
       if (state.isHost) return;
       const { type, col, row } = data;
 
@@ -876,7 +882,7 @@ export function bindInboundEvents(
       Multiplayer.updateUI();
     });
 
-    socket.on("reject_place_tower", (data: SocketEventMap["reject_place_tower"]) => {
+    s.on("reject_place_tower", (data: SocketEventMap["reject_place_tower"]) => {
       if (state.isHost) return;
       const { col, row } = data;
 
@@ -905,7 +911,7 @@ export function bindInboundEvents(
       }
     });
 
-    socket.on("confirm_upgrade_tower", (data: SocketEventMap["confirm_upgrade_tower"]) => {
+    s.on("confirm_upgrade_tower", (data: SocketEventMap["confirm_upgrade_tower"]) => {
       if (state.isHost) return;
       const { col, row, specId, level } = data;
       const tower = state.towers.find((t) => t.col === col && t.row === row);
@@ -927,7 +933,7 @@ export function bindInboundEvents(
       }
     });
 
-    socket.on("confirm_sell_tower", (data: SocketEventMap["confirm_sell_tower"]) => {
+    s.on("confirm_sell_tower", (data: SocketEventMap["confirm_sell_tower"]) => {
       if (state.isHost) return;
       const { col, row } = data;
       const idx = state.towers.findIndex((t) => t.col === col && t.row === row);
@@ -942,14 +948,14 @@ export function bindInboundEvents(
     });
 
     // Wave start synchronization
-    socket.on("start_wave_sync", (data: SocketEventMap["start_wave_sync"]) => {
+    s.on("start_wave_sync", (data: any) => {
       if (!state.isWaveActive) {
         startWaveCallback(data);
       }
     });
 
     // Lives synchronization
-    socket.on("sync_lives", (lives: number) => {
+    s.on("sync_lives", (lives: number) => {
       if (lives < state.lives && !state.godMode) {
         state.screenDamageEffect = 30; // Start pulse
       }
@@ -958,13 +964,13 @@ export function bindInboundEvents(
     });
 
     // Gold synchronization (optional, if needed)
-    socket.on("sync_gold", (gold: number) => {
+    s.on("sync_gold", (gold: number) => {
       state.gold = gold;
       Multiplayer.updateUI();
     });
 
     // Host ended wave notification
-    socket.on("host_ended_wave", () => {
+    s.on("host_ended_wave", () => {
       showGameNotification(
         "info",
         "🌊 WELLE BEENDET",

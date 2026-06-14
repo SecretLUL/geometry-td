@@ -3,6 +3,100 @@
     "isComment": true,
     "note": "WICHTIGER HINWEIS: Schreibe zu jedem Log-Eintrag zwingend immer nur jeweils EINZELNE, SEHR KURZE SÄTZE! Keine Nebensätze oder ausführliche Erklärungen!"
   },
+
+  {
+    "version": "v2.18.28",
+    "date": "14. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Profil-Reiter im Hauptmenü durch ein kompaktes Profil-Widget in der oberen rechten Ecke ersetzt."
+      },
+      {
+        "type": "feature",
+        "desc": "Passwort-Bestätigungsfeld zur Registrierung hinzugefügt, um Tippfehler zu vermeiden."
+      },
+      {
+        "type": "feature",
+        "desc": "Emojis in der Kartenauswahl durch hochauflösende Vektorgrafiken (SVGs) ersetzt."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.27",
+    "date": "14. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Falsche Feuerraten-Beschreibung (Ricochet-Spezialisierung) im Sniper-Tooltip korrigiert."
+      },
+      {
+        "type": "fix",
+        "desc": "Stufenanzeige (Level 10) aus der Überschrift des Spezialisierungsfensters entfernt."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.26",
+    "date": "14. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Anzeigefehler der Spezialisierungsstufe im Upgrade-Menü korrigiert."
+      },
+      {
+        "type": "fix",
+        "desc": "Fehlerhafte Tooltip-Werte bei Turm-Upgrades behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.25",
+    "date": "12. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "balance",
+        "desc": "Freischaltung des Collector-Gegners auf Welle 15 verschoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.24",
+    "date": "12. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "Fehler beim Starten von Wellen im Einzelspieler- und Mehrspielermodus behoben."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.23",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "refactor",
+        "desc": "Redundante costScaling-Konfigurationen der Türme als SSOT zentralisiert."
+      }
+    ]
+  },
+  {
+    "version": "v2.18.22",
+    "date": "10. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "perf",
+        "desc": "Spatial Hashing System zur Vermeidung von Garbage Collection Rucklern auf Zero-Allocation 1D-Arrays umgestellt."
+      }
+    ]
+  },
   {
     "version": "v2.18.21",
     "date": "10. Juni 2026",
@@ -989,7 +1083,6 @@
       }
     ]
   },
-
   {
     "version": "v2.9.2",
     "date": "1. Juni 2026",

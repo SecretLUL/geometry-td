@@ -102,17 +102,20 @@ export function emitSyncGameState(data: SyncFullGameStatePayload): void {
     lastEnemies.map((e: SyncEnemyState) => [e.id, e])
   );
 
-  for (let e of currentEnemies) {
+  for (const e of currentEnemies) {
     const lastE = lastEnemiesMap.get(e.id);
     if (!lastE) {
       enemyDelta.push(e);
     } else {
       const changes: Partial<SyncEnemyState> & { id: number } = { id: e.id };
       let hasChanges = false;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const objE = e as Record<string, any>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const objLastE = lastE as Record<string, any>;
-      for (let key in objE) {
+      for (const key in objE) {
         if (objE[key] !== objLastE[key]) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (changes as Record<string, any>)[key] = objE[key];
           hasChanges = true;
         }
@@ -149,7 +152,7 @@ export function emitSyncGameState(data: SyncFullGameStatePayload): void {
     "benchmarkActive",
     "towers",
   ];
-  for (let field of otherFields) {
+  for (const field of otherFields) {
     if (field === "enemyPool") {
       if (
         !stringArraysEqual(data.enemyPool, Multiplayer.lastSyncState.enemyPool) &&
@@ -166,9 +169,12 @@ export function emitSyncGameState(data: SyncFullGameStatePayload): void {
       }
     } else {
       if (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (data as any)[field] !== (Multiplayer.lastSyncState as any)[field] &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (data as any)[field] !== undefined
       ) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (delta as any)[field] = (data as any)[field];
       }
     }
@@ -204,7 +210,7 @@ export function syncNow(): void {
       })),
       enemiesToSpawn: state.enemiesToSpawn,
       spawnCooldown: state.spawnCooldown,
-      enemyPool: state.enemyPool,
+      enemyPool: state.enemyPool || [],
       isWaveActive: state.isWaveActive,
       autoStartActive: state.autoStartActive,
       wave: state.wave,
@@ -285,7 +291,13 @@ export function emitRequestSellTower(col: number, row: number): void {
 }
 
 export function emitRequestWaveStart(wave: number | { wave: number; pool?: string[] }): void {
-  socket?.emit("request_wave_start", wave);
+  if (!socket || !socket.connected) {
+    if (Multiplayer.startWaveCallback) {
+      Multiplayer.startWaveCallback(wave);
+    }
+  } else {
+    socket?.emit("request_wave_start", wave);
+  }
 }
 
 export function emitSyncLives(lives: number): void {

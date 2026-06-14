@@ -79,6 +79,8 @@ export class SniperTower extends Tower {
       this.redrawPixiBase();
       this.redrawPixiTurret();
 
+      Tower.recalculateAllBoosts();
+
       if (updateUICallback) updateUICallback();
       return true;
     }
@@ -302,7 +304,7 @@ export class SniperTower extends Tower {
           .stroke({ color: 0x000000, alpha: 0.3, width: 1.5 * scale });
         g.circle(0, 0, 5 * scale).fill({ color: 0x222222 });
 
-        let barrelLen = 28;
+        const barrelLen = 28;
         const time = state.animTime;
 
         // 2. Dual parallel magnetic rails

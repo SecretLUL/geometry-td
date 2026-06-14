@@ -651,7 +651,7 @@ export class Tower {
       this.angle = Math.atan2(this.target.y - this.y, this.target.x - this.x);
 
       if (this.fireCooldown <= 0) {
-        let dmg = this.getEffectiveDamage();
+        const dmg = this.getEffectiveDamage();
         const fr = this.getEffectiveFireRate();
 
         const aoe = this.aoeRadius || 0;

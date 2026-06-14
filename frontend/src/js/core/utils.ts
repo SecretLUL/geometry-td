@@ -66,14 +66,20 @@ export function getNearbyEnemies(x: number, y: number, radius: number): Enemy[] 
     return nearby;
   }
 
-  for (let ix = -radiusCells; ix <= radiusCells; ix++) {
-    for (let iy = -radiusCells; iy <= radiusCells; iy++) {
-      const key = (cx + ix) | ((cy + iy) << 16);
-      const cell = stateRef.enemyGrid.get(key);
-      if (cell) {
-        for (let i = 0; i < cell.length; i++) {
-          nearby.push(cell[i]);
-        }
+  const GRID_WIDTH = 50;
+  const GRID_HEIGHT = 50;
+
+  const minX = Math.max(0, cx - radiusCells);
+  const maxX = Math.min(GRID_WIDTH - 1, cx + radiusCells);
+  const minY = Math.max(0, cy - radiusCells);
+  const maxY = Math.min(GRID_HEIGHT - 1, cy + radiusCells);
+
+  for (let gy = minY; gy <= maxY; gy++) {
+    for (let gx = minX; gx <= maxX; gx++) {
+      const index = gx + gy * GRID_WIDTH;
+      const cell = stateRef.enemyGrid[index];
+      for (let i = 0; i < cell.length; i++) {
+        nearby.push(cell[i]);
       }
     }
   }

@@ -25,6 +25,9 @@ export class ProfileController {
 
     const regUser = document.getElementById("register-username") as HTMLInputElement | null;
     const regPass = document.getElementById("register-password") as HTMLInputElement | null;
+    const regPassConfirm = document.getElementById(
+      "register-password-confirm"
+    ) as HTMLInputElement | null;
     const regBtn = document.getElementById("register-submit-btn");
     const regError = document.getElementById("register-error-msg");
     const regSuccess = document.getElementById("register-success-msg");
@@ -34,6 +37,11 @@ export class ProfileController {
     const getBaseUrl = () => {
       return "";
     };
+
+    const topProfileWidget = document.getElementById("top-profile-widget");
+    topProfileWidget?.addEventListener("click", () => {
+      this.main.navigation.switchTab("profile");
+    });
 
     gotoRegister?.addEventListener("click", () => {
       if (loginForm) {
@@ -92,6 +100,13 @@ export class ProfileController {
         dashboardSection.style.display = "none";
         dashboardSection.classList.add("hidden");
       }
+
+      const topAvatar = document.getElementById("top-profile-avatar");
+      const topName = document.getElementById("top-profile-name");
+      if (topAvatar) topAvatar.innerHTML = "👤";
+      if (topName) topName.textContent = "Gast";
+      topProfileWidget?.classList.add("tooltip-container");
+
       this.main.lexicon.initLexicon();
     };
 
@@ -117,6 +132,8 @@ export class ProfileController {
       if (userEl) userEl.textContent = user.username;
 
       const avatarDisplay = document.getElementById("profile-avatar-display");
+      const topAvatar = document.getElementById("top-profile-avatar");
+
       if (avatarDisplay) {
         avatarDisplay.replaceChildren();
         if (user.avatar) {
@@ -128,6 +145,22 @@ export class ProfileController {
           avatarDisplay.textContent = "👤";
         }
       }
+
+      if (topAvatar) {
+        topAvatar.replaceChildren();
+        if (user.avatar) {
+          const img = document.createElement("img");
+          img.src = user.avatar;
+          img.alt = "Profile";
+          topAvatar.appendChild(img);
+        } else {
+          topAvatar.textContent = "👤";
+        }
+      }
+
+      const topName = document.getElementById("top-profile-name");
+      if (topName) topName.textContent = user.username;
+      topProfileWidget?.classList.remove("tooltip-container");
 
       const joinedEl = document.getElementById("dashboard-joined");
       if (joinedEl) {
@@ -451,12 +484,20 @@ export class ProfileController {
               const result = await response.json();
               if (response.ok && result.success) {
                 const avatarDisplay = document.getElementById("profile-avatar-display");
+                const topAvatar = document.getElementById("top-profile-avatar");
                 if (avatarDisplay) {
                   avatarDisplay.replaceChildren();
                   const newImg = document.createElement("img");
                   newImg.src = resizedBase64;
                   newImg.alt = "Profile Picture";
                   avatarDisplay.appendChild(newImg);
+                }
+                if (topAvatar) {
+                  topAvatar.replaceChildren();
+                  const newImg = document.createElement("img");
+                  newImg.src = resizedBase64;
+                  newImg.alt = "Profile";
+                  topAvatar.appendChild(newImg);
                 }
                 cleanup();
               } else {
@@ -575,7 +616,9 @@ export class ProfileController {
         const result = await response.json();
         if (response.ok && result.success) {
           const userEl = document.getElementById("dashboard-username");
+          const topName = document.getElementById("top-profile-name");
           if (userEl) userEl.textContent = newUsername;
+          if (topName) topName.textContent = newUsername;
           this.main.currentUsername = newUsername;
           closeUsernameEdit();
         } else {
@@ -637,10 +680,19 @@ export class ProfileController {
     regBtn?.addEventListener("click", async () => {
       const username = regUser?.value.trim();
       const password = regPass?.value;
+      const passwordConfirm = regPassConfirm?.value;
 
-      if (!username || !password) {
+      if (!username || !password || !passwordConfirm) {
         if (regError) {
           regError.textContent = "Bitte fülle alle Felder aus.";
+          regError.style.display = "block";
+        }
+        return;
+      }
+
+      if (password !== passwordConfirm) {
+        if (regError) {
+          regError.textContent = "Die Passwörter stimmen nicht überein.";
           regError.style.display = "block";
         }
         return;
@@ -663,6 +715,7 @@ export class ProfileController {
 
           if (regUser) regUser.value = "";
           if (regPass) regPass.value = "";
+          if (regPassConfirm) regPassConfirm.value = "";
           if (regError) regError.style.display = "none";
           if (regSuccess) {
             regSuccess.textContent = "Registrierung erfolgreich! Bitte logge dich ein.";

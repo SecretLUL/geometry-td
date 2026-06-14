@@ -104,7 +104,7 @@ services:
       - POSTGRES_USER=gtd_user
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - ${PROJECT_ROOT}/postgres_data_dev:/var/lib/postgresql/data
+      - db_data_dev:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -122,7 +122,7 @@ services:
       - POSTGRES_USER=gtd_user
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - ${PROJECT_ROOT}/postgres_data_prod:/var/lib/postgresql/data
+      - db_data_prod:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -136,3 +136,7 @@ networks:
     driver: bridge
   gtd-dev-network:
     driver: bridge
+
+volumes:
+  db_data_dev:
+  db_data_prod:

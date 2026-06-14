@@ -17,7 +17,7 @@ import {
 } from "../fx/fx";
 import { Projectile } from "../entities/projectiles";
 import { logger } from "./logger";
-import { Enemy, Tower, Vector2D } from "../types";
+import { Enemy, Tower, Vector2D, Effect } from "../types";
 import { Config } from "./config";
 
 function parseGoldText(text: string): { amount: number; suffix: string } | null {
@@ -52,19 +52,19 @@ class ObjectPool<T extends { active: boolean }> {
 }
 
 export const PoolManager = {
-  particles: null as any as ObjectPool<Particle>,
-  projectiles: null as any as ObjectPool<Projectile>,
-  floatingTexts: null as any as ObjectPool<FloatingText>,
-  stunRays: null as any as ObjectPool<StunRay>,
-  muzzleFlashes: null as any as ObjectPool<MuzzleFlash>,
-  sniperBeams: null as any as ObjectPool<SniperBeam>,
-  radiationAreas: null as any as ObjectPool<RadiationArea>,
-  shockwaves: null as any as ObjectPool<Shockwave>,
-  teslaArcs: null as any as ObjectPool<TeslaArc>,
+  particles: null as unknown as ObjectPool<Particle>,
+  projectiles: null as unknown as ObjectPool<Projectile>,
+  floatingTexts: null as unknown as ObjectPool<FloatingText>,
+  stunRays: null as unknown as ObjectPool<StunRay>,
+  muzzleFlashes: null as unknown as ObjectPool<MuzzleFlash>,
+  sniperBeams: null as unknown as ObjectPool<SniperBeam>,
+  radiationAreas: null as unknown as ObjectPool<RadiationArea>,
+  shockwaves: null as unknown as ObjectPool<Shockwave>,
+  teslaArcs: null as unknown as ObjectPool<TeslaArc>,
 
   // Combined lists for polymorphic state arrays
-  stunEffectsList: [] as any[],
-  groundEffectsList: [] as any[],
+  stunEffectsList: [] as Effect[],
+  groundEffectsList: [] as Effect[],
 
   init(): void {
     logger.info("Initializing Global Object Pools...");
@@ -226,20 +226,20 @@ export const PoolManager = {
 
   reset(): void {
     if (this.particles) {
-      for (let p of this.particles.getArray()) p.active = false;
-      for (let p of this.projectiles.getArray()) {
+      for (const p of this.particles.getArray()) p.active = false;
+      for (const p of this.projectiles.getArray()) {
         p.active = false;
         p.trailHead = 0;
         p.trailCount = 0;
         p.hitEnemies.length = 0;
       }
-      for (let p of this.floatingTexts.getArray()) p.active = false;
-      for (let p of this.stunRays.getArray()) p.active = false;
-      for (let p of this.muzzleFlashes.getArray()) p.active = false;
-      for (let p of this.sniperBeams.getArray()) p.active = false;
-      for (let p of this.teslaArcs.getArray()) p.active = false;
-      for (let p of this.radiationAreas.getArray()) p.active = false;
-      for (let p of this.shockwaves.getArray()) p.active = false;
+      for (const p of this.floatingTexts.getArray()) p.active = false;
+      for (const p of this.stunRays.getArray()) p.active = false;
+      for (const p of this.muzzleFlashes.getArray()) p.active = false;
+      for (const p of this.sniperBeams.getArray()) p.active = false;
+      for (const p of this.teslaArcs.getArray()) p.active = false;
+      for (const p of this.radiationAreas.getArray()) p.active = false;
+      for (const p of this.shockwaves.getArray()) p.active = false;
     }
   },
 };

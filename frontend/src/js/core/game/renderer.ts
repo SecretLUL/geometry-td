@@ -385,7 +385,7 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
       }
     }
   } else {
-    for (let sprite of photonSprites) {
+    for (const sprite of photonSprites) {
       sprite.visible = false;
     }
   }

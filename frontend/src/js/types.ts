@@ -8,6 +8,11 @@
 
 // ─── GAME STATE TYPES ─────────────────────────────────────────────────────────
 
+export interface Effect {
+  active?: boolean;
+  update(): void;
+}
+
 export interface GameState {
   isHost: boolean;
   lives: number;
@@ -27,7 +32,13 @@ export interface GameState {
   waveModified: boolean;
   originalWave: number | null;
   benchmarkActive: boolean;
-  benchmarkBackup: any | null;
+  benchmarkBackup: {
+    wave: number;
+    godMode: boolean;
+    infiniteGold: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    towers: any[];
+  } | null;
   selectedTowerType: string | null; // null = no tower selected (placement mode off)
   camera: Vector2D;
 
@@ -40,10 +51,10 @@ export interface GameState {
   enemies: Enemy[];
   towers: Tower[];
   projectiles: Projectile[];
-  particles: any[];
-  floatingTexts: any[];
-  stunEffects: any[]; // Boss stun rays / FX
-  groundEffects: any[]; // Napalm, Shockwaves, Radiation, etc.
+  particles: Effect[];
+  floatingTexts: Effect[];
+  stunEffects: Effect[]; // Boss stun rays / FX
+  groundEffects: Effect[]; // Napalm, Shockwaves, Radiation, etc.
 
   enemiesToSpawn: number;
   spawnCooldown: number;
@@ -51,9 +62,10 @@ export interface GameState {
   screenShake: number;
   shopHoveredType: string | null;
   animTime: number;
-  enemyGrid?: Map<number, Enemy[]>;
-  projectileEvents?: any[];
-  enemyPool?: any;
+  enemyGrid?: Enemy[][];
+  activeGridIndices?: number[];
+  projectileEvents?: ProjectileEvent[];
+  enemyPool?: string[];
   perfMode?: boolean;
   showFps?: boolean;
   contextShopCell?: { col: number; row: number } | null;
@@ -118,7 +130,7 @@ export interface Enemy {
   lastDamageParticleTime?: number;
   spawnFrames?: number;
   swarmGroupId?: number;
-  damageSources?: Map<any, number>;
+  damageSources?: Map<unknown, number>;
   rotationSpeedMultiplier?: number;
   customFlash?: boolean;
   triggerFlash?: (duration: number) => void;
@@ -138,13 +150,14 @@ export interface Enemy {
   shieldHp?: number;
   regenTimer?: number;
   incomingDamage?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pixiSprite?: any;
-  auraGraphics?: any;
+  auraGraphics?: unknown;
 
   // Instance Methods
   initHp(): void;
-  takeDamage(amount: number, source?: any): number;
-  drawShape(g: any): void;
+  takeDamage(amount: number, source?: unknown): number;
+  drawShape(g: unknown): void;
   draw(): void;
   updatePixi(): void;
   update(): "stunned" | "reached_end" | "moving";
@@ -212,6 +225,7 @@ export interface Tower {
   isPredicted?: boolean;
   predictionTime?: number;
   predictedCost?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pixiSprite?: any;
 
   // Instance Methods
@@ -229,7 +243,7 @@ export interface Tower {
   getSpecializationInfo(specId: TowerSpecialization, isMastery?: boolean): string;
   getSpecializations(): Array<{ id: TowerSpecialization; name: string; desc: string }>;
   applySpecialization(specId: TowerSpecialization, silent?: boolean): void;
-  drawPixi(g: any, part: "base" | "turret"): void;
+  drawPixi(g: unknown, part: "base" | "turret"): void;
   redrawPixiBase(): void;
   redrawPixiTurret(): void;
   initPixi(): void;
@@ -263,6 +277,7 @@ export interface Projectile {
   hitEnemies: Enemy[];
   isHoming: boolean;
   angle: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pixiSprite?: any;
 
   // Instance Methods
@@ -438,7 +453,7 @@ export interface SocketEventMap {
     value: boolean;
   };
   toggle_auto: boolean;
-  start_wave_sync: any;
+  start_wave_sync: unknown;
   sync_lives: number;
   sync_gold: number;
   sync_towers: SyncTowerState[];

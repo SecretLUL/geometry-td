@@ -291,7 +291,7 @@ export function setupModMenu() {
     const wasInfinite = state.infiniteGold;
     state.infiniteGold = true;
 
-    for (let tBackup of state.benchmarkBackup.towers) {
+    for (const tBackup of state.benchmarkBackup.towers) {
       const TowerClass = typeClasses[tBackup.type];
       if (TowerClass) {
         const tower = new TowerClass(tBackup.col, tBackup.row);
