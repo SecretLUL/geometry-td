@@ -31,9 +31,9 @@ export const Config = {
 
   // Tower cost scaling SSOT (Single Source of Truth)
   DEFAULT_COST_SCALING: {
-    earlyMultiplier: 1.5,
-    lateMultiplier: 1.5,
-    thresholdLevel: 5,
+    earlyMultiplier: 1.3,
+    lateMultiplier: 1.3,
+    thresholdLevel: 10,
   },
 
   // Enemy Parameters
@@ -558,7 +558,7 @@ export const TowerData: Record<string, TowerStatsConfig> = {
     baseCost: 400,
     baseDamage: 800,
     damagePerLevel: 350,
-    baseRange: 120,
+    baseRange: 140,
     rangePerLevel: 3,
     baseFireRate: 210,
     fireRateDecrease: 10,

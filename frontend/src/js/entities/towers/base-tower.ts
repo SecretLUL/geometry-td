@@ -115,6 +115,12 @@ export class Tower {
       entitiesContainer.addChild(this.pixiSprite);
 
       this.pixiBoostGraphics = new PIXI.Graphics();
+      const radius = Config.TILE_SIZE / 2 - 2;
+      this.pixiBoostGraphics.circle(0, 0, radius).fill({ color: 0xffa801, alpha: 0.5 });
+      this.pixiBoostGraphics
+        .circle(0, 0, radius + 2)
+        .stroke({ color: 0xffa801, alpha: 1, width: 1.5 });
+      this.pixiBoostGraphics.visible = false;
       this.pixiSprite.addChild(this.pixiBoostGraphics);
 
       this.pixiBaseGraphics = new PIXI.Graphics();
@@ -150,16 +156,15 @@ export class Tower {
     this.pixiSprite.position.set(this.x, this.y);
 
     if (this.pixiBoostGraphics) {
-      this.pixiBoostGraphics.clear();
       if (this.constructionTimer <= 0 && this.isBoosted()) {
+        this.pixiBoostGraphics.visible = true;
         const pulse = 0.5 + 0.5 * Math.sin(state.animTime * 0.0025);
-        const alpha = 0.15 + 0.15 * pulse;
-        const radius = Config.TILE_SIZE / 2 - 2 + pulse * 2;
-
-        this.pixiBoostGraphics.circle(0, 0, radius).fill({ color: 0xffa801, alpha: alpha });
-        this.pixiBoostGraphics
-          .circle(0, 0, radius + 2)
-          .stroke({ color: 0xffa801, alpha: alpha * 2, width: 1.5 });
+        this.pixiBoostGraphics.alpha = 0.3 + 0.3 * pulse;
+        const baseRadius = Config.TILE_SIZE / 2 - 2;
+        const scale = 1 + (pulse * 2) / baseRadius;
+        this.pixiBoostGraphics.scale.set(scale);
+      } else {
+        this.pixiBoostGraphics.visible = false;
       }
     }
 

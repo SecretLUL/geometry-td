@@ -184,6 +184,22 @@ function getBankGoldGradient(): PIXI.FillGradient | string {
   return "#ffd700";
 }
 
+const GOLD_STROKE_CONFIG = { color: "#1a0f00", width: 3 };
+const GOLD_SHADOW_CONFIG = {
+  alpha: 0.6,
+  blur: 3,
+  color: 0x000000,
+  distance: 2,
+  angle: Math.PI / 4,
+};
+const NORMAL_SHADOW_CONFIG = {
+  alpha: 0.4,
+  blur: 0,
+  color: 0x000000,
+  distance: 2,
+  angle: Math.PI / 4,
+};
+
 export class FloatingText {
   public x!: number;
   public y!: number;
@@ -249,38 +265,25 @@ export class FloatingText {
     if (typeof window !== "undefined" && app.renderer) {
       if (!this.textObj) {
         this.textObj = new PIXI.Text({
-          text: this.text,
+          text: this.text.toLowerCase(),
           style: {
-            fontFamily: "Outfit, sans-serif",
+            fontFamily: "BLADRMF_.TTF",
             fontSize: this.isGold ? 22 : 20,
             fontWeight: this.isGold ? "900" : "bold",
             fill: this.isGold ? this.getGoldGradient() : this.color,
-            stroke: this.isGold ? { color: "#1a0f00", width: 3 } : undefined,
-            dropShadow: {
-              alpha: this.isGold ? 0.6 : 0.4,
-              blur: this.isGold ? 3 : 0,
-              color: 0x000000,
-              distance: 2,
-              angle: Math.PI / 4,
-            },
+            stroke: this.isGold ? GOLD_STROKE_CONFIG : undefined,
+            dropShadow: this.isGold ? GOLD_SHADOW_CONFIG : NORMAL_SHADOW_CONFIG,
           },
         });
         this.textObj.anchor.set(0.5);
       } else {
-        this.textObj.text = this.text;
+        this.textObj.text = this.text.toLowerCase();
+        this.textObj.style.fontFamily = "BLADRMF_.TTF";
         this.textObj.style.fontSize = this.isGold ? 22 : 20;
         this.textObj.style.fontWeight = this.isGold ? "900" : "bold";
         this.textObj.style.fill = this.isGold ? this.getGoldGradient() : this.color;
-        this.textObj.style.stroke = this.isGold
-          ? { color: "#1a0f00", width: 3 }
-          : (undefined as any);
-        this.textObj.style.dropShadow = {
-          alpha: this.isGold ? 0.6 : 0.4,
-          blur: this.isGold ? 3 : 0,
-          color: 0x000000,
-          distance: 2,
-          angle: Math.PI / 4,
-        };
+        this.textObj.style.stroke = this.isGold ? GOLD_STROKE_CONFIG : (undefined as any);
+        this.textObj.style.dropShadow = this.isGold ? GOLD_SHADOW_CONFIG : NORMAL_SHADOW_CONFIG;
       }
       entitiesContainer.addChild(this.textObj);
       this.textObj.visible = true;
@@ -314,18 +317,13 @@ export class FloatingText {
     this.scaleForce = 0.2;
 
     if (this.textObj) {
-      this.textObj.text = this.text;
+      this.textObj.text = this.text.toLowerCase();
+      this.textObj.style.fontFamily = "BLADRMF_.TTF";
       this.textObj.style.fontSize = 22;
       this.textObj.style.fontWeight = "900";
       this.textObj.style.fill = this.getGoldGradient();
-      this.textObj.style.stroke = { color: "#1a0f00", width: 3 };
-      this.textObj.style.dropShadow = {
-        alpha: 0.6,
-        blur: 3,
-        color: 0x000000,
-        distance: 2,
-        angle: Math.PI / 4,
-      };
+      this.textObj.style.stroke = GOLD_STROKE_CONFIG;
+      this.textObj.style.dropShadow = GOLD_SHADOW_CONFIG;
     }
 
     // Spawn particles at the merge source (coin location)
@@ -405,6 +403,9 @@ export class StunRay {
   public active: boolean = false;
   public graphics?: PIXI.Graphics;
 
+  private ptsX = new Float32Array(6);
+  private ptsY = new Float32Array(6);
+
   constructor(startX = 0, startY = 0, targetX = 0, targetY = 0) {
     if (startX !== 0 || startY !== 0 || targetX !== 0 || targetY !== 0) {
       this.init(startX, startY, targetX, targetY);
@@ -446,21 +447,24 @@ export class StunRay {
     if (this.life <= 0) return;
 
     const segments = 5;
-    const pts: { x: number; y: number }[] = [];
-    pts.push({ x: this.startX, y: this.startY });
+
+    this.ptsX[0] = this.startX;
+    this.ptsY[0] = this.startY;
 
     for (let i = 1; i < segments; i++) {
       const tx = this.startX + (this.targetX - this.startX) * (i / segments);
       const ty = this.startY + (this.targetY - this.startY) * (i / segments);
       const offset = (Math.random() - 0.5) * 15;
-      pts.push({ x: tx + offset, y: ty + offset });
+      this.ptsX[i] = tx + offset;
+      this.ptsY[i] = ty + offset;
     }
-    pts.push({ x: this.targetX, y: this.targetY });
+    this.ptsX[segments] = this.targetX;
+    this.ptsY[segments] = this.targetY;
 
     const drawPath = (color: string, width: number, alpha: number) => {
-      g.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) {
-        g.lineTo(pts[i].x, pts[i].y);
+      g.moveTo(this.ptsX[0], this.ptsY[0]);
+      for (let i = 1; i <= segments; i++) {
+        g.lineTo(this.ptsX[i], this.ptsY[i]);
       }
       g.stroke({ color, width, alpha });
     };
@@ -653,6 +657,9 @@ export class TeslaArc {
   public active: boolean = false;
   public graphics?: PIXI.Graphics;
 
+  private ptsX = new Float32Array(6);
+  private ptsY = new Float32Array(6);
+
   constructor(startX = 0, startY = 0, targetX = 0, targetY = 0, color = "#00ffff") {
     if (startX !== 0 || startY !== 0 || targetX !== 0 || targetY !== 0) {
       this.init(startX, startY, targetX, targetY, color);
@@ -701,8 +708,8 @@ export class TeslaArc {
 
     // Draw a beautiful jagged electric arc with 5 segments
     const segments = 5;
-    const pts: { x: number; y: number }[] = [];
-    pts.push({ x: this.startX, y: this.startY });
+    this.ptsX[0] = this.startX;
+    this.ptsY[0] = this.startY;
 
     const dx = this.targetX - this.startX;
     const dy = this.targetY - this.startY;
@@ -720,15 +727,22 @@ export class TeslaArc {
         // Scale offset by distance so short arcs are less jagged, and long arcs are suitably jagged
         const maxOffset = Math.min(20, distance * 0.12);
         const offset = (Math.random() - 0.5) * maxOffset * 2;
-        pts.push({ x: tx + nx * offset, y: ty + ny * offset });
+        this.ptsX[i] = tx + nx * offset;
+        this.ptsY[i] = ty + ny * offset;
+      }
+    } else {
+      for (let i = 1; i < segments; i++) {
+        this.ptsX[i] = this.startX;
+        this.ptsY[i] = this.startY;
       }
     }
-    pts.push({ x: this.targetX, y: this.targetY });
+    this.ptsX[segments] = this.targetX;
+    this.ptsY[segments] = this.targetY;
 
     const drawPath = (color: string, width: number, alpha: number) => {
-      g.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) {
-        g.lineTo(pts[i].x, pts[i].y);
+      g.moveTo(this.ptsX[0], this.ptsY[0]);
+      for (let i = 1; i <= segments; i++) {
+        g.lineTo(this.ptsX[i], this.ptsY[i]);
       }
       g.stroke({ color, width, alpha });
     };

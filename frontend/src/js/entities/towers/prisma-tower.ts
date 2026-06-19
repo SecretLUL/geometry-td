@@ -14,6 +14,8 @@ import { PoolManager } from "../../core/pool";
 import * as PIXI from "pixi.js";
 import { app, entitiesContainer } from "../../core/game/viewport";
 
+const checkedEnemies = new Set<number>();
+
 export class PrismaTower extends Tower {
   public lockTimer: number;
   public beamTarget: Enemy | null;
@@ -170,7 +172,7 @@ export class PrismaTower extends Tower {
       this.target.hp <= 0 ||
       this.target.deadMarked ||
       getDistanceSq(this.target.x, this.target.y, this.x, this.y) > rangeSq ||
-      !state.enemies.includes(this.target);
+      !state.enemiesSet.has(this.target);
 
     if (needsTarget) {
       if (this.target) {
@@ -234,7 +236,7 @@ export class PrismaTower extends Tower {
       }
 
       if (this.masteryUnlocked) {
-        const isFiring = this.target && state.enemies.includes(this.target) && this.target.hp > 0;
+        const isFiring = this.target && state.enemiesSet.has(this.target) && this.target.hp > 0;
         const rotSpeed = isFiring ? time * 0.0035 : time * 0.001;
 
         if (this.pixiTurretCoreGraphics) {
@@ -254,14 +256,14 @@ export class PrismaTower extends Tower {
     const nearby = this.getNearbyEnemies(this.x, this.y, effRange);
 
     let bestEnemy: Enemy | null = null;
-    const checked = new Set<number>();
+    checkedEnemies.clear();
 
     for (let i = 0; i < nearby.length; i++) {
       const enemy = nearby[i];
       if (!enemy || enemy.hp <= 0 || enemy.deadMarked) continue;
 
-      if (checked.has(enemy.id)) continue;
-      checked.add(enemy.id);
+      if (checkedEnemies.has(enemy.id)) continue;
+      checkedEnemies.add(enemy.id);
 
       const distSq = getDistanceSq(enemy.x, enemy.y, this.x, this.y);
       if (distSq > rangeSq) continue;
@@ -633,7 +635,7 @@ export class PrismaTower extends Tower {
     if (
       this.fireCooldown <= 0 &&
       this.target &&
-      state.enemies.includes(this.target) &&
+      state.enemiesSet.has(this.target) &&
       this.target.hp > 0
     ) {
       const prismR = 10;
@@ -647,13 +649,13 @@ export class PrismaTower extends Tower {
       const nearby = this.getNearbyEnemies(this.x, this.y, this.range);
       let splits = 0;
       const maxSplits = this.masteryUnlocked ? 6 : 3;
-      const checked = new Set<number>();
+      checkedEnemies.clear();
 
       for (let i = 0; i < nearby.length; i++) {
         const enemy = nearby[i];
         if (!enemy || enemy.hp <= 0 || enemy.deadMarked) continue;
-        if (checked.has(enemy.id)) continue;
-        checked.add(enemy.id);
+        if (checkedEnemies.has(enemy.id)) continue;
+        checkedEnemies.add(enemy.id);
 
         if (this.target && enemy === this.target) continue;
         if (getDistanceSq(enemy.x, enemy.y, this.x, this.y) <= rangeSq) {
@@ -1114,13 +1116,13 @@ export class PrismaTower extends Tower {
 
     const radiusSq = aoeRadius * aoeRadius;
     const nearby = this.getNearbyEnemies(target.x, target.y, aoeRadius);
-    const checked = new Set<number>();
+    checkedEnemies.clear();
 
     for (let i = 0; i < nearby.length; i++) {
       const enemy = nearby[i];
       if (!enemy || enemy === target || enemy.hp <= 0 || enemy.deadMarked) continue;
-      if (checked.has(enemy.id)) continue;
-      checked.add(enemy.id);
+      if (checkedEnemies.has(enemy.id)) continue;
+      checkedEnemies.add(enemy.id);
 
       if (getDistanceSq(enemy.x, enemy.y, target.x, target.y) > radiusSq) continue;
 
@@ -1161,13 +1163,13 @@ export class PrismaTower extends Tower {
         ? spec.values!.masterySplits
         : spec.values!.normalSplits;
 
-      const checked = new Set<number>();
+      checkedEnemies.clear();
 
       for (let i = 0; i < nearby.length; i++) {
         const enemy = nearby[i];
         if (!enemy || enemy.hp <= 0 || enemy.deadMarked) continue;
-        if (checked.has(enemy.id)) continue;
-        checked.add(enemy.id);
+        if (checkedEnemies.has(enemy.id)) continue;
+        checkedEnemies.add(enemy.id);
 
         if (this.target && enemy === this.target) continue;
 

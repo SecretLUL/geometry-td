@@ -7,7 +7,7 @@
 import { state } from "../../core/state";
 import { waypoints } from "../../core/map";
 import { createExplosion } from "../../fx/fx";
-import { getDistance } from "../../core/utils";
+import { getDistance, getDistanceSq } from "../../core/utils";
 import { Enemy, EnemyType } from "../../types";
 import { app, entitiesContainer } from "../../core/game/viewport";
 import { Config } from "../../core/config";
@@ -56,6 +56,7 @@ export class BaseEnemy implements Enemy {
   public swarmGroupId?: number;
   public needsRedraw: boolean = true;
   public rotationSpeedMultiplier: number = 1.0;
+  public cachedAcceleratorBuff: boolean = false;
 
   public pixiSprite?: PIXI.Container;
   public bodyGraphics?: PIXI.Graphics;
@@ -235,13 +236,7 @@ export class BaseEnemy implements Enemy {
     // Check for Accelerator speed buff aura
     let speedMultiplier = 1.0;
     const auraRadius = 3.0 * Config.TILE_SIZE;
-    const accelerators = state.activeAccelerators || [];
-    const hasAcceleratorAura =
-      accelerators.length > 0 &&
-      accelerators.some(
-        (e) => !e.deadMarked && getDistance(this.x, this.y, e.x, e.y) <= auraRadius
-      );
-    if (hasAcceleratorAura) {
+    if (this.cachedAcceleratorBuff) {
       speedMultiplier = 1.4;
     }
 
@@ -329,19 +324,21 @@ export class BaseEnemy implements Enemy {
       if (!this.auraGraphics) {
         this.auraGraphics = new PIXI.Graphics();
         this.pixiSprite.addChildAt(this.auraGraphics, 0);
+        this.auraGraphics
+          .circle(0, 0, auraRadius)
+          .fill({ color: 0xccff00, alpha: 1 })
+          .stroke({ color: 0xccff00, width: 1.0, alpha: 5 });
       }
-      this.auraGraphics.clear();
+
       const pulse = 1.0 + Math.sin(state.animTime * 0.01) * 0.015;
       const alpha = 0.03 + Math.sin(state.animTime * 0.01) * 0.01;
 
-      this.auraGraphics
-        .circle(0, 0, auraRadius * pulse)
-        .fill({ color: 0xccff00, alpha: alpha })
-        .stroke({ color: 0xccff00, width: 1.0, alpha: 0.15 });
+      this.auraGraphics.scale.set(pulse);
+      this.auraGraphics.alpha = alpha;
     }
 
     // Spawn neon glowing speed trail particles behind accelerated enemies
-    if (hasAcceleratorAura && !state.isPaused && Math.random() < 0.1) {
+    if (this.cachedAcceleratorBuff && !state.isPaused && Math.random() < 0.1) {
       PoolManager.getParticle(
         this.x + (Math.random() - 0.5) * 12,
         this.y + (Math.random() - 0.5) * 12,
@@ -374,14 +371,16 @@ export class BaseEnemy implements Enemy {
 
     // Check for Accelerator speed buff aura
     let speedMultiplier = 1.0;
-    const auraRadius = 3.0 * Config.TILE_SIZE;
+    const auraRadiusSq = (3.0 * Config.TILE_SIZE) ** 2;
     const accelerators = state.activeAccelerators || [];
-    const hasAcceleratorAura =
+
+    this.cachedAcceleratorBuff =
       accelerators.length > 0 &&
       accelerators.some(
-        (e) => !e.deadMarked && getDistance(this.x, this.y, e.x, e.y) <= auraRadius
+        (e) => !e.deadMarked && getDistanceSq(this.x, this.y, e.x, e.y) <= auraRadiusSq
       );
-    if (hasAcceleratorAura) {
+
+    if (this.cachedAcceleratorBuff) {
       speedMultiplier = 1.4;
     }
 

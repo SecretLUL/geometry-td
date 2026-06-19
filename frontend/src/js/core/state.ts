@@ -44,6 +44,7 @@ export const state: GameState = {
   hoveredEnemy: null, // Enemy currently under mouse cursor
 
   enemies: [],
+  enemiesSet: new Set(),
   activeAccelerators: [],
   towers: [],
   projectiles: [], // Populated by PoolManager.init() in game.ts after initPixi()

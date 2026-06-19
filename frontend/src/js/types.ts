@@ -49,6 +49,7 @@ export interface GameState {
   hoveredEnemy: Enemy | null; // Enemy currently under mouse cursor
 
   enemies: Enemy[];
+  enemiesSet: Set<Enemy>;
   towers: Tower[];
   projectiles: Projectile[];
   particles: Effect[];

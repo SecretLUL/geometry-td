@@ -49,6 +49,30 @@ function measureTrueFps(timestamp: number) {
 // so it continues tracking render rate even when the tab is unfocused.
 requestAnimationFrame(measureTrueFps);
 
+function updateEnemiesSet(): void {
+  state.enemiesSet.clear();
+  const len = state.enemies.length;
+  for (let i = 0; i < len; i++) {
+    state.enemiesSet.add(state.enemies[i]);
+  }
+}
+
+function hasActiveDefragmenter(excludeEnemy: Enemy): boolean {
+  const len = state.enemies.length;
+  for (let i = 0; i < len; i++) {
+    const e = state.enemies[i];
+    if (
+      e !== excludeEnemy &&
+      (e.typeName === "Defragmenter" ||
+        e.typeName === "DefragmenterFragment" ||
+        e.typeName === "DefragmenterSubfragment")
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Persistent Map objects to avoid garbage collection thrashing in game loop interpolation
 const state0EnemyMap = new Map<number, unknown>();
 const currentEnemyMap = new Map<number, Enemy>();
@@ -304,13 +328,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                 if (oldEnemy.typeName === "Boss") {
                   for (const tw of state.towers) tw.stunTimer = 0;
                 }
-                const hasDefragActive = state.enemies.some(
-                  (e) =>
-                    e !== oldEnemy &&
-                    (e.typeName === "Defragmenter" ||
-                      e.typeName === "DefragmenterFragment" ||
-                      e.typeName === "DefragmenterSubfragment")
-                );
+                const hasDefragActive = hasActiveDefragmenter(oldEnemy);
                 if (
                   !hasDefragActive &&
                   oldEnemy.typeName !== "Defragmenter" &&
@@ -328,6 +346,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
           for (let i = 0; i < newEnemiesBuffer.length; i++) {
             state.enemies.push(newEnemiesBuffer[i]);
           }
+          updateEnemiesSet();
 
           // On the host, enemy.update() calls updatePixi() internally.
           // Clients skip enemy.update() entirely, so sprites are never repositioned and become invisible.
@@ -345,6 +364,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
 
       while (speedAccumulator >= 1) {
         speedAccumulator -= 1;
+        updateEnemiesSet();
 
         // Spatial Hashing Grid for Collision optimization (Zero Allocation Array)
         const CELL_SIZE = 100;
@@ -485,7 +505,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
               tower.target.hp > 0 &&
               !tower.target.deadMarked &&
               getDistanceSq(tower.target.x, tower.target.y, tower.x, tower.y) <= rangeSq &&
-              state.enemies.includes(tower.target);
+              state.enemiesSet.has(tower.target);
 
             if (!hasValidTarget) {
               if (tower.type === "Prisma" && tower.target) {
@@ -546,13 +566,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                 enemy.typeName === "DefragmenterFragment" ||
                 enemy.typeName === "DefragmenterSubfragment"
               ) {
-                const hasDefragActive = state.enemies.some(
-                  (e) =>
-                    e !== enemy &&
-                    (e.typeName === "Defragmenter" ||
-                      e.typeName === "DefragmenterFragment" ||
-                      e.typeName === "DefragmenterSubfragment")
-                );
+                const hasDefragActive = hasActiveDefragmenter(enemy);
                 if (
                   !hasDefragActive &&
                   enemy.typeName !== "Defragmenter" &&
@@ -622,13 +636,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                 if (enemy.typeName === "Boss") {
                   for (const t of state.towers) t.stunTimer = 0;
                 }
-                const hasDefragActive = state.enemies.some(
-                  (e) =>
-                    e !== enemy &&
-                    (e.typeName === "Defragmenter" ||
-                      e.typeName === "DefragmenterFragment" ||
-                      e.typeName === "DefragmenterSubfragment")
-                );
+                const hasDefragActive = hasActiveDefragmenter(enemy);
                 if (
                   !hasDefragActive &&
                   enemy.typeName !== "Defragmenter" &&
@@ -840,7 +848,14 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
           }
         }
       } else {
-        const boss = state.enemies.find((e) => e.typeName === "Boss");
+        let boss: Enemy | null = null;
+        const enemiesLen = state.enemies.length;
+        for (let idx = 0; idx < enemiesLen; idx++) {
+          if (state.enemies[idx].typeName === "Boss") {
+            boss = state.enemies[idx];
+            break;
+          }
+        }
         if (boss) {
           if (cachedBossHpFill) {
             cachedBossHpFill.style.width = (Math.max(0, boss.hp) / boss.maxHp) * 100 + "%";

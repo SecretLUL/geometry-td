@@ -479,7 +479,11 @@ export class Projectile {
                     this.speed,
                     this.bounceCount - 1
                   );
-                  nextProj.hitEnemies = [...this.hitEnemies];
+                  nextProj.hitEnemies.length = 0;
+                  const hitCount = this.hitEnemies.length;
+                  for (let h = 0; h < hitCount; h++) {
+                    nextProj.hitEnemies.push(this.hitEnemies[h]);
+                  }
                   nextProj.trailX.set(this.trailX);
                   nextProj.trailY.set(this.trailY);
                   nextProj.trailHead = this.trailHead;
