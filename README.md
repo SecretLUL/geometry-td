@@ -118,6 +118,13 @@ Once the configuration has been merged, you can deploy:
 docker compose up -d --build frontend-prod backend-prod db-prod
 ```
 
+> [!TIP]
+> **Deployment Helper Scripts:**
+> *   `deplay-to-nas.example.bat`: Windows batch script template to auto-commit, push, connect to NAS via SSH, and trigger the remote deploy script.
+> *   `deploy.example.sh`: Bash script template run on the server (NAS) to pull the latest code, rebuild the production containers, and prune obsolete Docker images.
+> 
+> Copy these templates to `deplay-to-nas.bat` and `deploy.sh` respectively, adjust your connection details and paths, and run them to automate your deployment. The custom files containing your secrets are ignored by Git.
+
 #### Production Architecture:
 *   **Frontend Nginx (`frontend-prod`):** Accessible externally on port `8181`. Nginx serves the compiled static web assets, applies Gzip compression, and acts as a reverse proxy forwarding API requests (`/api/`) and WebSocket traffic (`/socket.io/`) to the backend container.
 *   **Backend API (`backend-prod`):** Runs internally on port `3000` as the unprivileged `node` user and is exposed on host port `7171`.
