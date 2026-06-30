@@ -62,7 +62,6 @@ geometry-td/
 │   └── vite.config.js
 ├── docker-compose.yaml       # Local container configuration (development services only)
 ├── docker-compose.example.yaml # Template for Dev & Prod services (including volumes/networks)
-├── deploy.sh                 # Automatic production deployment shell script
 └── package.json              # Global npm scripts for code validation
 ```
 
@@ -114,12 +113,7 @@ docker compose up -d db-dev backend-dev frontend-dev
 > 
 > To deploy in production, copy the production services (`frontend-prod`, `backend-prod`, `db-prod`) along with their corresponding networks and volumes from `docker-compose.example.yaml` into your active `docker-compose.yaml`.
 
-Once the configuration has been merged, you can deploy using the shell script:
-```bash
-# Run the deployment script
-./deploy.sh
-```
-Or manually via Docker Compose:
+Once the configuration has been merged, you can deploy:
 ```bash
 docker compose up -d --build frontend-prod backend-prod db-prod
 ```

@@ -2,11 +2,11 @@
 **/node_modules/
 .npm/
 
-# Build-Ausgaben
+# Build Outputs
 **/dist/
 **/build/
 
-# Docker & Umgebungsvariablen
+# Docker & Environment Variables
 .env
 .env.local
 .env.*
@@ -19,17 +19,13 @@ docker-compose.yml
 !docker-compose.example.yml
 
 
-# Betriebssystem-Müll
+# Operating System Trash
 .DS_Store
 Thumbs.db
 
-# Datenbanken
+# Databases
 **/postgres_data_dev/
 **/postgres_data_prod/
 
-# KI Gedöns
+# AI Stuff
 .agents/
-project_tree.txt
-
-# Lokale Dokumentation
-README.local.md
