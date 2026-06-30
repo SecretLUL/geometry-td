@@ -28,27 +28,6 @@ export let lastFpsUpdate = performance.now();
 export let fpsDisplayVal = 60;
 export let framesSinceLastFps = 0;
 
-function measureTrueFps(timestamp: number) {
-  if (!timestamp) timestamp = performance.now();
-
-  if (timestamp - lastFpsUpdate > 1000) {
-    // Reset after long inactive periods (e.g. background tab)
-    framesSinceLastFps = 0;
-    lastFpsUpdate = timestamp;
-  } else {
-    framesSinceLastFps++;
-    if (timestamp - lastFpsUpdate >= 500) {
-      fpsDisplayVal = Math.round((framesSinceLastFps * 1000) / (timestamp - lastFpsUpdate));
-      framesSinceLastFps = 0;
-      lastFpsUpdate = timestamp;
-    }
-  }
-  requestAnimationFrame(measureTrueFps);
-}
-// Start a standalone FPS measurement loop independent of the main game loop,
-// so it continues tracking render rate even when the tab is unfocused.
-requestAnimationFrame(measureTrueFps);
-
 function updateEnemiesSet(): void {
   state.enemiesSet.clear();
   const len = state.enemies.length;
@@ -82,6 +61,7 @@ const newEnemiesBuffer: Enemy[] = [];
 // Game loop timing state
 export let lastFrameTime = performance.now();
 export let lastAnimFrameTime = performance.now();
+let nextFrameTime = performance.now();
 export let frameCount = 0;
 let speedAccumulator = 0;
 
@@ -112,40 +92,50 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
 
   if (!timestamp) timestamp = performance.now();
 
-  let targetFPS =
-    parseInt(
-      cachedRefreshRateSelect
-        ? cachedRefreshRateSelect.value
-        : localStorage.getItem("td_refresh_rate") || "60"
-    ) || 60;
+  const refreshRateVal = cachedRefreshRateSelect
+    ? cachedRefreshRateSelect.value
+    : localStorage.getItem("td_refresh_rate") || "60";
+  const isUncapped = refreshRateVal === "uncapped";
+  let targetFPS = isUncapped ? 9999 : parseInt(refreshRateVal) || 60;
 
   // If the window is unfocused and Low Performance Mode is enabled, cap target FPS to 60 FPS
   // to save system resources. Otherwise, allow the high refresh rate (e.g. 144 FPS) to continue.
   if (!isFocused && state.perfMode && targetFPS > 60) {
     targetFPS = 60;
   }
-  const frameInterval = 1000 / targetFPS;
+  const frameInterval = isUncapped ? 0 : 1000 / targetFPS;
+
+  // Frame pacing check using nextFrameTime to prevent VSync beating and high refresh rate capping issues
+  if (!isUncapped) {
+    if (timestamp - nextFrameTime > 100) {
+      nextFrameTime = timestamp;
+    }
+    // Tolerance of 1.0 ms to absorb VSync jitter
+    if (timestamp < nextFrameTime - 1.0) return;
+  }
+
+  // FPS Tracking
+  framesSinceLastFps++;
+  const now = performance.now();
+  if (now - lastFpsUpdate > 1000) {
+    framesSinceLastFps = 0;
+    lastFpsUpdate = now;
+  } else if (now - lastFpsUpdate >= 500) {
+    fpsDisplayVal = Math.round((framesSinceLastFps * 1000) / (now - lastFpsUpdate));
+    framesSinceLastFps = 0;
+    lastFpsUpdate = now;
+  }
+
+  // Update nextFrameTime for target FPS pacing
+  if (!isUncapped) {
+    nextFrameTime = Math.max(nextFrameTime + frameInterval, timestamp);
+  }
 
   let elapsed = timestamp - lastFrameTime;
-
   if (elapsed > 100) elapsed = 100; // Cap to prevent spiral of death
 
-  // Mitigate timing jitter (VSync beating for requestAnimationFrame, setInterval inaccuracy for worker).
-  // Using a tolerance ensures that if a tick arrives a fraction of a millisecond early,
-  // we don't drop it and cause a stutter.
-  const tolerance = fromWorker ? 1.0 : 2.0;
-  if (elapsed < frameInterval - tolerance) return;
-
-  let consumedTime = 0;
-  if (elapsed >= frameInterval) {
-    consumedTime = elapsed - (elapsed % frameInterval);
-    lastFrameTime = timestamp - (elapsed % frameInterval);
-  } else {
-    // If we fired slightly early because of the tolerance, advance the timer
-    // by exactly one frame interval to keep the average pacing stable.
-    consumedTime = frameInterval;
-    lastFrameTime += frameInterval;
-  }
+  let consumedTime = elapsed;
+  lastFrameTime = timestamp;
 
   // Keep high-brightness HTML DOM FPS overlay hidden (drawn on canvas instead)
   cachedFpsDisplayEl?.classList.add("hidden");
@@ -1003,9 +993,8 @@ export function tryStartGame(): void {
       ) as HTMLInputElement | null;
       const updateWorkerFps = () => {
         const selectEl = igRefreshRateSelect || refreshRateSelect;
-        let fps =
-          parseInt(selectEl ? selectEl.value : localStorage.getItem("td_refresh_rate") || "60") ||
-          60;
+        const val = selectEl ? selectEl.value : localStorage.getItem("td_refresh_rate") || "60";
+        let fps = val === "uncapped" ? 60 : parseInt(val) || 60;
 
         // If the window is unfocused and Low Performance Mode is enabled, cap worker ticks
         // to a maximum of 60 FPS to save system resources.

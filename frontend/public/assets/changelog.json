@@ -5,6 +5,18 @@
   },
 
   {
+    "version": "v2.18.37",
+    "date": "30. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "fps-begrenzung bei 144 hz korrigiert, 165 hz und unbegrenzt optionen hinzugefügt und fps-anzeige auf reale loop-updates umgestellt."
+      }
+    ]
+  },
+
+  {
     "version": "v2.18.36",
     "date": "30. Juni 2026",
     "status": "active",
