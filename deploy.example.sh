@@ -7,7 +7,7 @@ echo "🚀 Starting automated production deployment..."
 
 # 1. Pull latest code from GitHub
 echo "📥 Pulling current code from repository..."
-git pull origin main
+git pull origin master
 
 # 2. Rebuild and restart production containers in background
 echo "🏗️ Building Docker images and restarting containers..."
