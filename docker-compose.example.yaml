@@ -1,82 +1,89 @@
 services:
   # =========================================================================
-  # 1. LIVE-UMGEBUNG (PRODUCTION) -> geometry-td.ammar-nas.duckdns.org
+  # 1. PRODUCTION ENVIRONMENT -> geometry-td.ammar-nas.duckdns.org
   # =========================================================================
+
+  # Frontend service for the production environment
   frontend-prod:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.prod # Uses the optimized production Dockerfile
     container_name: gtd-frontend-prod
     restart: unless-stopped
     ports:
-      - "8181:80" # Dein Reverse Proxy (z.B. NPM) leitet die Live-Domain hierher
+      - "8181:80" # Maps host port 8181 to container port 80 (HTTP)
     networks:
       - gtd-prod-network
 
+  # Backend (API Server) service for the production environment
   backend-prod:
     build:
       context: ./backend
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.prod # Uses the production Dockerfile (e.g. compiled JS/TS)
     container_name: gtd-backend-prod
     restart: unless-stopped
-    user: node
+    user: node # Runs the container as the non-privileged 'node' user for security
     ports:
-      - "7171:3000" # Live-Backend Port
+      - "7171:3000" # Maps host port 7171 to backend port 3000
     depends_on:
-      - db-prod
+      - db-prod # Ensures backend starts only after the db-prod container is ready
     environment:
-      - FRONTEND_URL=http://gtd-frontend-prod
-      - NODE_ENV=production
-      - DB_HOST=db-prod
-      - DB_PORT=5432
-      - DB_NAME=geometry_td
-      - DB_USER=gtd_user
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=http://gtd-frontend-prod # Frontend URL for CORS configuration
+      - NODE_ENV=production                  # Sets Node environment to production mode
+      - DB_HOST=db-prod                      # Database hostname within the internal Docker network
+      - DB_PORT=5432                         # Default PostgreSQL port
+      - DB_NAME=geometry_td                  # Database name
+      - DB_USER=gtd_user                     # Database user
+      - DB_PASSWORD=${DB_PASSWORD}           # Database password loaded from .env
+      - JWT_SECRET=${JWT_SECRET}             # JWT secret key loaded from .env
     cap_add:
-      - SYS_ADMIN
+      - SYS_ADMIN # Adds system administration capabilities if needed by specific system tools
     networks:
       - gtd-prod-network
 
+  # PostgreSQL database service for the production environment
   db-prod:
-    image: postgres:16-alpine
+    image: postgres:16-alpine # Lightweight Alpine-based PostgreSQL 16 image
     container_name: gtd-db-prod
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=geometry_td
-      - POSTGRES_USER=gtd_user
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=geometry_td               # Initial database name
+      - POSTGRES_USER=gtd_user                # Initial superuser name
+      - POSTGRES_PASSWORD=${DB_PASSWORD}      # Database password from .env
     volumes:
-      - db_data_prod:/var/lib/postgresql/data
+      - db_data_prod:/var/lib/postgresql/data # Persists database files on the host
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '0.5'    # Limits CPU usage to a maximum of 50% of one core
+          memory: 512M   # Limits memory usage to 512 Megabytes
     networks:
       - gtd-prod-network
 
   # =========================================================================
-  # 2. ENTWICKLUNGS-UMGEBUNG (DEV) -> gtd-dev.ammar-nas.duckdns.org
+  # 2. DEVELOPMENT ENVIRONMENT (DEV) -> gtd-dev.ammar-nas.duckdns.org
   # =========================================================================
+
+  # Frontend service for local development (supports Hot Module Replacement / HMR)
   frontend-dev:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.dev # Uses the development Dockerfile (includes npm install, etc.)
     container_name: gtd-frontend-dev
     restart: unless-stopped
     user: node
     working_dir: /home/node/app
     ports:
-      - "7777:5173" # Dein Reverse Proxy leitet die Dev-Domain hierher
+      - "7777:5173" # Maps host port 7777 to the Vite dev server port (default 5173)
     volumes:
-      - ${PROJECT_ROOT}/frontend:/home/node/app
-      - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
+      - ${PROJECT_ROOT}/frontend:/home/node/app  # Mounts local codebase for real-time updates (hot reload)
+      - /home/node/app/node_modules              # Prevents overwriting container-internal node_modules
     command: >
       sh -c "npm install && npm run dev -- --host"
     networks:
       - gtd-dev-network
 
+  # Backend API service for local development
   backend-dev:
     build:
       context: ./backend
@@ -86,9 +93,9 @@ services:
     user: node
     working_dir: /home/node/app
     ports:
-      - "7676:3000" # Separates Dev-Backend auf Port 7676!
+      - "7676:3000" # Maps host port 7676 to container port 3000
     depends_on:
-      - db-dev
+      - db-dev      # Ensures dev backend starts only after the db-dev container is ready
     environment:
       - NODE_ENV=development
       - DB_HOST=db-dev
@@ -97,10 +104,10 @@ services:
       - DB_USER=gtd_user
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
-      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_USEPOLLING=true # Enables file-watching polling (useful for Windows host mounts)
     volumes:
-      - ${PROJECT_ROOT}/backend:/home/node/app
-      - /home/node/app/node_modules # Anonymes Volume: Verhindert langsame Disk-I/O auf dem NAS-Mount
+      - ${PROJECT_ROOT}/backend:/home/node/app   # Mounts local codebase for hot reload (e.g. Nodemon)
+      - /home/node/app/node_modules              # Prevents overwriting container-internal node_modules
     command: >
       sh -c "npm install && npm run dev"
     cap_add:
@@ -108,11 +115,12 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.5'
-          memory: 1.5G
+          cpus: '1.5'    # Higher CPU limit allowed for compilation & hot-reloading in dev
+          memory: 1.5G   # Higher memory limit allowed for dev compilation tasks
     networks:
       - gtd-dev-network
 
+  # PostgreSQL database service for local development
   db-dev:
     image: postgres:16-alpine
     container_name: gtd-db-dev
@@ -122,7 +130,7 @@ services:
       - POSTGRES_USER=gtd_user
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - db_data_dev:/var/lib/postgresql/data
+      - db_data_dev:/var/lib/postgresql/data # Separate volume for development data
     deploy:
       resources:
         limits:
@@ -131,12 +139,14 @@ services:
     networks:
       - gtd-dev-network
 
+# Network definitions for isolation between environments
 networks:
   gtd-prod-network:
-    driver: bridge
+    driver: bridge # Bridge network for production services
   gtd-dev-network:
-    driver: bridge
+    driver: bridge # Bridge network for development services
 
+# Volume definitions for persistent database storage
 volumes:
-  db_data_prod:
-  db_data_dev:
+  db_data_prod: # Persistent storage volume for the production database
+  db_data_dev:  # Persistent storage volume for the development database
