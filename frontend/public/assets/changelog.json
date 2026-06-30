@@ -5,6 +5,18 @@
   },
 
   {
+    "version": "v2.18.35",
+    "date": "30. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "docker-compose-beispiel und .env.example hinzugefügt sowie .gitignore aktualisiert."
+      }
+    ]
+  },
+
+  {
     "version": "v2.18.34",
     "date": "17. Juni 2026",
     "status": "active",

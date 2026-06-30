@@ -10,6 +10,14 @@
 .env
 .env.local
 .env.*
+!.env.example
+!.env.local.example
+
+docker-compose.yaml
+docker-compose.yml
+!docker-compose.example.yaml
+!docker-compose.example.yml
+
 
 # Betriebssystem-Müll
 .DS_Store
