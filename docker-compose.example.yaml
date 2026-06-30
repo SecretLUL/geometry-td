@@ -38,6 +38,24 @@ services:
     networks:
       - gtd-prod-network
 
+  db-prod:
+    image: postgres:16-alpine
+    container_name: gtd-db-prod
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=geometry_td
+      - POSTGRES_USER=gtd_user
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_data_prod:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - gtd-prod-network
+
   # =========================================================================
   # 2. ENTWICKLUNGS-UMGEBUNG (DEV) -> gtd-dev.ammar-nas.duckdns.org
   # =========================================================================
@@ -113,24 +131,6 @@ services:
     networks:
       - gtd-dev-network
 
-  db-prod:
-    image: postgres:16-alpine
-    container_name: gtd-db-prod
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=geometry_td
-      - POSTGRES_USER=gtd_user
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - db_data_prod:/var/lib/postgresql/data
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-    networks:
-      - gtd-prod-network
-
 networks:
   gtd-prod-network:
     driver: bridge
@@ -138,5 +138,5 @@ networks:
     driver: bridge
 
 volumes:
-  db_data_dev:
   db_data_prod:
+  db_data_dev:
