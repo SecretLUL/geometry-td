@@ -11,6 +11,10 @@
     "changes": [
       {
         "type": "feature",
+        "desc": "base-tower.ts refaktoriert und modularisiert."
+      },
+      {
+        "type": "feature",
         "desc": "prisma-renderer.ts refaktoriert und modularisiert."
       },
       {

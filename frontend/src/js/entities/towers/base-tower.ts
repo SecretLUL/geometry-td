@@ -13,6 +13,11 @@ import { PoolManager } from "../../core/pool";
 import * as PIXI from "pixi.js";
 import { app, entitiesContainer } from "../../core/game/viewport";
 import { Multiplayer } from "../../core/multiplayer/context";
+import { BaseTowerRenderer } from "./base-tower-renderer";
+import {
+  recalculateAllBoosts as recalculateAllBoostsHelper,
+  recalculateBoosts as recalculateBoostsHelper,
+} from "./booster/booster-calc";
 
 export function getPlayerColor(playerIndex: number): number {
   if (playerIndex === 0) return 0x00f2fe; // Cyan
@@ -82,6 +87,7 @@ export class Tower {
   public pixiGhostContainer?: PIXI.Container;
   public ownerIndex: number;
   public pixiOwnerGlowGraphics?: PIXI.Graphics;
+  public renderer?: any;
 
   constructor(col: number, row: number) {
     const data = TowerData["Base"];
@@ -124,6 +130,10 @@ export class Tower {
     this.cachedBoosterDamageMult = 1;
     this.visualBooster = null;
 
+    if (this.constructor === Tower) {
+      this.renderer = new BaseTowerRenderer(this);
+    }
+
     this.initPixi();
   }
 
@@ -131,6 +141,10 @@ export class Tower {
     if (typeof window === "undefined" || !app || !app.renderer) return;
     const isHeadlessMode = new URLSearchParams(window.location.search).get("headless") === "true";
     if (isHeadlessMode) return;
+
+    if (this.constructor === Tower && !this.renderer) {
+      this.renderer = new BaseTowerRenderer(this);
+    }
 
     if (!this.pixiSprite) {
       this.pixiSprite = new PIXI.Container();
@@ -257,77 +271,11 @@ export class Tower {
   }
 
   public static recalculateAllBoosts(): void {
-    if (!state.towers) return;
-    for (let i = 0; i < state.towers.length; i++) {
-      state.towers[i].recalculateBoosts();
-    }
+    recalculateAllBoostsHelper();
   }
 
   public recalculateBoosts(): void {
-    let rangeMultiplier = 1;
-    let damageMultiplier = 1;
-    let fireRateMultiplier = 1;
-    let isBoosted = false;
-    this.visualBooster = null;
-
-    if (this.type !== "Booster" && state.towers) {
-      for (let i = 0; i < state.towers.length; i++) {
-        const t = state.towers[i];
-        if (
-          t.type === "Booster" &&
-          t !== this &&
-          (t.constructionTimer === undefined || t.constructionTimer <= 0)
-        ) {
-          const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
-          const boosterRange = t.range;
-          if (distSq <= boosterRange * boosterRange) {
-            isBoosted = true;
-            if (!this.visualBooster) {
-              this.visualBooster = t;
-            }
-
-            // Range multiplier
-            if (t.specialization === "amplitude") {
-              const spec = TowerData["Booster"].specializations["amplitude"];
-              const rangeBoost = t.masteryUnlocked
-                ? spec.values!.masteryRangeBoost
-                : spec.values!.normalRangeBoost;
-              rangeMultiplier += rangeBoost;
-            } else {
-              rangeMultiplier += 0.1; // +10% base range buff
-            }
-
-            // Damage multiplier
-            if (t.specialization === "amplitude") {
-              const spec = TowerData["Booster"].specializations["amplitude"];
-              const dmgBoost = t.masteryUnlocked
-                ? spec.values!.masteryDmgBoost
-                : spec.values!.normalDmgBoost;
-              damageMultiplier += dmgBoost;
-            } else {
-              damageMultiplier += 0.15; // +15% base damage buff
-            }
-
-            // Fire rate multiplier
-            if (t.specialization === "frequency") {
-              const spec = TowerData["Booster"].specializations["frequency"];
-              const speedBoost = t.masteryUnlocked
-                ? spec.values!.masteryBoost
-                : spec.values!.normalBoost;
-              fireRateMultiplier += speedBoost;
-            }
-          }
-        }
-      }
-    }
-
-    this.cachedRange = this.range * rangeMultiplier;
-    this.cachedBoosterDamageMult = damageMultiplier;
-    this.cachedFireRate = Math.max(
-      Config.TOWER_MIN_FIRE_RATE,
-      Math.round(this.fireRate / fireRateMultiplier)
-    );
-    this.cachedIsBoosted = isBoosted;
+    recalculateBoostsHelper(this);
   }
 
   public getEffectiveRange(): number {
@@ -442,163 +390,11 @@ export class Tower {
   }
 
   public drawPixi(g: PIXI.Graphics, part: "base" | "turret"): void {
-    const TS = Config.TILE_SIZE;
-
-    let scale = 1;
-    if (this.constructionTimer > 0) {
-      const progress = 1 - this.constructionTimer / this.constructionDuration;
-      const c1 = 1.70158;
-      const c3 = c1 + 1;
-      scale = 1 + c3 * Math.pow(progress - 1, 3) + c1 * Math.pow(progress - 1, 2);
-
-      if (part === "base") {
-        g.arc(0, 0, TS / 2 + 2, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
-        g.stroke({ color: "#4cc9f0", alpha: 0.3, width: 6 });
-
-        g.arc(0, 0, TS / 2 + 2, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
-        g.stroke({ color: "#4cc9f0", alpha: 1, width: 3 });
+    if (this.constructor === Tower) {
+      if (!this.renderer) {
+        this.renderer = new BaseTowerRenderer(this);
       }
-    }
-
-    if (part === "base") {
-      const halfBase = TS / 2 - 5;
-      let baseColor = this.currentColor;
-
-      if (this.specialization) {
-        const spec = TowerData[this.type].specializations[this.specialization];
-        if (spec) baseColor = spec.color;
-      }
-
-      g.roundRect(
-        -halfBase * scale,
-        -halfBase * scale,
-        halfBase * 2 * scale,
-        halfBase * 2 * scale,
-        4
-      ).fill({ color: baseColor });
-
-      g.rect(
-        (-halfBase + 4) * scale,
-        (-halfBase + 4) * scale,
-        (halfBase * 2 - 8) * scale,
-        (halfBase * 2 - 8) * scale
-      ).stroke({ color: 0xffffff, alpha: 0.1, width: 1 });
-
-      if (this.specialization === "heavy") {
-        const s = 6 * scale;
-        g.rect(-halfBase * scale, -halfBase * scale, s, s).fill({ color: "#636e72" });
-        g.rect((halfBase - 6) * scale, -halfBase * scale, s, s).fill({ color: "#636e72" });
-        g.rect(-halfBase * scale, (halfBase - 6) * scale, s, s).fill({ color: "#636e72" });
-        g.rect((halfBase - 6) * scale, (halfBase - 6) * scale, s, s).fill({ color: "#636e72" });
-
-        if (this.masteryUnlocked) {
-          const radius = 1.5 * scale;
-          g.circle((-halfBase + 3) * scale, (-halfBase + 3) * scale, radius).fill({
-            color: "#ffd700",
-          });
-          g.circle((halfBase - 3) * scale, (-halfBase + 3) * scale, radius).fill({
-            color: "#ffd700",
-          });
-          g.circle((-halfBase + 3) * scale, (halfBase - 3) * scale, radius).fill({
-            color: "#ffd700",
-          });
-          g.circle((halfBase - 3) * scale, (halfBase - 3) * scale, radius).fill({
-            color: "#ffd700",
-          });
-        }
-      }
-
-      // Antenna elements removed
-
-      // Level Badge
-      if (this.level > 1 && this.pixiLevelText) {
-        const badgeX = (TS / 2 - 11) * scale;
-        const badgeY = (TS / 2 - 11) * scale;
-        const size = 9.5 * scale;
-
-        for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI / 3) * i - Math.PI / 6;
-          const hx = badgeX + size * Math.cos(angle);
-          const hy = badgeY + size * Math.sin(angle);
-          if (i === 0) g.moveTo(hx, hy);
-          else g.lineTo(hx, hy);
-        }
-        g.closePath();
-
-        g.fill({ color: "#0f172a", alpha: 0.85 });
-
-        let borderColor = this.currentColor;
-        if (this.level >= Config.TOWER_MASTERY_LEVEL) borderColor = "#ffd700";
-        else if (this.level >= Config.TOWER_SPECIALIZATION_LEVEL) borderColor = "#ff9f43";
-
-        // We have to redraw the hexpath because stroke consumes it? Or fill consumes it?
-        // Yes, drawing paths usually consumes it.
-        for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI / 3) * i - Math.PI / 6;
-          const hx = badgeX + size * Math.cos(angle);
-          const hy = badgeY + size * Math.sin(angle);
-          if (i === 0) g.moveTo(hx, hy);
-          else g.lineTo(hx, hy);
-        }
-        g.closePath();
-
-        g.stroke({ color: borderColor, width: 1.5 });
-
-        this.pixiLevelText.text = this.level.toString();
-        this.pixiLevelText.position.set(badgeX, badgeY);
-        if (this.level >= Config.TOWER_MASTERY_LEVEL) this.pixiLevelText.style.fill = "#ffd700";
-        else if (this.level >= Config.TOWER_SPECIALIZATION_LEVEL)
-          this.pixiLevelText.style.fill = "#ff9f43";
-        else this.pixiLevelText.style.fill = "#ffffff";
-        this.pixiLevelText.visible = true;
-      } else if (this.pixiLevelText) {
-        this.pixiLevelText.visible = false;
-      }
-    }
-
-    if (part === "turret") {
-      const turretColor2 =
-        this.specialization === "heavy"
-          ? "#636e72"
-          : this.specialization === "missiles"
-            ? "#ff7675"
-            : "#fff";
-
-      // Draw turret body
-      g.circle(0, 0, 10 * scale)
-        .fill({ color: turretColor2 })
-        .stroke({ color: 0x000000, alpha: 0.3, width: 1 });
-
-      // barrel
-      if (this.specialization === "heavy") {
-        g.rect(0, -5 * scale, 18 * scale, 10 * scale)
-          .fill({ color: "#1e272e" })
-          .stroke({ color: "#636e72", width: 1 });
-        g.rect(16 * scale, -7 * scale, 4 * scale, 14 * scale).fill({ color: "#1e272e" });
-      } else {
-        g.rect(0, -3 * scale, 15 * scale, 6 * scale).fill({
-          color: this.specialization === "missiles" ? "#2d3436" : "#ddd",
-        });
-      }
-
-      if (this.specialization === "missiles") {
-        g.rect(-5 * scale, -14 * scale, 12 * scale, 6 * scale).fill({ color: "#fca311" });
-        g.rect(-5 * scale, 8 * scale, 12 * scale, 6 * scale).fill({ color: "#fca311" });
-
-        g.moveTo(7 * scale, -14 * scale)
-          .lineTo(11 * scale, -11 * scale)
-          .lineTo(7 * scale, -8 * scale)
-          .fill({ color: "#ff3366" });
-        g.moveTo(7 * scale, 8 * scale)
-          .lineTo(11 * scale, 11 * scale)
-          .lineTo(7 * scale, 14 * scale)
-          .fill({ color: "#ff3366" });
-
-        if (this.masteryUnlocked) {
-          g.rect(-12 * scale, -4 * scale, 8 * scale, 8 * scale).fill({ color: "#2d3436" });
-          g.circle(-8 * scale, 0, 3 * scale).fill({ color: "#ff3366" });
-        }
-      }
+      this.renderer.drawPixi(g, part);
     }
   }
 
