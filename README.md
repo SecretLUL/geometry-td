@@ -15,7 +15,11 @@ The visual design is built around a neon-cybernetic cyber-glassmorphism theme, a
 ## 🚀 Key Features
 
 *   **GPU-Accelerated Rendering (PixiJS v8):** Pure WebGL rendering engine. Utilizes advanced techniques such as sprite pooling (for projectiles and particles) and isolated `RenderGroups` to prevent stuttering and CPU overhead.
-*   **Network Synchronization & Co-op (Up to 4 Players):** Real-time multiplayer combining **WebSockets (Socket.io)** for lobby and state coordination, and **WebRTC Peer-to-Peer** for low-latency transmission of position and projectile data between clients.
+*   **Network Synchronization & Co-op (Up to 4 Players):** Real-time multiplayer combining **WebSockets (Socket.io)** and **WebRTC Peer-to-Peer** for co-op play. Features:
+    *   **Dynamic Map Division:** The map splits dynamically into halves (2 players), thirds (3 players), or quadrants (4 players) based on player count.
+    *   **Automated Tower Relocation:** Shifts in boundaries trigger a relocation phase (game paused, full refund sell values) for towers left outside the player's new zone.
+    *   **Individual Budgets:** Gold is split equally upon player connection. Wave completion bonuses are shared, and enemy bounties are awarded based on tower damage contribution.
+    *   **Aesthetics & Glows:** Cyber-glowing neon lines partition the game board. Towers emit player-colored glowing rings, and upgrade tooltips display ownership.
 *   **Authoritative Headless Host System:** To prevent cheating, the core game physics and state calculations run on a server-side headless browser (**Puppeteer/Chromium**). Clients receive validated delta updates and interpolate them smoothly.
 *   **Headless Health-Check & Clean-up System:** The backend runs a health check every 30 seconds to clean up orphaned browser instances (e.g., when all human players leave the lobby), abort browsers stuck in the launching state (> 45s), and restart crashed instances.
 *   **Persistent Progress System:** Secure registration and login via JWT-based authentication (stored in secure HttpOnly cookies). Progress, unlocked skins, achievements (with confetti animations), and high scores are saved in a PostgreSQL database.

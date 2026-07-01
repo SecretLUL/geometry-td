@@ -5,6 +5,46 @@
   },
 
   {
+    "version": "v2.19.1",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "zirkuläre abhängigkeiten im multiplayer behoben."
+      },
+      {
+        "type": "fix",
+        "desc": "relocation-phase und ui-overlays synchronisiert."
+      },
+      {
+        "type": "fix",
+        "desc": "visual freeze und textanzeige bei der turm-relokation korrigiert."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.19",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "spielfeldaufteilung und individuelle goldbudgets für bis zu 4 spieler implementiert."
+      },
+      {
+        "type": "feature",
+        "desc": "farbigen neon-glow und besitzanzeige im tooltip für spielertürme hinzugefügt."
+      },
+      {
+        "type": "feature",
+        "desc": "turm-relokationsphase bei änderung der spieleranzahl integriert."
+      }
+    ]
+  },
+
+  {
     "version": "v2.18.39",
     "date": "1. Juli 2026",
     "status": "active",
