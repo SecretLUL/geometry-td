@@ -14,6 +14,7 @@ import {
   RequestPlaceTowerSchema,
   RequestUpgradeTowerSchema,
   RequestSellTowerSchema,
+  RequestRelocateTowerSchema,
   ConfirmPlaceTowerSchema,
   RejectPlaceTowerSchema,
   ConfirmUpgradeTowerSchema,
@@ -38,6 +39,22 @@ import {
 } from './types';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from './auth';
+
+function recalculateStartingGold(state: any) {
+  if (state.wave > 1 || state.isWaveActive) return;
+  const activeCount = state.playerSlots ? state.playerSlots.filter((id: any) => id !== null).length : 1;
+  const splitGold = Math.floor(300 / Math.max(1, activeCount));
+  if (!state.playerGolds) {
+    state.playerGolds = [300, 300, 300, 300];
+  }
+  for (let i = 0; i < 4; i++) {
+    if (state.playerSlots && state.playerSlots[i] !== null) {
+      state.playerGolds[i] = splitGold;
+    } else {
+      state.playerGolds[i] = 0;
+    }
+  }
+}
 
 async function updateRoomHighscores(roomId: string, io: Server) {
   const state = roomStates[roomId];
@@ -189,6 +206,22 @@ export function setupSockets(io: Server) {
         initRoomState(finalRoomId, mapName, mode);
         const state = roomStates[finalRoomId];
 
+        let assignedSlot = -1;
+        if (!socket.isHeadless) {
+          if (!state.playerSlots) {
+            state.playerSlots = [null, null, null, null];
+          }
+          let idx = state.playerSlots.indexOf(socket.id);
+          if (idx === -1) {
+            idx = state.playerSlots.indexOf(null);
+          }
+          if (idx !== -1) {
+            state.playerSlots[idx] = socket.id;
+            assignedSlot = idx;
+          }
+          recalculateStartingGold(state);
+        }
+
         state.sockets.add(socket.id);
 
         const isDevEnv = process.env.NODE_ENV === 'development';
@@ -203,7 +236,7 @@ export function setupSockets(io: Server) {
             console.log(`[DEV-HOST] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as HOST.`);
           }
           state.hostId = socket.id;
-          socket.emit("role_assigned", { isHost: true, iceServers: ICE_SERVERS });
+          socket.emit("role_assigned", { isHost: true, iceServers: ICE_SERVERS, playerIndex: assignedSlot });
         } else {
           console.log(`[NETWORK] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as CLIENT.`);
 
@@ -213,7 +246,7 @@ export function setupSockets(io: Server) {
             });
           }
 
-          socket.emit("role_assigned", { isHost: false, iceServers: ICE_SERVERS });
+          socket.emit("role_assigned", { isHost: false, iceServers: ICE_SERVERS, playerIndex: assignedSlot });
         }
 
         let humanCount = 0;
@@ -231,6 +264,10 @@ export function setupSockets(io: Server) {
         socket.mission = finalRoomId;
 
         io.to(finalRoomId).emit("player_count_update", state.playerCount);
+        io.to(finalRoomId).emit("player_slots_update", {
+          playerSlots: state.playerSlots,
+          playerGolds: state.playerGolds
+        });
 
         const stateToSend = { ...state, sockets: Array.from(state.sockets) };
         socket.emit("full_game_state", stateToSend);
@@ -263,6 +300,7 @@ export function setupSockets(io: Server) {
       const state = roomStates[socket.mission];
       data.tick = state.currentTick || 0;
       data.timestamp = Date.now();
+      data.playerId = socket.id;
       if (state.hostId) {
         io.to(state.hostId).emit("request_place_tower", data);
       }
@@ -279,6 +317,7 @@ export function setupSockets(io: Server) {
       const state = roomStates[socket.mission];
       data.tick = state.currentTick || 0;
       data.timestamp = Date.now();
+      data.playerId = socket.id;
       if (state.hostId) {
         io.to(state.hostId).emit("request_upgrade_tower", data);
       }
@@ -295,8 +334,26 @@ export function setupSockets(io: Server) {
       const state = roomStates[socket.mission];
       data.tick = state.currentTick || 0;
       data.timestamp = Date.now();
+      data.playerId = socket.id;
       if (state.hostId) {
         io.to(state.hostId).emit("request_sell_tower", data);
+      }
+    });
+
+    socket.on("request_relocate_tower", (rawPayload: unknown) => {
+      if (!socket.mission) return;
+      const parsed = RequestRelocateTowerSchema.safeParse(rawPayload);
+      if (!parsed.success) {
+        console.warn(`[VALIDATION FAILED] request_relocate_tower von ${socket.id}:`, parsed.error.format());
+        return;
+      }
+      const data = parsed.data as any;
+      const state = roomStates[socket.mission];
+      data.tick = state.currentTick || 0;
+      data.timestamp = Date.now();
+      data.playerId = socket.id;
+      if (state.hostId) {
+        io.to(state.hostId).emit("request_relocate_tower", data);
       }
     });
 
@@ -531,7 +588,10 @@ export function setupSockets(io: Server) {
         return;
       }
       const gold = parsed.data;
-      roomStates[socket.mission].gold = gold;
+      roomStates[socket.mission].playerGolds = gold;
+      if (gold && gold.length > 0) {
+        roomStates[socket.mission].gold = gold[0];
+      }
       socket.to(socket.mission).emit("sync_gold", gold);
     });
 
@@ -561,6 +621,13 @@ export function setupSockets(io: Server) {
 
         state.sockets.delete(socket.id);
 
+        if (state.playerSlots) {
+          const idx = state.playerSlots.indexOf(socket.id);
+          if (idx !== -1) {
+            state.playerSlots[idx] = null;
+          }
+        }
+
         if (state.hostId === socket.id) {
           console.log(`[HOST] Host ${socket.id} disconnected.`);
           state.hostId = null;
@@ -578,7 +645,16 @@ export function setupSockets(io: Server) {
             }
           }
           state.playerCount = humanCount;
+          
+          if (state.wave === 1 && !state.isWaveActive) {
+            recalculateStartingGold(state);
+          }
+
           io.to(socket.mission).emit("player_count_update", state.playerCount);
+          io.to(socket.mission).emit("player_slots_update", {
+            playerSlots: state.playerSlots,
+            playerGolds: state.playerGolds
+          });
 
           if (state.playerCount === 0) {
             console.log(`[NETWORK] No players remaining in ${socket.mission}. Stopping headless host.`);

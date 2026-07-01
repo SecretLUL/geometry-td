@@ -12,6 +12,23 @@ import { Enemy, TowerType, TowerSpecialization, Tower as ITower } from "../../ty
 import { PoolManager } from "../../core/pool";
 import * as PIXI from "pixi.js";
 import { app, entitiesContainer } from "../../core/game/viewport";
+import { Multiplayer } from "../../core/multiplayer/context";
+
+export function getPlayerColor(playerIndex: number): number {
+  if (playerIndex === 0) return 0x00f2fe; // Cyan
+  if (playerIndex === 1) return 0xff007f; // Pink
+  if (playerIndex === 2) return 0xffb703; // Yellow
+  if (playerIndex === 3) return 0x00ff88; // Green
+  return 0xffffff;
+}
+
+export function getPlayerColorString(playerIndex: number): string {
+  if (playerIndex === 0) return "#00f2fe"; // Cyan
+  if (playerIndex === 1) return "#ff007f"; // Pink
+  if (playerIndex === 2) return "#ffb703"; // Yellow
+  if (playerIndex === 3) return "#00ff88"; // Green
+  return "#ffffff";
+}
 
 export function tierOf(level: number): number {
   return Math.floor((level - 1) / 3);
@@ -63,6 +80,8 @@ export class Tower {
   public pixiLevelText?: PIXI.Text;
   public pixiStunSprite?: PIXI.Text;
   public pixiGhostContainer?: PIXI.Container;
+  public ownerIndex: number;
+  public pixiOwnerGlowGraphics?: PIXI.Graphics;
 
   constructor(col: number, row: number) {
     const data = TowerData["Base"];
@@ -74,6 +93,7 @@ export class Tower {
     this.kills = 0;
     this.damageDealt = 0;
 
+    this.ownerIndex = Multiplayer.myPlayerIndex !== undefined ? Multiplayer.myPlayerIndex : 0;
     this.level = 1;
     this.range = data.baseRange;
     this.damage = data.baseDamage;
@@ -125,6 +145,9 @@ export class Tower {
       this.pixiBoostGraphics.visible = false;
       this.pixiSprite.addChild(this.pixiBoostGraphics);
 
+      this.pixiOwnerGlowGraphics = new PIXI.Graphics();
+      this.pixiSprite.addChild(this.pixiOwnerGlowGraphics);
+
       this.pixiBaseGraphics = new PIXI.Graphics();
       this.pixiSprite.addChild(this.pixiBaseGraphics);
 
@@ -156,6 +179,11 @@ export class Tower {
     if (!this.pixiSprite || !this.pixiTurretGraphics || !this.pixiBaseGraphics) return;
 
     this.pixiSprite.position.set(this.x, this.y);
+
+    if (this.pixiOwnerGlowGraphics && this.pixiOwnerGlowGraphics.visible) {
+      const pulse = 0.75 + Math.sin(Date.now() / 150) * 0.2;
+      this.pixiOwnerGlowGraphics.alpha = pulse;
+    }
 
     if (this.pixiBoostGraphics) {
       if (this.constructionTimer <= 0 && this.isBoosted()) {
@@ -190,10 +218,30 @@ export class Tower {
     }
   }
 
+  public drawOwnerGlow(): void {
+    if (!this.pixiOwnerGlowGraphics) return;
+    this.pixiOwnerGlowGraphics.clear();
+
+    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    if (activeCount <= 1) {
+      this.pixiOwnerGlowGraphics.visible = false;
+      return;
+    }
+
+    this.pixiOwnerGlowGraphics.visible = true;
+    const color = getPlayerColor(this.ownerIndex);
+    const radius = Config.TILE_SIZE / 2;
+
+    // Draw neon outer glow circle (glow under tower base)
+    this.pixiOwnerGlowGraphics.circle(0, 0, radius - 2).fill({ color, alpha: 0.12 });
+    this.pixiOwnerGlowGraphics.circle(0, 0, radius - 2).stroke({ color, alpha: 0.75, width: 2 });
+  }
+
   public redrawPixiBase(): void {
     if (!this.pixiBaseGraphics) return;
     this.pixiBaseGraphics.clear();
     this.drawPixi(this.pixiBaseGraphics, "base");
+    this.drawOwnerGlow();
   }
 
   public redrawPixiTurret(): void {

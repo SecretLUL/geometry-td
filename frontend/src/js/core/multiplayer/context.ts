@@ -83,6 +83,7 @@ export interface IMultiplayer {
   currentTick: number;
   lastSyncState: SyncFullGameStatePayload | null;
   lastReceivedState: SyncFullGameStatePayload | null;
+  myPlayerIndex: number;
   activeMode?: "singleplayer" | "public" | "private";
   activeRoomId?: string;
   startWaveCallback?: (data?: any) => void;
@@ -90,14 +91,15 @@ export interface IMultiplayer {
   init(startWaveCallback: (data?: unknown) => void, updateUICallback: () => void): void;
   updatePlayerCountUI(count: number): void;
 
-  processPlaceTower(type: TowerType, col: number, row: number): boolean;
+  processPlaceTower(type: TowerType, col: number, row: number, playerId?: string): boolean;
   processUpgradeTower(
     col: number,
     row: number,
     specId?: TowerSpecialization | null,
-    silent?: boolean
+    silent?: boolean,
+    playerId?: string
   ): boolean;
-  processSellTower(col: number, row: number): boolean;
+  processSellTower(col: number, row: number, playerId?: string): boolean;
 
   emitSyncGameState(data: SyncFullGameStatePayload): void;
   syncNow(): void;
@@ -114,8 +116,9 @@ export interface IMultiplayer {
   emitRequestSellTower(col: number, row: number): void;
   emitRequestWaveStart(wave: number | { wave: number; pool?: string[] }): void;
   emitSyncLives(lives: number): void;
-  emitSyncGold(gold: number): void;
+  emitSyncGold(gold: number[]): void;
   emitHostEndedWave(): void;
+  emitRequestRelocateTower(fromCol: number, fromRow: number, toCol: number, toRow: number): void;
 }
 
 export interface SocketInstance {
@@ -142,4 +145,5 @@ export const Multiplayer = {
   currentTick: 0,
   lastSyncState: null as SyncFullGameStatePayload | null,
   lastReceivedState: null as SyncFullGameStatePayload | null,
+  myPlayerIndex: 0,
 } as IMultiplayer;

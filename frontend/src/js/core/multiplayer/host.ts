@@ -19,8 +19,17 @@ import {
 import { createExplosion } from "../../fx/fx";
 import { TowerSpecialization, TowerType } from "../../types";
 import { Multiplayer, socket } from "./context";
+import { isCellAllowedForPlayer } from "../utils";
 
-export function processPlaceTower(type: TowerType, col: number, row: number): boolean {
+function getPlayerIndex(playerId?: string): number {
+  if (!state.playerSlots || !playerId) return 0;
+  const idx = state.playerSlots.indexOf(playerId);
+  return idx === -1 ? 0 : idx;
+}
+
+export function processPlaceTower(type: TowerType, col: number, row: number, playerId?: string): boolean {
+  const pIdx = getPlayerIndex(playerId);
+
   // Check if tower already exists at this position
   if (state.towers.find((t) => t.col === col && t.row === row)) {
     socket?.emit("reject_place_tower", { type, col, row });
@@ -36,9 +45,18 @@ export function processPlaceTower(type: TowerType, col: number, row: number): bo
     : 0;
   const cost = getTowerPurchaseCost(type, existingCount);
 
-  if (state.infiniteGold || state.gold >= cost) {
-    if (!state.infiniteGold) state.gold -= cost;
-    Multiplayer.emitSyncGold(state.gold);
+  if (!state.playerGolds) {
+    state.playerGolds = [300, 300, 300, 300];
+  }
+
+  if (state.infiniteGold || state.playerGolds[pIdx] >= cost) {
+    if (!state.infiniteGold) {
+      state.playerGolds[pIdx] -= cost;
+      if (pIdx === Multiplayer.myPlayerIndex) {
+        state.gold = state.playerGolds[pIdx];
+      }
+    }
+    Multiplayer.emitSyncGold(state.playerGolds);
 
     let TowerClass = Tower;
     if (type === "Sniper") TowerClass = SniperTower;
@@ -49,6 +67,7 @@ export function processPlaceTower(type: TowerType, col: number, row: number): bo
     else if (type === "Generator") TowerClass = GeneratorTower;
 
     const newTower = new TowerClass(col, row);
+    (newTower as any).ownerIndex = pIdx;
     state.towers.push(newTower);
 
     Tower.recalculateAllBoosts();
@@ -57,7 +76,7 @@ export function processPlaceTower(type: TowerType, col: number, row: number): bo
     createExplosion(col * TS + TS / 2, row * TS + TS / 2, "#ffffff", 5);
 
     Multiplayer.updateUI();
-    socket?.emit("confirm_place_tower", { type, col, row });
+    socket?.emit("confirm_place_tower", { type, col, row, ownerIndex: pIdx });
     return true;
   }
 
@@ -69,17 +88,30 @@ export function processUpgradeTower(
   col: number,
   row: number,
   specId: TowerSpecialization | null = null,
-  silent: boolean = false
+  silent: boolean = false,
+  playerId?: string
 ): boolean {
+  const pIdx = getPlayerIndex(playerId);
   const tower = state.towers.find((t) => t.col === col && t.row === row);
   if (tower) {
+    if ((tower as any).ownerIndex !== undefined && (tower as any).ownerIndex !== pIdx) {
+      return false;
+    }
     if (tower.level >= Config.TOWER_MAX_LEVEL) {
       return false;
     }
     const cost = tower.upgradeCost;
-    if (state.infiniteGold || state.gold >= cost) {
-      if (!state.infiniteGold) state.gold -= cost;
-      Multiplayer.emitSyncGold(state.gold);
+    if (!state.playerGolds) {
+      state.playerGolds = [300, 300, 300, 300];
+    }
+    if (state.infiniteGold || state.playerGolds[pIdx] >= cost) {
+      if (!state.infiniteGold) {
+        state.playerGolds[pIdx] -= cost;
+        if (pIdx === Multiplayer.myPlayerIndex) {
+          state.gold = state.playerGolds[pIdx];
+        }
+      }
+      Multiplayer.emitSyncGold(state.playerGolds);
 
       const wasInfinite = state.infiniteGold;
       state.infiniteGold = true;
@@ -98,23 +130,119 @@ export function processUpgradeTower(
   return false;
 }
 
-export function processSellTower(col: number, row: number): boolean {
+export function processSellTower(col: number, row: number, playerId?: string): boolean {
+  const pIdx = getPlayerIndex(playerId);
   const idx = state.towers.findIndex((t) => t.col === col && t.row === row);
   if (idx !== -1) {
     const tower = state.towers[idx];
-    const refund = Math.floor(tower.totalSpent * 0.5);
-    state.gold += refund;
-    Multiplayer.emitSyncGold(state.gold);
+    if ((tower as any).ownerIndex !== undefined && (tower as any).ownerIndex !== pIdx) {
+      return false;
+    }
+    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    const isMisplaced = !isCellAllowedForPlayer(tower.col, tower.row, tower.ownerIndex !== undefined ? tower.ownerIndex : 0, activeCount);
+    const refundMult = (state.relocationActive && isMisplaced) ? 1.0 : 0.5;
+    const refund = Math.floor(tower.totalSpent * refundMult);
+
+    if (!state.playerGolds) {
+      state.playerGolds = [300, 300, 300, 300];
+    }
+    state.playerGolds[pIdx] += refund;
+    if (pIdx === Multiplayer.myPlayerIndex) {
+      state.gold = state.playerGolds[pIdx];
+    }
+    Multiplayer.emitSyncGold(state.playerGolds);
 
     tower.destroy();
     state.towers.splice(idx, 1);
     Tower.recalculateAllBoosts();
 
     createExplosion(tower.x, tower.y, "#e94560", 10);
+
+    recalculateRelocationState();
+
     Multiplayer.updateUI();
 
     socket?.emit("confirm_sell_tower", { col, row });
     return true;
   }
   return false;
+}
+
+export function recalculateRelocationState(): void {
+  if (!state.isHost) return;
+
+  const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+  const relocStates = [false, false, false, false];
+  let anyReloc = false;
+
+  for (const t of state.towers) {
+    if (t.ownerIndex !== undefined) {
+      if (!isCellAllowedForPlayer(t.col, t.row, t.ownerIndex, activeCount)) {
+        relocStates[t.ownerIndex] = true;
+        anyReloc = true;
+      }
+    }
+  }
+
+  const wasRelocationActive = state.relocationActive;
+  state.relocationActive = anyReloc;
+  state.playerRelocationStates = relocStates;
+
+  if (anyReloc) {
+    if (!state.isPaused) {
+      state.isPaused = true;
+      Multiplayer.emitTogglePause?.(true);
+    }
+  } else if (wasRelocationActive) {
+    state.isPaused = false;
+    Multiplayer.emitTogglePause?.(false);
+  }
+}
+
+export function processRelocateTower(
+  fromCol: number,
+  fromRow: number,
+  toCol: number,
+  toRow: number,
+  playerId?: string
+): boolean {
+  if (!state.isHost) return false;
+
+  const pIdx = state.playerSlots ? state.playerSlots.indexOf(playerId || "") : -1;
+  if (pIdx === -1) return false;
+
+  const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+
+  const tower = state.towers.find((t) => t.col === fromCol && t.row === fromRow);
+  if (!tower) return false;
+
+  if (tower.ownerIndex !== pIdx) return false;
+
+  if (!isCellAllowedForPlayer(toCol, toRow, pIdx, activeCount)) return false;
+
+  if (state.towers.find((t) => t.col === toCol && t.row === toRow)) return false;
+
+  tower.col = toCol;
+  tower.row = toRow;
+  tower.x = toCol * Config.TILE_SIZE + Config.TILE_SIZE / 2;
+  tower.y = toRow * Config.TILE_SIZE + Config.TILE_SIZE / 2;
+
+  if (tower.pixiSprite) {
+    tower.pixiSprite.position.set(tower.x, tower.y);
+  }
+
+  tower.redrawPixiBase();
+  tower.redrawPixiTurret();
+
+  Tower.recalculateAllBoosts();
+
+  const TS = Config.TILE_SIZE;
+  createExplosion(toCol * TS + TS / 2, toRow * TS + TS / 2, "#00ff88", 5);
+
+  recalculateRelocationState();
+
+  Multiplayer.syncNow();
+  Multiplayer.updateUI();
+
+  return true;
 }

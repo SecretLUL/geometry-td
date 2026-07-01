@@ -17,6 +17,8 @@ export interface GameState {
   isHost: boolean;
   lives: number;
   gold: number;
+  playerGolds: number[];
+  playerSlots: Array<string | null>;
   wave: number;
   totalGoldEarned: number;
   totalGoldFromInterest: number;
@@ -79,6 +81,9 @@ export interface GameState {
   unlockedAchievements?: string[];
   isGuest?: boolean;
   activeAccelerators?: Enemy[];
+  relocationActive?: boolean;
+  playerRelocationStates?: boolean[];
+  relocatingTower?: { col: number; row: number } | null;
 }
 
 export interface Vector2D {
@@ -229,6 +234,8 @@ export interface Tower {
   predictedCost?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pixiSprite?: any;
+  ownerIndex?: number;
+  drawOwnerGlow?(): void;
 
   // Instance Methods
   getEffectiveRange(): number;
@@ -341,6 +348,7 @@ export interface SyncTowerState {
   specId?: TowerSpecialization | null;
   damageDealt?: number;
   totalSpent?: number;
+  ownerIndex?: number;
 }
 
 /** Complete state emitted by the Host (e.g. at 20Hz sync interval) */
@@ -362,6 +370,10 @@ export interface SyncFullGameStatePayload {
   timestamp?: number;
   localTimestamp?: number;
   towers?: SyncTowerState[];
+  playerSlots?: Array<string | null>;
+  playerGolds?: number[];
+  relocationActive?: boolean;
+  playerRelocationStates?: boolean[];
 }
 
 /** Delta compressed update sent between clients to minimize bandwidth */
@@ -385,6 +397,10 @@ export interface SyncDeltaGameStatePayload {
   screenDamageEffect?: number;
   benchmarkActive?: boolean;
   towers?: SyncTowerState[];
+  playerSlots?: Array<string | null>;
+  playerGolds?: number[];
+  relocationActive?: boolean;
+  playerRelocationStates?: boolean[];
 }
 
 /** Outer envelope wrapping game state synchronizations */

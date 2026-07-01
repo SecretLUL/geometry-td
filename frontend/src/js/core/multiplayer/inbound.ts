@@ -120,6 +120,10 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
       "screenDamageEffect",
       "benchmarkActive",
       "towers",
+      "playerGolds",
+      "playerSlots",
+      "relocationActive",
+      "playerRelocationStates",
     ];
     for (const key of otherFields) {
       if (delta[key] !== undefined) {
@@ -397,7 +401,30 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
   if (reconstructedState.benchmarkActive !== undefined) {
     state.benchmarkActive = reconstructedState.benchmarkActive;
   }
-  if (reconstructedState.gold !== undefined) state.gold = reconstructedState.gold;
+  if (reconstructedState.playerGolds !== undefined) {
+    state.playerGolds = reconstructedState.playerGolds;
+    if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
+      state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
+    } else {
+      state.gold = reconstructedState.gold || 0;
+    }
+  } else if (reconstructedState.gold !== undefined) {
+    state.gold = reconstructedState.gold;
+  }
+
+  if (reconstructedState.playerSlots !== undefined) {
+    state.playerSlots = reconstructedState.playerSlots;
+    const activeCount = state.playerSlots.filter((id) => id !== null).length;
+    Multiplayer.lastPlayerCount = activeCount || 1;
+  }
+
+  if (reconstructedState.relocationActive !== undefined) {
+    state.relocationActive = reconstructedState.relocationActive;
+  }
+
+  if (reconstructedState.playerRelocationStates !== undefined) {
+    state.playerRelocationStates = reconstructedState.playerRelocationStates;
+  }
 
   if (reconstructedState.towers) {
     reconstructedState.towers.forEach((tData: SyncTowerState) => {
@@ -420,6 +447,13 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
       if (tower) {
         tower.damageDealt = tData.damageDealt || 0;
         tower.totalSpent = tData.totalSpent !== undefined ? tData.totalSpent : tower.totalSpent;
+        if (tData.ownerIndex !== undefined) {
+          const oldOwner = tower.ownerIndex;
+          tower.ownerIndex = tData.ownerIndex;
+          if (oldOwner !== tData.ownerIndex) {
+            tower.drawOwnerGlow?.();
+          }
+        }
 
         // Sync level and specialization authoritatively from host
         const targetLevel = tData.level || 1;
@@ -441,6 +475,18 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
         }
       }
     });
+
+    // Clean up any local towers that are not present in the host's authoritative list
+    const syncedPositions = new Set(reconstructedState.towers.map((t) => `${t.col},${t.row}`));
+    for (let i = state.towers.length - 1; i >= 0; i--) {
+      const localTower = state.towers[i];
+      const posKey = `${localTower.col},${localTower.row}`;
+      if (!syncedPositions.has(posKey)) {
+        localTower.destroy();
+        state.towers.splice(i, 1);
+      }
+    }
+
     Tower.recalculateAllBoosts();
   }
 
@@ -477,8 +523,13 @@ export function bindInboundEvents(
       window.location.href = "index.html?error=" + encodeURIComponent(msg);
     });
 
-    s.on("role_assigned", (data: SocketEventMap["role_assigned"]) => {
+    s.on("role_assigned", (data: any) => {
       state.isHost = data.isHost;
+      if (data.playerIndex !== undefined && data.playerIndex !== -1) {
+        Multiplayer.myPlayerIndex = data.playerIndex;
+      } else {
+        Multiplayer.myPlayerIndex = 0;
+      }
       if (data.iceServers) {
         setIceServers(data.iceServers);
       }
@@ -486,7 +537,7 @@ export function bindInboundEvents(
       setWebRTCRole(state.isHost, null);
       if (state.isHost) {
         // Host immediately syncs the starting parameters to the server!
-        Multiplayer.emitSyncGold(state.gold);
+        Multiplayer.emitSyncGold(state.playerGolds);
         Multiplayer.emitSyncLives(state.lives);
       }
     });
@@ -504,11 +555,32 @@ export function bindInboundEvents(
     registerWebRTCMessageHandler(processIncomingGameState);
 
     // Initial state for late-joining clients
-    s.on("full_game_state", (data: SocketEventMap["full_game_state"]) => {
+    s.on("full_game_state", (data: any) => {
+      if (data.playerSlots !== undefined) {
+        state.playerSlots = data.playerSlots;
+        const idx = state.playerSlots.indexOf(s.id || "");
+        if (idx !== -1) {
+          Multiplayer.myPlayerIndex = idx;
+        }
+        const activeCount = state.playerSlots.filter((id: any) => id !== null).length;
+        Multiplayer.lastPlayerCount = activeCount || 1;
+      }
+      if (data.playerGolds !== undefined) {
+        state.playerGolds = data.playerGolds;
+        if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
+          state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
+        }
+      }
+      if (data.relocationActive !== undefined) {
+        state.relocationActive = data.relocationActive;
+      }
+      if (data.playerRelocationStates !== undefined) {
+        state.playerRelocationStates = data.playerRelocationStates;
+      }
       if (!state.isHost) {
         if (data.wave) state.wave = data.wave;
         if (data.lives !== undefined) state.lives = data.lives;
-        if (data.gold !== undefined) state.gold = data.gold;
+        if (data.gold !== undefined && (state.gold === undefined || state.gold === 300)) state.gold = data.gold;
       }
 
       // Initialize WebRTC connection using hostId provided by server
@@ -570,6 +642,9 @@ export function bindInboundEvents(
         newTower.damageDealt = tData.damageDealt || 0;
         newTower.totalSpent =
           tData.totalSpent !== undefined ? tData.totalSpent : newTower.totalSpent;
+        if (tData.ownerIndex !== undefined) {
+          (newTower as any).ownerIndex = tData.ownerIndex;
+        }
         newTower.constructionTimer = 0;
         newTower.initPixi();
 
@@ -699,6 +774,10 @@ export function bindInboundEvents(
         screenDamageEffect: 0,
         benchmarkActive: benchmarkActive || false,
         towers: towers || [],
+        playerSlots: data.playerSlots || [null, null, null, null],
+        playerGolds: data.playerGolds || [300, 300, 300, 300],
+        relocationActive: data.relocationActive || false,
+        playerRelocationStates: data.playerRelocationStates || [false, false, false, false],
       };
 
       Multiplayer.updateUI();
@@ -820,6 +899,10 @@ export function bindInboundEvents(
         newTower.damageDealt = tData.damageDealt || 0;
         newTower.totalSpent =
           tData.totalSpent !== undefined ? tData.totalSpent : newTower.totalSpent;
+        if (tData.ownerIndex !== undefined) {
+          newTower.ownerIndex = tData.ownerIndex;
+          newTower.drawOwnerGlow?.();
+        }
         newTower.constructionTimer = 0;
         newTower.initPixi();
 
@@ -832,25 +915,30 @@ export function bindInboundEvents(
     });
 
     // Host Validation Listeners
-    s.on("request_place_tower", (data: SocketEventMap["request_place_tower"]) => {
+    s.on("request_place_tower", (data: any) => {
       if (!state.isHost) return;
-      Multiplayer.processPlaceTower(data.type, data.col, data.row);
+      Multiplayer.processPlaceTower(data.type, data.col, data.row, data.playerId);
     });
 
-    s.on("request_upgrade_tower", (data: SocketEventMap["request_upgrade_tower"]) => {
+    s.on("request_upgrade_tower", (data: any) => {
       if (!state.isHost) return;
-      Multiplayer.processUpgradeTower(data.col, data.row, data.specId, true);
+      Multiplayer.processUpgradeTower(data.col, data.row, data.specId, true, data.playerId);
     });
 
-    s.on("request_sell_tower", (data: SocketEventMap["request_sell_tower"]) => {
+    s.on("request_sell_tower", (data: any) => {
       if (!state.isHost) return;
-      Multiplayer.processSellTower(data.col, data.row);
+      Multiplayer.processSellTower(data.col, data.row, data.playerId);
+    });
+
+    s.on("request_relocate_tower", (data: any) => {
+      if (!state.isHost) return;
+      (Multiplayer as any).processRelocateTower(data.fromCol, data.fromRow, data.toCol, data.toRow, data.playerId);
     });
 
     // Client Confirms
-    s.on("confirm_place_tower", (data: SocketEventMap["confirm_place_tower"]) => {
+    s.on("confirm_place_tower", (data: any) => {
       if (state.isHost) return;
-      const { type, col, row } = data;
+      const { type, col, row, ownerIndex } = data;
 
       const TS = Config.TILE_SIZE;
       const existing = state.towers.find((t) => t.col === col && t.row === row);
@@ -860,6 +948,9 @@ export function bindInboundEvents(
           existing.isPredicted = false;
           delete existing.predictionTime;
           delete existing.predictedCost;
+          if (ownerIndex !== undefined) {
+            (existing as any).ownerIndex = ownerIndex;
+          }
           createExplosion(col * TS + TS / 2, row * TS + TS / 2, "#ffffff", 5);
           Multiplayer.updateUI();
         }
@@ -875,6 +966,9 @@ export function bindInboundEvents(
       else if (type === "Generator") TowerClass = GeneratorTower;
 
       const newTower = new TowerClass(col, row);
+      if (ownerIndex !== undefined) {
+        (newTower as any).ownerIndex = ownerIndex;
+      }
       state.towers.push(newTower);
       Tower.recalculateAllBoosts();
 
@@ -963,9 +1057,43 @@ export function bindInboundEvents(
       Multiplayer.updateUI();
     });
 
-    // Gold synchronization (optional, if needed)
-    s.on("sync_gold", (gold: number) => {
-      state.gold = gold;
+    // Gold synchronization
+    s.on("sync_gold", (playerGolds: number[]) => {
+      state.playerGolds = playerGolds;
+      if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
+        state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
+      }
+      Multiplayer.updateUI();
+    });
+
+    // Player slots update
+    s.on("player_slots_update", (data: { playerSlots: Array<string | null>; playerGolds: number[] }) => {
+      state.playerSlots = data.playerSlots;
+      state.playerGolds = data.playerGolds;
+
+      const idx = state.playerSlots.indexOf(s.id || "");
+      if (idx !== -1) {
+        Multiplayer.myPlayerIndex = idx;
+      }
+
+      if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
+        state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
+      }
+
+      Multiplayer.lastPlayerCount = state.playerSlots.filter((id) => id !== null).length;
+
+      // Force redraw of towers to update neon colors immediately
+      for (const t of state.towers) {
+        if (t.drawOwnerGlow) {
+          t.drawOwnerGlow();
+        }
+      }
+
+      if (state.isHost) {
+        (Multiplayer as any).recalculateRelocationState();
+        Multiplayer.syncNow();
+      }
+
       Multiplayer.updateUI();
     });
 

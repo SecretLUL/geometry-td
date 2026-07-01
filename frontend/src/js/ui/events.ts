@@ -22,10 +22,21 @@ import { showUpgradeModal, showContextShop, hideContextShop } from "./modals";
 import { updateTooltip } from "./tooltips";
 import { updateUI, cancelPlacement, setPauseState } from "./ui";
 import { resetHudDisplay } from "./hud";
+import { isCellAllowedForPlayer } from "../core/utils";
 
 export function buildTowerAt(type: string, col: number, row: number): boolean {
   const TS = Config.TILE_SIZE;
   if (!type || !TowerData[type]) return false;
+
+  const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+  const myIndex = Multiplayer.myPlayerIndex || 0;
+  if (!isCellAllowedForPlayer(col, row, myIndex, activeCount)) {
+    const mouseX = col * TS + TS / 2;
+    const mouseY = row * TS + TS / 2;
+    PoolManager.getFloatingText(mouseX, mouseY, "Nicht dein Bereich!", "#ff3366");
+    return false;
+  }
+
   const existingCount = state.towers
     ? state.towers.filter((t) => t.type === "Generator" && !t.isPredicted).length
     : 0;
@@ -513,7 +524,7 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
 
   // ── Canvas: click ─────────────────────────────────────────────────────────
   canvas.addEventListener("click", (e) => {
-    if (state.gameOver || state.isPaused || state.benchmarkActive) return;
+    if (state.gameOver || state.benchmarkActive) return;
 
     const rect = canvas.getBoundingClientRect();
     // Use clientWidth/clientHeight (CSS layout px) so coordinates map to CSS px space,
@@ -530,6 +541,47 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
     const row = Math.floor(mouseY / TS);
 
     if (col < 0 || col >= getCOLS() || row < 0 || row >= getROWS()) return;
+
+    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    const myIndex = Multiplayer.myPlayerIndex || 0;
+
+    // Relocation click handler
+    if (state.relocationActive) {
+      const hasMisplaced = state.towers.some(
+        (t) =>
+          t.ownerIndex === myIndex &&
+          !isCellAllowedForPlayer(t.col, t.row, myIndex, activeCount)
+      );
+      if (!hasMisplaced) return; // Not our turn to relocate
+
+      const existingTower = state.towers.find((t) => t.col === col && t.row === row);
+
+      if (existingTower) {
+        if (
+          existingTower.ownerIndex === myIndex &&
+          !isCellAllowedForPlayer(existingTower.col, existingTower.row, myIndex, activeCount)
+        ) {
+          state.relocatingTower = { col, row };
+          PoolManager.getFloatingText(mouseX, mouseY, "Verschiebe Turm...", "#ffaa00");
+          updateUI();
+        }
+      } else if (state.relocatingTower) {
+        if (isCellAllowedForPlayer(col, row, myIndex, activeCount)) {
+          Multiplayer.emitRequestRelocateTower(
+            state.relocatingTower.col,
+            state.relocatingTower.row,
+            col,
+            row
+          );
+          state.relocatingTower = null;
+        } else {
+          PoolManager.getFloatingText(mouseX, mouseY, "Nicht dein Bereich!", "#ff3366");
+        }
+      }
+      return;
+    }
+
+    if (state.isPaused) return;
 
     const existingTower = state.towers.find((t) => t.col === col && t.row === row);
 
@@ -590,7 +642,7 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
   // ── Canvas: right-click sell / cancel ─────────────────────────────────────
   canvas.addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    if (state.gameOver || state.isPaused || state.benchmarkActive) return;
+    if (state.gameOver || (state.isPaused && !state.relocationActive) || state.benchmarkActive) return;
 
     // Dismiss mobile context shop if open
     const contextShop = document.getElementById("context-shop");

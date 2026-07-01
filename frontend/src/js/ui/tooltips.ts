@@ -7,6 +7,8 @@
 import { state } from "../core/state";
 import { Config, TowerData, getTowerPurchaseCost } from "../core/config";
 import { getEl } from "../core/utils";
+import { Multiplayer } from "../core/multiplayer/context";
+import { getPlayerColorString } from "../entities/towers/base-tower";
 
 export function updateTooltip(): void {
   const tooltip = getEl("tooltip");
@@ -147,7 +149,17 @@ export function updateTooltip(): void {
         ? ""
         : `<p>Reichweite: <span>${formatStat(rangeVal, isRangeBoosted)}</span></p>`;
 
+    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    let ownerHtml = "";
+    if (activeCount > 1 && hoveredTower.ownerIndex !== undefined) {
+      const ownerColor = getPlayerColorString(hoveredTower.ownerIndex);
+      const isMe = hoveredTower.ownerIndex === Multiplayer.myPlayerIndex;
+      const meSuffix = isMe ? " (Du)" : "";
+      ownerHtml = `<div style="margin-bottom:6px; font-weight:bold; color:${ownerColor}; text-shadow:0 0 4px ${ownerColor}">Besitzer: Spieler ${hoveredTower.ownerIndex + 1}${meSuffix}</div>`;
+    }
+
     tooltip.innerHTML = `
+            ${ownerHtml}
             <h3 style="margin-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:4px;">${hoveredTower.type} Tower</h3>
             <p>Level: <span>${hoveredTower.level}${maxLvl ? ' <em style="color:#fca311">(MAX)</em>' : ""}</span></p>
             <p>Spezial: <span style="color:#ffb703">${specName}</span></p>

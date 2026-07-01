@@ -36,6 +36,13 @@ export const RequestSellTowerSchema = z.object({
   goldEarned: z.number().nonnegative().optional(),
 }).passthrough();
 
+export const RequestRelocateTowerSchema = z.object({
+  fromCol: z.number().int().nonnegative(),
+  fromRow: z.number().int().nonnegative(),
+  toCol: z.number().int().nonnegative(),
+  toRow: z.number().int().nonnegative(),
+}).passthrough();
+
 // 3. Tower Actions - Confirms (Host to all clients)
 export const ConfirmPlaceTowerSchema = z.object({
   col: z.number().int().nonnegative(),
@@ -89,7 +96,7 @@ export const ToggleModSchema = z.object({
 
 export const SyncLivesSchema = z.number().int().nonnegative().max(10000);
 
-export const SyncGoldSchema = z.number().nonnegative().max(100000000);
+export const SyncGoldSchema = z.array(z.number());
 
 // 5. Game State Synchronization (Host authoritative updates)
 export const SyncGameStateSchema = z.object({

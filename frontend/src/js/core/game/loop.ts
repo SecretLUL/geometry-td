@@ -145,7 +145,7 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
   if (animElapsed > 100) animElapsed = 100;
   lastAnimFrameTime = timestamp;
 
-  if (!state.isPaused && !state.gameOver) {
+  if (!state.gameOver) {
     state.animTime = (state.animTime || 0) + animElapsed;
   }
 
@@ -612,8 +612,38 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
                 }
               }
 
-              state.gold += enemy.reward;
+              let ownerIndex = Multiplayer.myPlayerIndex || 0;
+              if (
+                (enemy as Enemy & { damageSources?: Map<Tower, number> }).damageSources &&
+                (enemy as Enemy & { damageSources?: Map<Tower, number> }).damageSources!.size > 0
+              ) {
+                let topContributor: Tower | null = null;
+                let maxDmg = 0;
+                for (const [source, dmg] of (
+                  enemy as Enemy & { damageSources?: Map<Tower, number> }
+                ).damageSources!.entries()) {
+                  if (dmg > maxDmg) {
+                    maxDmg = dmg;
+                    topContributor = source as Tower;
+                  }
+                }
+                if (topContributor && (topContributor as any).ownerIndex !== undefined) {
+                  ownerIndex = (topContributor as any).ownerIndex;
+                }
+              }
+
+              if (!state.playerGolds) {
+                state.playerGolds = [300, 300, 300, 300];
+              }
+              state.playerGolds[ownerIndex] += enemy.reward;
+              if (Multiplayer.myPlayerIndex !== undefined) {
+                state.gold = state.playerGolds[Multiplayer.myPlayerIndex] || 0;
+              }
               state.totalGoldEarned += enemy.reward;
+
+              if (state.isHost) {
+                Multiplayer.emitSyncGold(state.playerGolds);
+              }
               createExplosion(enemy.x, enemy.y, enemy.color, 15);
               createCoinBurst(enemy.x, enemy.y, 8);
               PoolManager.getFloatingText(enemy.x, enemy.y, `+${enemy.reward}g`, "#fca311");
@@ -908,6 +938,9 @@ export function gameLoop(timestamp: number, fromWorker = false): void {
       drawScene(fpsDisplayVal);
     } else {
       // Paused
+      for (let i = 0; i < state.floatingTexts.length; i++) {
+        state.floatingTexts[i].update();
+      }
       drawScene(fpsDisplayVal, true);
     }
     updateTooltip();

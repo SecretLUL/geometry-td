@@ -15,6 +15,8 @@ import { showGameOverScreen } from "./modals";
 import { setupModMenu } from "./modMenu";
 import { setupEvents } from "./events";
 import { showGameNotification } from "./notifications";
+import { isCellAllowedForPlayer } from "../core/utils";
+import { Multiplayer } from "../core/multiplayer/context";
 
 export { updateTooltip, showGameNotification };
 
@@ -276,6 +278,53 @@ export function updateUI(): void {
     state.gameOver = true;
     showGameOverScreen();
   }
+
+  // Update Pause & Relocation overlays reactively
+  const pauseOverlay = document.getElementById("pauseOverlay");
+  const pauseTipText = document.getElementById("pauseTipText");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const resumeGameBtn = document.getElementById("resumeGameBtn");
+
+  if (pauseBtn) {
+    pauseBtn.innerText = state.isPaused ? "Weiter" : "Pause";
+    pauseBtn.style.background = state.isPaused
+      ? "linear-gradient(to bottom, #ffb703, #d49a00)"
+      : "";
+    pauseBtn.style.color = state.isPaused ? "#fff" : "";
+  }
+
+  if (resumeGameBtn) {
+    if (state.relocationActive) {
+      resumeGameBtn.style.display = "none";
+    } else {
+      resumeGameBtn.style.display = "";
+    }
+  }
+
+  // Handle relocation phase UI specifically
+  if (state.relocationActive && state.isPaused) {
+    if (pauseOverlay) pauseOverlay.classList.add("hidden"); // do not cover screen
+    updateRelocationUI();
+  } else {
+    const relocBanner = document.getElementById("relocationBanner");
+    if (relocBanner) relocBanner.classList.add("hidden");
+    const relocModal = document.getElementById("relocationModal");
+    if (relocModal) relocModal.classList.add("hidden");
+
+    if (pauseOverlay) {
+      if (state.isPaused) {
+        if (pauseOverlay.classList.contains("hidden")) {
+          pauseOverlay.classList.remove("hidden");
+          if (pauseTipText) {
+            const randomTip = PAUSE_TIPS[Math.floor(Math.random() * PAUSE_TIPS.length)];
+            pauseTipText.innerText = `„${randomTip}“`;
+          }
+        }
+      } else {
+        pauseOverlay.classList.add("hidden");
+      }
+    }
+  }
 }
 
 export function cancelPlacement(): void {
@@ -316,28 +365,110 @@ const PAUSE_TIPS = [
 export function setPauseState(paused: boolean): void {
   if (state.gameOver) return;
   state.isPaused = paused;
+  updateUI();
+}
 
-  const pauseBtn = document.getElementById("pauseBtn");
-  const pauseOverlay = document.getElementById("pauseOverlay");
-  const pauseTipText = document.getElementById("pauseTipText");
+export function updateRelocationUI(): void {
+  const relocBannerId = "relocationBanner";
+  const relocModalId = "relocationModal";
 
-  if (pauseBtn) {
-    pauseBtn.innerText = state.isPaused ? "Weiter" : "Pause";
-    pauseBtn.style.background = state.isPaused
-      ? "linear-gradient(to bottom, #ffb703, #d49a00)"
-      : "";
-    pauseBtn.style.color = state.isPaused ? "#fff" : "";
+  let relocBanner = document.getElementById(relocBannerId);
+  let relocModal = document.getElementById(relocModalId);
+
+  if (!relocBanner) {
+    relocBanner = document.createElement("div");
+    relocBanner.id = relocBannerId;
+    relocBanner.style.position = "absolute";
+    relocBanner.style.top = "15px";
+    relocBanner.style.left = "50%";
+    relocBanner.style.transform = "translateX(-50%)";
+    relocBanner.style.background = "linear-gradient(135deg, #ff0055, #ff5500)";
+    relocBanner.style.color = "#fff";
+    relocBanner.style.padding = "10px 20px";
+    relocBanner.style.borderRadius = "8px";
+    relocBanner.style.fontSize = "16px";
+    relocBanner.style.fontWeight = "bold";
+    relocBanner.style.boxShadow = "0 0 15px rgba(255, 0, 85, 0.5)";
+    relocBanner.style.zIndex = "9999";
+    relocBanner.style.pointerEvents = "none";
+    relocBanner.style.fontFamily = "'Outfit', sans-serif";
+    document.getElementById("game-container")?.appendChild(relocBanner);
   }
 
-  if (pauseOverlay) {
-    if (state.isPaused) {
-      pauseOverlay.classList.remove("hidden");
-      if (pauseTipText) {
-        const randomTip = PAUSE_TIPS[Math.floor(Math.random() * PAUSE_TIPS.length)];
-        pauseTipText.innerText = `„${randomTip}“`;
+  if (!relocModal) {
+    relocModal = document.createElement("div");
+    relocModal.id = relocModalId;
+    relocModal.style.position = "absolute";
+    relocModal.style.top = "0";
+    relocModal.style.left = "0";
+    relocModal.style.width = "100%";
+    relocModal.style.height = "100%";
+    relocModal.style.background = "rgba(10, 10, 15, 0.85)";
+    relocModal.style.backdropFilter = "blur(10px)";
+    relocModal.style.display = "flex";
+    relocModal.style.flexDirection = "column";
+    relocModal.style.justifyContent = "center";
+    relocModal.style.alignItems = "center";
+    relocModal.style.zIndex = "9998";
+    relocModal.style.color = "#fff";
+    relocModal.style.fontFamily = "'Outfit', sans-serif";
+    
+    const content = document.createElement("div");
+    content.className = "reloc-modal-content";
+    content.style.textAlign = "center";
+    content.style.padding = "40px";
+    content.style.borderRadius = "16px";
+    content.style.border = "1px solid rgba(255, 0, 85, 0.3)";
+    content.style.background = "linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(10, 10, 15, 0.95))";
+    content.style.boxShadow = "0 0 30px rgba(0, 0, 0, 0.5)";
+
+    const title = document.createElement("h2");
+    title.innerText = "Spielfeld-Aufteilung!";
+    title.style.fontSize = "32px";
+    title.style.margin = "0 0 15px 0";
+    title.style.color = "#ff0055";
+    title.style.textShadow = "0 0 10px rgba(255, 0, 85, 0.5)";
+
+    const desc = document.createElement("p");
+    desc.id = "relocModalDesc";
+    desc.style.fontSize = "18px";
+    desc.style.color = "#a0a5c0";
+
+    content.appendChild(title);
+    content.appendChild(desc);
+    relocModal.appendChild(content);
+
+    document.getElementById("game-container")?.appendChild(relocModal);
+  }
+
+  const myIndex = Multiplayer.myPlayerIndex || 0;
+  const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+  
+  // Check if local player has misplaced towers
+  const hasMisplaced = state.towers.some(
+    (t) => t.ownerIndex === myIndex && !isCellAllowedForPlayer(t.col, t.row, myIndex, activeCount)
+  );
+
+  if (hasMisplaced) {
+    relocBanner.classList.remove("hidden");
+    relocBanner.innerText = "⚠️ ZONE GEÄNDERT! Versetze deine misplaced (blinkenden) Türme oder verkaufe sie für 100% Rückerstattung.";
+    relocModal.classList.add("hidden");
+  } else {
+    relocBanner.classList.add("hidden");
+    relocModal.classList.remove("hidden");
+
+    const relocatingNames = [];
+    if (state.playerRelocationStates) {
+      for (let i = 0; i < 4; i++) {
+        if (state.playerRelocationStates[i]) {
+          relocatingNames.push(`Spieler ${i + 1}`);
+        }
       }
-    } else {
-      pauseOverlay.classList.add("hidden");
+    }
+    const namesStr = relocatingNames.length > 0 ? relocatingNames.join(", ") : "andere Spieler";
+    const descEl = document.getElementById("relocModalDesc");
+    if (descEl) {
+      descEl.innerText = `Das Spiel ist pausiert, da sich die Zonengrenzen verschoben haben. Bitte warte, während ${namesStr} ihre außerhalb der neuen Grenzen liegenden Türme umplatzieren oder verkaufen...`;
     }
   }
 }

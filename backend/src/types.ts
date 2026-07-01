@@ -51,6 +51,7 @@ export interface RoomTowerState {
   specId?: string;
   damageDealt?: number;
   totalSpent?: number;
+  ownerIndex?: number;
 }
 
 export interface SyncFullGameStatePayload {
@@ -70,6 +71,10 @@ export interface SyncFullGameStatePayload {
   towers?: RoomTowerState[];
   tick?: number;
   timestamp?: number;
+  playerSlots?: Array<string | null>;
+  playerGolds?: number[];
+  relocationActive?: boolean;
+  playerRelocationStates?: boolean[];
 }
 
 export interface SyncDeltaGameStatePayload {
@@ -90,6 +95,10 @@ export interface SyncDeltaGameStatePayload {
   screenDamageEffect?: number;
   benchmarkActive?: boolean;
   towers?: RoomTowerState[];
+  playerSlots?: Array<string | null>;
+  playerGolds?: number[];
+  relocationActive?: boolean;
+  playerRelocationStates?: boolean[];
 }
 
 export interface RoomState {
@@ -119,5 +128,9 @@ export interface RoomState {
   mapName: string;
   mode: 'singleplayer' | 'public' | 'private';
   roomId: string;
+  playerSlots?: Array<string | null>;
+  playerGolds?: number[];
+  relocationActive?: boolean;
+  playerRelocationStates?: boolean[];
   [key: string]: any;
 }

@@ -8,8 +8,11 @@
 import { state } from "../state";
 import { Config } from "../config";
 import { drawRangeCircle, drawGhostTower } from "../../entities/towers/index";
-import { drawMap, waypoints } from "../map";
+import { drawMap, waypoints, getCOLS, getROWS } from "../map";
 import { updateContextShopPosition } from "../../ui/modals";
+import { Multiplayer } from "../multiplayer/context";
+import { getPlayerColor } from "../../entities/towers/base-tower";
+import { isCellAllowedForPlayer } from "../utils";
 import {
   clampCamera,
   mapContainer,
@@ -247,6 +250,88 @@ function initSpawnerGraphics(TS: number): void {
 }
 
 // redrawSpawnerGraphics has been removed as the rotating line around the base was removed
+
+export function drawMultiplayerDivisionLines(g: PIXI.Graphics): void {
+  const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+  if (activeCount <= 1) return;
+
+  const TS = Config.TILE_SIZE;
+  const cols = getCOLS();
+  const rows = getROWS();
+  const width = cols * TS;
+  const height = rows * TS;
+
+  const time = state.animTime || Date.now();
+  const baseAlpha = 0.5 + 0.15 * Math.sin(time * 0.005);
+
+  const drawGlowLine = (x1: number, y1: number, x2: number, y2: number, color: number) => {
+    g.moveTo(x1, y1).lineTo(x2, y2).stroke({ color, alpha: baseAlpha * 0.35, width: 6 });
+    g.moveTo(x1, y1).lineTo(x2, y2).stroke({ color, alpha: 0.9, width: 2 });
+  };
+
+  if (activeCount === 2) {
+    const midX = 8 * TS;
+    drawGlowLine(midX, 0, midX, height, 0xff007f);
+  } else if (activeCount === 3) {
+    drawGlowLine(5 * TS, 0, 5 * TS, height, 0x00f2fe);
+    drawGlowLine(10 * TS, 0, 10 * TS, height, 0xffb703);
+  } else if (activeCount >= 4) {
+    const midX = 8 * TS;
+    const midY = 8 * TS;
+    drawGlowLine(midX, 0, midX, height, 0x00ff88);
+    drawGlowLine(0, midY, width, midY, 0x00ff88);
+  }
+
+  const myIndex = Multiplayer.myPlayerIndex || 0;
+  let startCol = 0, endCol = cols - 1;
+  let startRow = 0, endRow = rows - 1;
+
+  if (activeCount === 2) {
+    if (myIndex === 0) { endCol = 7; }
+    else { startCol = 8; }
+  } else if (activeCount === 3) {
+    if (myIndex === 0) { endCol = 4; }
+    else if (myIndex === 1) { startCol = 5; endCol = 9; }
+    else { startCol = 10; }
+  } else if (activeCount >= 4) {
+    const isLeft = myIndex === 0 || myIndex === 2;
+    const isTop = myIndex === 0 || myIndex === 1;
+    if (isLeft) { endCol = 7; } else { startCol = 8; }
+    if (isTop) { endRow = 7; } else { startRow = 8; }
+  }
+
+  const zX = startCol * TS;
+  const zY = startRow * TS;
+  const zW = (endCol - startCol + 1) * TS;
+  const zH = (endRow - startRow + 1) * TS;
+
+  if (state.selectedTowerType) {
+    const myColor = getPlayerColor(myIndex);
+    const pulseAlpha = 0.08 + 0.04 * Math.sin(time * 0.007);
+    g.rect(zX, zY, zW, zH).stroke({ color: myColor, alpha: 0.7, width: 2 });
+    g.rect(zX, zY, zW, zH).fill({ color: myColor, alpha: pulseAlpha });
+  }
+
+  // Relocation highlight flashing red for misplaced towers
+  if (state.relocationActive) {
+    const flashAlpha = 0.15 + 0.12 * Math.sin(time * 0.012);
+    const relocColor = 0xff3366;
+    for (const t of state.towers) {
+      if (t.ownerIndex !== undefined) {
+        if (!isCellAllowedForPlayer(t.col, t.row, t.ownerIndex, activeCount)) {
+          g.rect(t.col * TS, t.row * TS, TS, TS).fill({ color: relocColor, alpha: flashAlpha });
+          g.rect(t.col * TS, t.row * TS, TS, TS).stroke({ color: relocColor, alpha: 0.8, width: 2 });
+        }
+      }
+    }
+
+    // Selected relocator tower (yellow border highlight)
+    if (state.relocatingTower) {
+      const { col, row } = state.relocatingTower;
+      g.rect(col * TS, row * TS, TS, TS).stroke({ color: 0xffaa00, alpha: 0.9, width: 3 });
+    }
+  }
+}
 
 export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): void {
   if (isHeadlessMode) return;
@@ -502,6 +587,9 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
     );
   }
 
+  // Multiplayer division lines
+  drawMultiplayerDivisionLines(uiGraphics);
+
   // Ghost tower overlay
   drawGhostTower(uiGraphics);
 
@@ -528,7 +616,7 @@ export function drawScene(fpsDisplayVal: number, isPaused: boolean = false): voi
     fpsText.visible = false;
   }
 
-  if (isPaused) {
+  if (isPaused && !state.relocationActive) {
     const viewW = app.canvas.clientWidth;
     const viewH = app.canvas.clientHeight;
     pauseGraphics.clear();

@@ -20,8 +20,34 @@ import {
 import { broadcastGameStateWebRTC } from "./webrtc";
 
 function stringArraysEqual(
-  a: string[] | null | undefined,
-  b: string[] | null | undefined
+  a: Array<string | null> | null | undefined,
+  b: Array<string | null> | null | undefined
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function numberArraysEqual(
+  a: number[] | null | undefined,
+  b: number[] | null | undefined
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function booleanArraysEqual(
+  a: boolean[] | null | undefined,
+  b: boolean[] | null | undefined
 ): boolean {
   if (a === b) return true;
   if (!a || !b) return false;
@@ -151,6 +177,10 @@ export function emitSyncGameState(data: SyncFullGameStatePayload): void {
     "screenDamageEffect",
     "benchmarkActive",
     "towers",
+    "playerGolds",
+    "playerSlots",
+    "relocationActive",
+    "playerRelocationStates",
   ];
   for (const field of otherFields) {
     if (field === "enemyPool") {
@@ -166,6 +196,27 @@ export function emitSyncGameState(data: SyncFullGameStatePayload): void {
         data.towers !== undefined
       ) {
         delta.towers = data.towers;
+      }
+    } else if (field === "playerGolds") {
+      if (
+        !numberArraysEqual(data.playerGolds, Multiplayer.lastSyncState.playerGolds) &&
+        data.playerGolds !== undefined
+      ) {
+        delta.playerGolds = data.playerGolds;
+      }
+    } else if (field === "playerSlots") {
+      if (
+        !stringArraysEqual(data.playerSlots, Multiplayer.lastSyncState.playerSlots) &&
+        data.playerSlots !== undefined
+      ) {
+        delta.playerSlots = data.playerSlots;
+      }
+    } else if (field === "playerRelocationStates") {
+      if (
+        !booleanArraysEqual(data.playerRelocationStates, Multiplayer.lastSyncState.playerRelocationStates) &&
+        data.playerRelocationStates !== undefined
+      ) {
+        delta.playerRelocationStates = data.playerRelocationStates;
       }
     } else {
       if (
@@ -216,6 +267,10 @@ export function syncNow(): void {
       wave: state.wave,
       lives: state.lives,
       gold: state.gold,
+      playerSlots: state.playerSlots,
+      playerGolds: state.playerGolds,
+      relocationActive: state.relocationActive,
+      playerRelocationStates: state.playerRelocationStates,
       screenDamageEffect: state.screenDamageEffect,
       benchmarkActive: state.benchmarkActive,
       towers: state.towers.map((t) => ({
@@ -226,6 +281,7 @@ export function syncNow(): void {
         specId: t.specialization,
         damageDealt: t.damageDealt,
         totalSpent: t.totalSpent,
+        ownerIndex: (t as any).ownerIndex,
       })),
     };
 
@@ -304,10 +360,14 @@ export function emitSyncLives(lives: number): void {
   socket?.emit("sync_lives", lives);
 }
 
-export function emitSyncGold(gold: number): void {
+export function emitSyncGold(gold: number[]): void {
   socket?.emit("sync_gold", gold);
 }
 
 export function emitHostEndedWave(): void {
   socket?.emit("host_ended_wave");
+}
+
+export function emitRequestRelocateTower(fromCol: number, fromRow: number, toCol: number, toRow: number): void {
+  socket?.emit("request_relocate_tower", { fromCol, fromRow, toCol, toRow });
 }

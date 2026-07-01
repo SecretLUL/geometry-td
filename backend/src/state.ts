@@ -33,7 +33,7 @@ export function initRoomState(roomId: string, mapName: string, mode: 'singleplay
       waveModified: false,
       benchmarkActive: false,
       lives: 20,
-      gold: 250,
+      gold: 300,
       playerCount: 0,
       sockets: new Set<string>(),
       hostTileSize: 40,
@@ -42,7 +42,11 @@ export function initRoomState(roomId: string, mapName: string, mode: 'singleplay
       lastReceivedState: null,
       mapName,
       mode,
-      roomId
+      roomId,
+      playerSlots: [null, null, null, null],
+      playerGolds: [300, 300, 300, 300],
+      relocationActive: false,
+      playerRelocationStates: [false, false, false, false]
     };
   }
 }

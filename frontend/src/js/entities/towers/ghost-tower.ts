@@ -13,6 +13,8 @@ import { TeslaTower } from "./tesla-tower";
 import { PrismaTower } from "./prisma-tower";
 import { BoosterTower } from "./booster-tower";
 import { GeneratorTower } from "./generator-tower";
+import { Multiplayer } from "../../core/multiplayer/context";
+import { isCellAllowedForPlayer } from "../../core/utils";
 import * as PIXI from "pixi.js";
 
 // ─── Ghost Tower (placement preview) ─────────────────────────────────────────
@@ -25,7 +27,9 @@ export function drawGhostTower(g: PIXI.Graphics): void {
   }
   const ghostCache = (state as any).ghostCache;
 
-  if (!state.selectedTowerType || !state.ghostMouse) {
+  const type = state.selectedTowerType || (state.relocatingTower ? state.towers.find(t => t.col === state.relocatingTower!.col && t.row === state.relocatingTower!.row)?.type : null);
+
+  if (!type || !state.ghostMouse) {
     for (const key in ghostCache) {
       if (ghostCache[key] && ghostCache[key].pixiSprite) {
         ghostCache[key].pixiSprite.visible = false;
@@ -44,10 +48,12 @@ export function drawGhostTower(g: PIXI.Graphics): void {
 
   // Determine which tower prototype to use for range/color
   let towerColor: number;
-  const type = state.selectedTowerType;
   const data = TowerData[type] || TowerData["Base"];
 
-  const range = data.baseRange;
+  const reloc = state.relocatingTower;
+  const towerToMove = reloc ? state.towers.find((t) => t.col === reloc.col && t.row === reloc.row) : null;
+  const range = towerToMove ? towerToMove.range : data.baseRange;
+
   if (type === "Sniper") {
     towerColor = 0x4cc9f0;
   } else if (type === "Bomb") {
@@ -65,7 +71,7 @@ export function drawGhostTower(g: PIXI.Graphics): void {
   }
 
   // Range ring
-  if (state.selectedTowerType !== "Sniper") {
+  if (type !== "Sniper") {
     drawRangeCircle(g, cx, cy, range, towerColor);
   }
 
@@ -96,9 +102,19 @@ export function drawGhostTower(g: PIXI.Graphics): void {
     ghostCache[type] = tmp;
   }
 
+  const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+  const isOccupied = state.towers.some((t) => t.col === col && t.row === row && !(t.col === state.relocatingTower?.col && t.row === state.relocatingTower?.row));
+  const isAllowed = isCellAllowedForPlayer(col, row, Multiplayer.myPlayerIndex, activeCount) && !isOccupied;
+
+  if (!isAllowed) {
+    g.rect(cx - TS / 2, cy - TS / 2, TS, TS).fill({ color: 0xff3366, alpha: 0.15 });
+    g.rect(cx - TS / 2, cy - TS / 2, TS, TS).stroke({ color: 0xff3366, alpha: 0.9, width: 2 });
+  }
+
   const ghost = ghostCache[type];
-  if (ghost.pixiSprite) {
+  if (ghost && ghost.pixiSprite) {
     ghost.pixiSprite.position.set(cx, cy);
+    ghost.pixiSprite.alpha = isAllowed ? 0.55 : 0.25;
 
     // If it's a Prisma Tower, it might have a beams graphics, hide it just in case
     if ((ghost as any).pixiBeamsGraphics) {

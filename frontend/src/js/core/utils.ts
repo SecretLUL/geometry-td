@@ -135,3 +135,30 @@ export function roundUpgradeCost(cost: number): number {
     return Math.round(cost / 5000) * 5000;
   }
 }
+
+export function isCellAllowedForPlayer(
+  col: number,
+  row: number,
+  playerIndex: number,
+  playerCount: number
+): boolean {
+  if (playerCount <= 1) return true; // Singleplayer
+
+  if (playerCount === 2) {
+    if (playerIndex === 0) return col <= 7;
+    if (playerIndex === 1) return col >= 8;
+  } else if (playerCount === 3) {
+    if (playerIndex === 0) return col <= 4;
+    if (playerIndex === 1) return col >= 5 && col <= 9;
+    if (playerIndex === 2) return col >= 10;
+  } else if (playerCount >= 4) {
+    const isLeft = col <= 7;
+    const isTop = row <= 7;
+    if (playerIndex === 0) return isLeft && isTop;
+    if (playerIndex === 1) return !isLeft && isTop;
+    if (playerIndex === 2) return isLeft && !isTop;
+    if (playerIndex === 3) return !isLeft && !isTop;
+  }
+  return false;
+}
+

@@ -8,7 +8,7 @@
 import { state } from "../state";
 import { Config } from "../config";
 import { Multiplayer, socket, setSocket } from "./context";
-import { processPlaceTower, processUpgradeTower, processSellTower } from "./host";
+import { processPlaceTower, processUpgradeTower, processSellTower, recalculateRelocationState, processRelocateTower } from "./host";
 import { bindInboundEvents } from "./inbound";
 import {
   emitSyncGameState,
@@ -25,6 +25,7 @@ import {
   emitSyncLives,
   emitSyncGold,
   emitHostEndedWave,
+  emitRequestRelocateTower,
 } from "./outbound";
 import { cleanupAllWebRTC, hasActiveWebRTCClients } from "./webrtc";
 import { logger } from "../logger";
@@ -92,7 +93,7 @@ Multiplayer.init = function (
   }
 
   const runSyncLoop = () => {
-    if (state.isHost && !state.isPaused && !state.gameOver) {
+    if (state.isHost && (!state.isPaused || state.relocationActive) && !state.gameOver) {
       const hasWebRTC = hasActiveWebRTCClients();
       const intervalDuration = hasWebRTC ? 50 : 100;
 
@@ -139,6 +140,8 @@ Multiplayer.init = function (
           wave: state.wave,
           lives: state.lives,
           gold: state.gold,
+          playerSlots: state.playerSlots,
+          playerGolds: state.playerGolds,
           screenDamageEffect: state.screenDamageEffect,
           benchmarkActive: state.benchmarkActive,
           towers: state.towers.map((t) => ({
@@ -149,6 +152,7 @@ Multiplayer.init = function (
             specId: t.specialization,
             damageDealt: t.damageDealt,
             totalSpent: t.totalSpent,
+            ownerIndex: (t as any).ownerIndex,
           })),
         };
 
@@ -300,6 +304,8 @@ Multiplayer.updatePlayerCountUI = function (count: number): void {
 Multiplayer.processPlaceTower = processPlaceTower;
 Multiplayer.processUpgradeTower = processUpgradeTower;
 Multiplayer.processSellTower = processSellTower;
+(Multiplayer as any).recalculateRelocationState = recalculateRelocationState;
+(Multiplayer as any).processRelocateTower = processRelocateTower;
 
 Multiplayer.emitSyncGameState = emitSyncGameState;
 Multiplayer.syncNow = syncNow;
@@ -315,5 +321,6 @@ Multiplayer.emitRequestWaveStart = emitRequestWaveStart;
 Multiplayer.emitSyncLives = emitSyncLives;
 Multiplayer.emitSyncGold = emitSyncGold;
 Multiplayer.emitHostEndedWave = emitHostEndedWave;
+Multiplayer.emitRequestRelocateTower = emitRequestRelocateTower;
 
 export { Multiplayer, socket, setSocket };

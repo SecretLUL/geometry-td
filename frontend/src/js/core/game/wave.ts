@@ -240,10 +240,19 @@ export function handleWaveLogic(): void {
     state.isWaveActive = false;
     state.wave++;
 
-    const waveBonus = Config.WAVE_BONUS_BASE + state.wave * Config.WAVE_BONUS_PER_WAVE;
+    const waveBonus = Config.WAVE_BONUS_BASE + (state.wave - 1) * Config.WAVE_BONUS_PER_WAVE;
+    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    const splitBonus = Math.floor(waveBonus / Math.max(1, activeCount));
 
-    // Interest earned on current gold
-    const interest = Math.floor(state.gold * Config.INTEREST_RATE);
+    if (!state.playerGolds) {
+      state.playerGolds = [300, 300, 300, 300];
+    }
+
+    for (let i = 0; i < 4; i++) {
+      if (state.playerSlots && state.playerSlots[i] !== null) {
+        state.playerGolds[i] += splitBonus;
+      }
+    }
 
     // Calculate Investment Bank payout
     let bankGold = 0;
@@ -254,7 +263,9 @@ export function handleWaveLogic(): void {
         (t.constructionTimer === undefined || t.constructionTimer <= 0)
       ) {
         const amount = t.getEffectiveGoldIncome();
-        bankGold += amount;
+        const tOwner = (t as any).ownerIndex !== undefined ? (t as any).ownerIndex : (Multiplayer.myPlayerIndex || 0);
+        state.playerGolds[tOwner] += amount;
+        bankGold += amount; // for UI notification summary
 
         // Visual coin burst and floating text at the bank tower location
         PoolManager.getFloatingText(t.x, t.y - 25, `+${amount}g Bank`, "#ffd700");
@@ -262,9 +273,11 @@ export function handleWaveLogic(): void {
       }
     }
 
-    state.gold += waveBonus + interest + bankGold;
-    state.totalGoldEarned += waveBonus + interest + bankGold;
-    state.totalGoldFromInterest += interest + bankGold; // reuse to track bank gold
+    if (Multiplayer.myPlayerIndex !== undefined) {
+      state.gold = state.playerGolds[Multiplayer.myPlayerIndex] || 0;
+    }
+    state.totalGoldEarned += waveBonus + bankGold;
+    state.totalGoldFromInterest += bankGold; // reuse to track bank gold
 
     // High-Tech DOM Alert Notification replaces ugly canvas texts
     showGameNotification(
@@ -279,7 +292,7 @@ export function handleWaveLogic(): void {
       20
     );
     updateUI();
-    Multiplayer.emitSyncGold(state.gold);
+    Multiplayer.emitSyncGold(state.playerGolds);
 
     if (state.autoStartActive && !state.gameOver) {
       setTimeout(() => startWave(), 1200);
