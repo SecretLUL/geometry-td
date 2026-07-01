@@ -8,8 +8,8 @@
 import { roundUpgradeCost } from "./utils";
 
 export const Config = {
-  CANVAS_COLS: 15,
-  CANVAS_ROWS: 15,
+  CANVAS_COLS: 16,
+  CANVAS_ROWS: 16,
   TILE_SIZE: 50, // base tile size; recalculated at runtime by viewport scaling
 
   GAME_SPEEDS: {

@@ -265,7 +265,9 @@ export function drawMultiplayerDivisionLines(g: PIXI.Graphics): void {
   const baseAlpha = 0.5 + 0.15 * Math.sin(time * 0.005);
 
   const drawGlowLine = (x1: number, y1: number, x2: number, y2: number, color: number) => {
-    g.moveTo(x1, y1).lineTo(x2, y2).stroke({ color, alpha: baseAlpha * 0.35, width: 6 });
+    g.moveTo(x1, y1)
+      .lineTo(x2, y2)
+      .stroke({ color, alpha: baseAlpha * 0.35, width: 6 });
     g.moveTo(x1, y1).lineTo(x2, y2).stroke({ color, alpha: 0.9, width: 2 });
   };
 
@@ -273,8 +275,8 @@ export function drawMultiplayerDivisionLines(g: PIXI.Graphics): void {
     const midX = 8 * TS;
     drawGlowLine(midX, 0, midX, height, 0xff007f);
   } else if (activeCount === 3) {
-    drawGlowLine(5 * TS, 0, 5 * TS, height, 0x00f2fe);
-    drawGlowLine(10 * TS, 0, 10 * TS, height, 0xffb703);
+    drawGlowLine(8 * TS, 0, 8 * TS, height, 0x00f2fe);
+    drawGlowLine(8 * TS, 8 * TS, width, 8 * TS, 0xffb703);
   } else if (activeCount >= 4) {
     const midX = 8 * TS;
     const midY = 8 * TS;
@@ -283,21 +285,40 @@ export function drawMultiplayerDivisionLines(g: PIXI.Graphics): void {
   }
 
   const myIndex = Multiplayer.myPlayerIndex || 0;
-  let startCol = 0, endCol = cols - 1;
-  let startRow = 0, endRow = rows - 1;
+  let startCol = 0,
+    endCol = cols - 1;
+  let startRow = 0,
+    endRow = rows - 1;
 
   if (activeCount === 2) {
-    if (myIndex === 0) { endCol = 7; }
-    else { startCol = 8; }
+    if (myIndex === 0) {
+      endCol = 7;
+    } else {
+      startCol = 8;
+    }
   } else if (activeCount === 3) {
-    if (myIndex === 0) { endCol = 4; }
-    else if (myIndex === 1) { startCol = 5; endCol = 9; }
-    else { startCol = 10; }
+    if (myIndex === 0) {
+      endCol = 7;
+    } else if (myIndex === 1) {
+      startCol = 8;
+      endRow = 7;
+    } else {
+      startCol = 8;
+      startRow = 8;
+    }
   } else if (activeCount >= 4) {
     const isLeft = myIndex === 0 || myIndex === 2;
     const isTop = myIndex === 0 || myIndex === 1;
-    if (isLeft) { endCol = 7; } else { startCol = 8; }
-    if (isTop) { endRow = 7; } else { startRow = 8; }
+    if (isLeft) {
+      endCol = 7;
+    } else {
+      startCol = 8;
+    }
+    if (isTop) {
+      endRow = 7;
+    } else {
+      startRow = 8;
+    }
   }
 
   const zX = startCol * TS;
@@ -320,7 +341,11 @@ export function drawMultiplayerDivisionLines(g: PIXI.Graphics): void {
       if (t.ownerIndex !== undefined) {
         if (!isCellAllowedForPlayer(t.col, t.row, t.ownerIndex, activeCount)) {
           g.rect(t.col * TS, t.row * TS, TS, TS).fill({ color: relocColor, alpha: flashAlpha });
-          g.rect(t.col * TS, t.row * TS, TS, TS).stroke({ color: relocColor, alpha: 0.8, width: 2 });
+          g.rect(t.col * TS, t.row * TS, TS, TS).stroke({
+            color: relocColor,
+            alpha: 0.8,
+            width: 2,
+          });
         }
       }
     }

@@ -5,6 +5,26 @@
   },
 
   {
+    "version": "v2.19.2",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "alle spielfelder auf 16x16 vergrößert."
+      },
+      {
+        "type": "feature",
+        "desc": "symmetrische spielfeldaufteilung für 2, 3 und 4 spieler implementiert."
+      },
+      {
+        "type": "fix",
+        "desc": "rendering-fehler auf der quantum bypass map behoben."
+      }
+    ]
+  },
+
+  {
     "version": "v2.19.1",
     "date": "1. Juli 2026",
     "status": "active",
