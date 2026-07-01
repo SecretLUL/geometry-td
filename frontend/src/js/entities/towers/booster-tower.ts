@@ -165,7 +165,7 @@ export class BoosterTower extends Tower {
         const flicker = Math.random() < 0.1 ? 0.05 : 0.12 + 0.08 * Math.sin(time * 0.005);
         let hasLines = false;
         for (const t of state.towers) {
-          if (t !== this && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+          if (t !== this && t.type !== "Booster" && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
             const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
             if (distSq <= rangeSq) {
               this.pixiBeamsGraphics.moveTo(this.x, this.y).lineTo(t.x, t.y);
@@ -185,18 +185,20 @@ export class BoosterTower extends Tower {
         }
         for (const t of state.towers) {
           // Buff other fully-constructed towers in range
-          if (t !== this && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+          if (t !== this && t.type !== "Booster" && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
             const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
             if (distSq <= rangeSq) {
-              const pulse = 0.5 + 0.5 * Math.sin(state.animTime * 0.003 + t.x);
-              const alpha = 0.35 + 0.25 * pulse;
-              const width = 1.5 + 1.0 * pulse;
-              this.pixiBeamsGraphics
-                .moveTo(this.x, this.y)
-                .lineTo(t.x, t.y)
-                .stroke({ color: beamColor, width: width, alpha: alpha });
+              if (t.visualBooster === this) {
+                const pulse = 0.5 + 0.5 * Math.sin(state.animTime * 0.003 + t.x);
+                const alpha = 0.35 + 0.25 * pulse;
+                const width = 1.5 + 1.0 * pulse;
+                this.pixiBeamsGraphics
+                  .moveTo(this.x, this.y)
+                  .lineTo(t.x, t.y)
+                  .stroke({ color: beamColor, width: width, alpha: alpha });
 
-              this.pixiBeamsGraphics.circle(t.x, t.y, 3.5).fill({ color: "#ffffff", alpha: alpha });
+                this.pixiBeamsGraphics.circle(t.x, t.y, 3.5).fill({ color: "#ffffff", alpha: alpha });
+              }
             }
           }
         }
@@ -368,6 +370,7 @@ export class BoosterTower extends Tower {
       if (this.constructionTimer === 0) {
         this.redrawPixiBase();
         this.redrawPixiTurret();
+        Tower.recalculateAllBoosts();
         // Complete explosion burst and ring shockwave
         createExplosion(this.x, this.y, this.currentColor || "#ff9f43", 15);
         PoolManager.getShockwave(this.x, this.y, 50, this.currentColor || "#ff9f43");

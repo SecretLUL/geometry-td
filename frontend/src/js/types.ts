@@ -221,6 +221,7 @@ export interface Tower {
   cachedFireRate: number;
   cachedIsBoosted: boolean;
   cachedBoosterDamageMult: number;
+  visualBooster?: Tower | null;
 
   // Client-Side Prediction support
   isPredicted?: boolean;

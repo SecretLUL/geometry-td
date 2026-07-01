@@ -101,6 +101,7 @@ export class Tower {
     this.cachedFireRate = this.fireRate;
     this.cachedIsBoosted = false;
     this.cachedBoosterDamageMult = 1;
+    this.visualBooster = null;
 
     this.initPixi();
   }
@@ -216,8 +217,9 @@ export class Tower {
     let damageMultiplier = 1;
     let fireRateMultiplier = 1;
     let isBoosted = false;
+    this.visualBooster = null;
 
-    if (state.towers) {
+    if (this.type !== "Booster" && state.towers) {
       for (let i = 0; i < state.towers.length; i++) {
         const t = state.towers[i];
         if (
@@ -229,6 +231,9 @@ export class Tower {
           const boosterRange = t.range;
           if (distSq <= boosterRange * boosterRange) {
             isBoosted = true;
+            if (!this.visualBooster) {
+              this.visualBooster = t;
+            }
 
             // Range multiplier
             if (t.specialization === "amplitude") {
