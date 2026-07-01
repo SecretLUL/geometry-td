@@ -11,6 +11,14 @@
     "changes": [
       {
         "type": "feature",
+        "desc": "prisma-renderer.ts refaktoriert und modularisiert."
+      },
+      {
+        "type": "feature",
+        "desc": "alle tower in eigene ordner verschoben."
+      },
+      {
+        "type": "feature",
         "desc": "fx.ts refaktoriert, modularisiert und in spezialisierte sub-dateien aufgeteilt."
       },
       {
