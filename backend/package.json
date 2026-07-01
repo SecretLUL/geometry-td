@@ -6,7 +6,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
   },
   "dependencies": {
     "express": "^5.2.1",
@@ -25,6 +27,7 @@
     "tsx": "^4.7.1",
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/cookie-parser": "^1.4.7"
+    "@types/cookie-parser": "^1.4.7",
+    "prettier": "^3.8.4"
   }
 }

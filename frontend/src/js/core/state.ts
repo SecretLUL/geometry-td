@@ -37,8 +37,6 @@ export const state: GameState = {
   infiniteGold: false,
   waveModified: false,
   originalWave: null,
-  benchmarkActive: false,
-  benchmarkBackup: null,
   selectedTowerType: null, // null = no tower selected (placement mode off)
   camera: { x: 0, y: 0 },
 

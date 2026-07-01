@@ -1,11 +1,11 @@
-import { Server } from 'socket.io';
-import { roomStates } from '../state';
+import { Server } from "socket.io";
+import { roomStates } from "../state";
 import {
   CustomSocket,
   SyncFullGameStatePayload,
   SyncDeltaGameStatePayload,
-  SyncEnemyState
-} from '../types';
+  SyncEnemyState,
+} from "../types";
 import {
   RequestWaveStartSchema,
   TogglePauseSchema,
@@ -14,33 +14,36 @@ import {
   ToggleModSchema,
   SyncGameStateSchema,
   SyncLivesSchema,
-  SyncGoldSchema
-} from '../schemas';
-import { updateRoomHighscores } from './utils';
+  SyncGoldSchema,
+} from "../schemas";
+import { updateRoomHighscores } from "./utils";
 
 export function registerGameHandlers(io: Server, socket: CustomSocket) {
   socket.on("request_wave_start", (rawPayload: unknown) => {
     if (!socket.mission) return;
     const parsed = RequestWaveStartSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] request_wave_start von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] request_wave_start von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     let data = parsed.data;
     const state = roomStates[socket.mission];
-    
-    if (typeof data !== 'object') {
+
+    if (typeof data !== "object") {
       data = { wave: data };
     }
-    
+
     state.wave = data.wave;
     data.tick = state.currentTick || 0;
     data.timestamp = Date.now();
-    
-    updateRoomHighscores(socket.mission, io).catch(err => {
+
+    updateRoomHighscores(socket.mission, io).catch((err) => {
       console.error("[DATABASE] Error during async highscore update for room:", err);
     });
-    
+
     console.log(`Wave ${state.wave} started in ${socket.mission} (requested by ${socket.id})`);
     io.to(socket.mission).emit("start_wave_sync", data);
   });
@@ -89,10 +92,9 @@ export function registerGameHandlers(io: Server, socket: CustomSocket) {
       return;
     }
     const data = parsed.data;
-    if (data.mod === 'godMode') roomStates[socket.mission].godModeActive = data.value;
-    if (data.mod === 'infiniteGold') roomStates[socket.mission].infiniteGoldActive = data.value;
-    if (data.mod === 'waveModified') roomStates[socket.mission].waveModified = data.value;
-    if (data.mod === 'benchmarkActive') roomStates[socket.mission].benchmarkActive = data.value;
+    if (data.mod === "godMode") roomStates[socket.mission].godModeActive = data.value;
+    if (data.mod === "infiniteGold") roomStates[socket.mission].infiniteGoldActive = data.value;
+    if (data.mod === "waveModified") roomStates[socket.mission].waveModified = data.value;
     socket.to(socket.mission).emit("toggle_mod", data);
   });
 
@@ -110,52 +112,58 @@ export function registerGameHandlers(io: Server, socket: CustomSocket) {
     const payload = parsed.data;
 
     if (payload.fullSync) {
-        state.lastReceivedState = payload.state as unknown as SyncFullGameStatePayload;
-        state.currentTick = payload.state.tick;
-        Object.assign(state, payload.state);
+      state.lastReceivedState = payload.state as unknown as SyncFullGameStatePayload;
+      state.currentTick = payload.state.tick;
+      Object.assign(state, payload.state);
     } else if (payload.delta) {
-        const delta = payload.state as unknown as SyncDeltaGameStatePayload;
-        state.currentTick = delta.tick;
-        if (!state.lastReceivedState) {
-            state.lastReceivedState = {
-                hostTileSize: state.hostTileSize || 40,
-                activeEnemies: [],
-                enemiesToSpawn: state.enemiesToSpawn || 0,
-                spawnCooldown: state.spawnCooldown || 0,
-                enemyPool: state.enemyPool || [],
-                isWaveActive: state.isWaveActive || false,
-                autoStartActive: state.autoStartActive || false,
-                wave: state.wave || 1,
-                lives: state.lives || 20,
-                gold: state.gold || 250,
-                screenDamageEffect: 0,
-                benchmarkActive: state.benchmarkActive || false
-            };
-        }
-        
-        const lastState = state.lastReceivedState;
+      const delta = payload.state as unknown as SyncDeltaGameStatePayload;
+      state.currentTick = delta.tick;
+      if (!state.lastReceivedState) {
+        state.lastReceivedState = {
+          hostTileSize: state.hostTileSize || 40,
+          activeEnemies: [],
+          enemiesToSpawn: state.enemiesToSpawn || 0,
+          spawnCooldown: state.spawnCooldown || 0,
+          enemyPool: state.enemyPool || [],
+          isWaveActive: state.isWaveActive || false,
+          autoStartActive: state.autoStartActive || false,
+          wave: state.wave || 1,
+          lives: state.lives || 20,
+          gold: state.gold || 250,
+          screenDamageEffect: 0,
+        };
+      }
 
-        const existingMap = new Map<number, SyncEnemyState>();
-        for (let e of lastState.activeEnemies) {
-            existingMap.set(e.id, e);
+      const lastState = state.lastReceivedState;
+
+      const existingMap = new Map<number, SyncEnemyState>();
+      for (let e of lastState.activeEnemies) {
+        existingMap.set(e.id, e);
+      }
+      const enemyDelta = (delta.enemyDelta || []) as any[];
+      for (let d of enemyDelta) {
+        let existing = existingMap.get(d.id);
+        if (existing) Object.assign(existing, d);
+        else lastState.activeEnemies.push(d as SyncEnemyState);
+      }
+      const deletedEnemyIds = delta.deletedEnemyIds;
+      if (deletedEnemyIds) {
+        lastState.activeEnemies = lastState.activeEnemies.filter(
+          (e: SyncEnemyState) => !deletedEnemyIds.includes(e.id)
+        );
+      }
+      for (let key in delta) {
+        if (
+          key !== "enemyDelta" &&
+          key !== "deletedEnemyIds" &&
+          key !== "tick" &&
+          key !== "timestamp"
+        ) {
+          (lastState as any)[key] = (delta as any)[key];
+          state[key] = (delta as any)[key];
         }
-        const enemyDelta = (delta.enemyDelta || []) as any[];
-        for (let d of enemyDelta) {
-            let existing = existingMap.get(d.id);
-            if (existing) Object.assign(existing, d);
-            else lastState.activeEnemies.push(d as SyncEnemyState);
-        }
-        const deletedEnemyIds = delta.deletedEnemyIds;
-        if (deletedEnemyIds) {
-            lastState.activeEnemies = lastState.activeEnemies.filter((e: SyncEnemyState) => !deletedEnemyIds.includes(e.id));
-        }
-        for (let key in delta) {
-            if (key !== 'enemyDelta' && key !== 'deletedEnemyIds' && key !== 'tick' && key !== 'timestamp') {
-                (lastState as any)[key] = (delta as any)[key];
-                state[key] = (delta as any)[key];
-            }
-        }
-        state.activeEnemies = lastState.activeEnemies;
+      }
+      state.activeEnemies = lastState.activeEnemies;
     }
 
     socket.to(socket.mission).emit("sync_game_state", payload);

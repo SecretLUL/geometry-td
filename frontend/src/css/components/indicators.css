@@ -1,6 +1,6 @@
 /*
  * @file: frontend/src/css/components/indicators.css
- * @purpose: Styles for cheat and benchmark status indicators.
+ * @purpose: Styles for cheat status indicators.
  * @last_update: 2026-07-01 / v2.0.0
  */
 
@@ -33,39 +33,6 @@
   letter-spacing: 2px;
   text-transform: uppercase;
   text-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#benchmarkIndicator {
-  position: absolute;
-  bottom: clamp(10px, 2.5vh, 40px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  border: 2px solid #ff9f1c;
-  background: rgba(13, 13, 31, 0.95);
-  box-shadow:
-    0 0 15px rgba(255, 159, 28, 0.4),
-    inset 0 0 10px rgba(255, 159, 28, 0.2);
-  border-radius: 12px;
-  padding: clamp(6px, 1.2vh, 12px) clamp(15px, 3vw, 30px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: pulse-orange 2s infinite alternate;
-  pointer-events: none;
-  backdrop-filter: blur(10px);
-}
-
-#benchmarkIndicator span {
-  color: #ff9f1c;
-  font-weight: 800;
-  font-size: clamp(0.75rem, 1.8vw, 1.25rem);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(255, 159, 28, 0.6);
   display: flex;
   align-items: center;
   gap: 8px;

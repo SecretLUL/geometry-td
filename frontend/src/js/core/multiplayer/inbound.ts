@@ -154,9 +154,7 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
       state.screenDamageEffect = reconstructedState.screenDamageEffect;
     }
   }
-  if (reconstructedState.benchmarkActive !== undefined) {
-    state.benchmarkActive = reconstructedState.benchmarkActive;
-  }
+
   if (reconstructedState.playerGolds !== undefined) {
     state.playerGolds = reconstructedState.playerGolds;
   }
@@ -314,7 +312,6 @@ export function bindInboundEvents(
         hostTileSize,
         autoStartActive,
         waveModified,
-        benchmarkActive,
         mode,
         roomId,
       } = data;
@@ -332,7 +329,6 @@ export function bindInboundEvents(
       if (godModeActive !== undefined) state.godMode = godModeActive;
       if (infiniteGoldActive !== undefined) state.infiniteGold = infiniteGoldActive;
       if (waveModified !== undefined) state.waveModified = waveModified;
-      if (benchmarkActive !== undefined) state.benchmarkActive = benchmarkActive;
       if (enemyPool !== undefined) state.enemyPool = enemyPool;
       if (isWaveActive !== undefined) state.isWaveActive = isWaveActive;
       if (autoStartActive !== undefined) {
@@ -401,7 +397,6 @@ export function bindInboundEvents(
         gold: gold || 0,
         enemyPool: enemyPool || [],
         screenDamageEffect: 0,
-        benchmarkActive: benchmarkActive || false,
         towers: towers || [],
         playerSlots: data.playerSlots || [null, null, null, null],
         playerGolds: data.playerGolds || [300, 300, 300, 300],
@@ -438,7 +433,6 @@ export function bindInboundEvents(
       if (data.mod === "godMode") state.godMode = data.value;
       if (data.mod === "infiniteGold") state.infiniteGold = data.value;
       if (data.mod === "waveModified") state.waveModified = data.value;
-      if (data.mod === "benchmarkActive") state.benchmarkActive = data.value;
       Multiplayer.updateUI();
     });
 

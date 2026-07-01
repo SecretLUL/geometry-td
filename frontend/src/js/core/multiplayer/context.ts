@@ -104,10 +104,7 @@ export interface IMultiplayer {
   emitSyncGameState(data: SyncFullGameStatePayload): void;
   syncNow(): void;
   emitChangeSpeed(speed: number): void;
-  emitToggleMod(
-    mod: "godMode" | "infiniteGold" | "waveModified" | "benchmarkActive",
-    value: boolean
-  ): void;
+  emitToggleMod(mod: "godMode" | "infiniteGold" | "waveModified", value: boolean): void;
   emitTogglePause(isPaused: boolean): void;
   emitToggleAuto(isActive: boolean): void;
   emitSyncTowers(towersList: SyncTowerState[]): void;

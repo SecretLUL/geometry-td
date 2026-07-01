@@ -1,6 +1,6 @@
-import { Request } from 'express';
-import { Socket } from 'socket.io';
-import { Browser, Page } from 'puppeteer-core';
+import { Request } from "express";
+import { Socket } from "socket.io";
+import { Browser, Page } from "puppeteer-core";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -21,7 +21,7 @@ export interface CustomSocket extends Socket {
 export interface ActiveBrowserInstance {
   browser: Browser | null;
   page: Page | null;
-  status: 'launching' | 'running' | 'failed';
+  status: "launching" | "running" | "failed";
   instanceId: string;
   launchStartedAt: number;
 }
@@ -66,7 +66,6 @@ export interface SyncFullGameStatePayload {
   lives: number;
   gold: number;
   screenDamageEffect: number;
-  benchmarkActive: boolean;
   projectileEvents?: any[];
   towers?: RoomTowerState[];
   tick?: number;
@@ -93,7 +92,6 @@ export interface SyncDeltaGameStatePayload {
   gold?: number;
   enemyPool?: string[];
   screenDamageEffect?: number;
-  benchmarkActive?: boolean;
   towers?: RoomTowerState[];
   playerSlots?: Array<string | null>;
   playerGolds?: number[];
@@ -116,7 +114,6 @@ export interface RoomState {
   godModeActive: boolean;
   infiniteGoldActive: boolean;
   waveModified: boolean;
-  benchmarkActive: boolean;
   lives: number;
   gold: number;
   playerCount: number;
@@ -126,7 +123,7 @@ export interface RoomState {
   currentTick: number;
   lastReceivedState: SyncFullGameStatePayload | null;
   mapName: string;
-  mode: 'singleplayer' | 'public' | 'private';
+  mode: "singleplayer" | "public" | "private";
   roomId: string;
   playerSlots?: Array<string | null>;
   playerGolds?: number[];

@@ -15,8 +15,7 @@ export function showGameOverScreen(): void {
   const currentWave = state.wave;
   const currentRecord =
     typeof state.recordWave === "string" ? parseInt(state.recordWave) : state.recordWave;
-  const cheatsActive =
-    state.godMode || state.infiniteGold || state.waveModified || state.benchmarkActive;
+  const cheatsActive = state.godMode || state.infiniteGold || state.waveModified;
   if (!cheatsActive && currentWave > currentRecord) {
     state.recordWave = currentWave;
     const storage = state.isGuest ? sessionStorage : localStorage;

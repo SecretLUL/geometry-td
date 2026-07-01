@@ -7,8 +7,12 @@ import { state } from "../core/state";
 
 export function setupSettingsEvents(): void {
   // Sync settings between main menu and in-game modal
-  const refreshRateSelect = document.getElementById("refreshRateSelect") as HTMLSelectElement | null;
-  const igRefreshRateSelect = document.getElementById("igRefreshRateSelect") as HTMLSelectElement | null;
+  const refreshRateSelect = document.getElementById(
+    "refreshRateSelect"
+  ) as HTMLSelectElement | null;
+  const igRefreshRateSelect = document.getElementById(
+    "igRefreshRateSelect"
+  ) as HTMLSelectElement | null;
 
   // Load and apply saved refresh rate from localStorage
   const savedRefreshRate = localStorage.getItem("td_refresh_rate") || "60";

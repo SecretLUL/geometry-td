@@ -1,6 +1,6 @@
-import { Server } from 'socket.io';
-import { roomStates } from '../state';
-import { CustomSocket, RoomTowerState } from '../types';
+import { Server } from "socket.io";
+import { roomStates } from "../state";
+import { CustomSocket, RoomTowerState } from "../types";
 import {
   RequestPlaceTowerSchema,
   RequestUpgradeTowerSchema,
@@ -10,15 +10,18 @@ import {
   RejectPlaceTowerSchema,
   ConfirmUpgradeTowerSchema,
   ConfirmSellTowerSchema,
-  SyncTowersSchema
-} from '../schemas';
+  SyncTowersSchema,
+} from "../schemas";
 
 export function registerTowerHandlers(io: Server, socket: CustomSocket) {
   socket.on("request_place_tower", (rawPayload: unknown) => {
     if (!socket.mission) return;
     const parsed = RequestPlaceTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] request_place_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] request_place_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data;
@@ -35,7 +38,10 @@ export function registerTowerHandlers(io: Server, socket: CustomSocket) {
     if (!socket.mission) return;
     const parsed = RequestUpgradeTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] request_upgrade_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] request_upgrade_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data;
@@ -52,7 +58,10 @@ export function registerTowerHandlers(io: Server, socket: CustomSocket) {
     if (!socket.mission) return;
     const parsed = RequestSellTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] request_sell_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] request_sell_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data;
@@ -69,7 +78,10 @@ export function registerTowerHandlers(io: Server, socket: CustomSocket) {
     if (!socket.mission) return;
     const parsed = RequestRelocateTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] request_relocate_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] request_relocate_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data as any;
@@ -86,7 +98,10 @@ export function registerTowerHandlers(io: Server, socket: CustomSocket) {
     if (!socket.mission) return;
     const parsed = ConfirmPlaceTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] confirm_place_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] confirm_place_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data;
@@ -98,7 +113,10 @@ export function registerTowerHandlers(io: Server, socket: CustomSocket) {
     if (!socket.mission) return;
     const parsed = RejectPlaceTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] reject_place_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] reject_place_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data;
@@ -109,11 +127,16 @@ export function registerTowerHandlers(io: Server, socket: CustomSocket) {
     if (!socket.mission) return;
     const parsed = ConfirmUpgradeTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] confirm_upgrade_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] confirm_upgrade_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data;
-    const tower = roomStates[socket.mission].towers.find((t: RoomTowerState) => t.col === data.col && t.row === data.row);
+    const tower = roomStates[socket.mission].towers.find(
+      (t: RoomTowerState) => t.col === data.col && t.row === data.row
+    );
     if (tower) {
       if (data.specId) {
         tower.specId = data.specId;
@@ -131,11 +154,16 @@ export function registerTowerHandlers(io: Server, socket: CustomSocket) {
     if (!socket.mission) return;
     const parsed = ConfirmSellTowerSchema.safeParse(rawPayload);
     if (!parsed.success) {
-      console.warn(`[VALIDATION FAILED] confirm_sell_tower von ${socket.id}:`, parsed.error.format());
+      console.warn(
+        `[VALIDATION FAILED] confirm_sell_tower von ${socket.id}:`,
+        parsed.error.format()
+      );
       return;
     }
     const data = parsed.data;
-    roomStates[socket.mission].towers = roomStates[socket.mission].towers.filter((t: RoomTowerState) => !(t.col === data.col && t.row === data.row));
+    roomStates[socket.mission].towers = roomStates[socket.mission].towers.filter(
+      (t: RoomTowerState) => !(t.col === data.col && t.row === data.row)
+    );
     socket.to(socket.mission).emit("confirm_sell_tower", data);
   });
 

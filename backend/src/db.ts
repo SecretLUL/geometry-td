@@ -1,12 +1,12 @@
-import pgPromise from 'pg-promise';
+import pgPromise from "pg-promise";
 
 const pgp = pgPromise();
 
-const dbHost = process.env.DB_HOST || 'localhost';
-const dbPort = parseInt(process.env.DB_PORT || '5432', 10);
-const dbName = process.env.DB_NAME || 'geometry_td';
-const dbUser = process.env.DB_USER || 'gtd_user';
-const dbPassword = process.env.DB_PASSWORD || 'sicheres_passwort_dev';
+const dbHost = process.env.DB_HOST || "localhost";
+const dbPort = parseInt(process.env.DB_PORT || "5432", 10);
+const dbName = process.env.DB_NAME || "geometry_td";
+const dbUser = process.env.DB_USER || "gtd_user";
+const dbPassword = process.env.DB_PASSWORD || "sicheres_passwort_dev";
 
 const cn = {
   host: dbHost,
@@ -17,7 +17,9 @@ const cn = {
   max: 10, // maximum number of clients in the pool
 };
 
-console.log(`[DATABASE] Connection config: Host=${dbHost}, Port=${dbPort}, Database=${dbName}, User=${dbUser}`);
+console.log(
+  `[DATABASE] Connection config: Host=${dbHost}, Port=${dbPort}, Database=${dbName}, User=${dbUser}`
+);
 
 export const db = pgp(cn);
 
@@ -54,16 +56,16 @@ export async function initDatabaseSchema() {
       );
     `);
     console.log('[DATABASE] Table "progress" verified.');
-    
+
     // Add the highest_wave_map column if it does not yet exist (idempotent migration)
     await db.none(`
       ALTER TABLE progress ADD COLUMN IF NOT EXISTS highest_wave_map VARCHAR(100);
     `);
     console.log('[DATABASE] Column "highest_wave_map" in table "progress" verified.');
-    
-    console.log('[DATABASE] Schema initialization completed successfully.');
+
+    console.log("[DATABASE] Schema initialization completed successfully.");
   } catch (error) {
-    console.error('[DATABASE] Error during schema initialization:', error);
+    console.error("[DATABASE] Error during schema initialization:", error);
     throw error;
   }
 }

@@ -133,7 +133,6 @@ class Logger {
     if (state.godMode) list.push("godMode");
     if (state.infiniteGold) list.push("infiniteGold");
     if (state.waveModified) list.push("waveModified");
-    if (state.benchmarkActive) list.push("benchmarkActive");
     return {
       active: list.length > 0,
       list,

@@ -16,11 +16,7 @@ import {
   uiContainer,
 } from "./viewport";
 
-import {
-  redrawStaticPaths,
-  initSpawnerGraphics,
-  drawScenery,
-} from "./scenery-renderer";
+import { redrawStaticPaths, initSpawnerGraphics, drawScenery } from "./scenery-renderer";
 import { drawOverlay } from "./overlay-renderer";
 import { drawInteractions } from "./interaction-renderer";
 

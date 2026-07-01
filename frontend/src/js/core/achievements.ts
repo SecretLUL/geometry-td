@@ -110,7 +110,7 @@ export async function checkAchievements(): Promise<void> {
   }
 
   // Achievements are locked when cheats or mods are active
-  if (state.godMode || state.infiniteGold || state.waveModified || state.benchmarkActive) {
+  if (state.godMode || state.infiniteGold || state.waveModified) {
     return;
   }
 

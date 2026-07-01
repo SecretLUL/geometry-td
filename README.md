@@ -47,7 +47,6 @@ geometry-td/
 │   │   ├── auth.ts           # Token verification & auth helper functions
 │   │   ├── db.ts             # Database connection & schema initialization
 │   │   ├── headless.ts       # Puppeteer control (headless Chromium host instances)
-│   │   ├── performance-test.ts # Automated multiplayer benchmark
 │   │   ├── schemas.ts        # Zod validation schemas for WebSocket payloads
 │   │   ├── socket.ts         # Socket handler with Zod schema validation
 │   │   ├── state.ts          # Global in-memory server state
@@ -212,31 +211,6 @@ The backend manages Puppeteer browser instances to serve as authoritative game h
     *   **Stuck Preventer:** Any instance stuck in the `launching` state for longer than 45 seconds is forcefully terminated and deleted.
     *   **Orphan Clean-up:** If a room has no human players remaining (`playerCount === 0`), the headless host is stopped.
     *   **Crash Recovery:** If a running browser becomes unresponsive (i.e. `browser.version()` times out), the instance is closed, marked as `failed`, and a new host is spawned for the room.
-
----
-
-## 📈 Performance Testing & Benchmarking
-
-The project includes an automated script to simulate and measure performance in a full 4-player co-op match.
-*   **Test Script:** [performance-test.ts](./backend/src/performance-test.ts)
-*   **How it works:**
-    1. Launches a Chromium browser and creates **4 isolated browser contexts** (Host, Client 1, Client 2, Client 3) to simulate separate user sessions.
-    2. Navigates all 4 pages to the map lobby, initiates the match, and simulates active gameplay.
-    3. Collects rendering and latency metrics during the simulation.
-    4. Prints a summary table in the console showing:
-       *   Average FPS and Minimum FPS
-       *   Frame jitter in milliseconds (deviation between frame delivery times)
-       *   Number of micro-stutters and severe lags
-       *   Gameplay experience rating (🟢 EXCELLENT, 🟡 ACCEPTABLE, 🔴 POOR)
-
-### Running the benchmark:
-Ensure Chromium is installed locally or run this test inside the backend Docker container:
-```bash
-cd backend
-npx tsx src/performance-test.ts
-```
-
----
 
 ## 📄 License
 

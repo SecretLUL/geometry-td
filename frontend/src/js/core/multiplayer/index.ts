@@ -149,7 +149,6 @@ Multiplayer.init = function (
           playerSlots: state.playerSlots,
           playerGolds: state.playerGolds,
           screenDamageEffect: state.screenDamageEffect,
-          benchmarkActive: state.benchmarkActive,
           towers: state.towers.map((t) => ({
             col: t.col,
             row: t.row,

@@ -33,14 +33,6 @@ export interface GameState {
   infiniteGold: boolean;
   waveModified: boolean;
   originalWave: number | null;
-  benchmarkActive: boolean;
-  benchmarkBackup: {
-    wave: number;
-    godMode: boolean;
-    infiniteGold: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    towers: any[];
-  } | null;
   selectedTowerType: string | null; // null = no tower selected (placement mode off)
   camera: Vector2D;
 
@@ -364,7 +356,6 @@ export interface SyncFullGameStatePayload {
   lives: number;
   gold: number;
   screenDamageEffect: number;
-  benchmarkActive: boolean;
   projectileEvents?: ProjectileEvent[];
   tick?: number;
   timestamp?: number;
@@ -395,7 +386,6 @@ export interface SyncDeltaGameStatePayload {
   gold?: number;
   enemyPool?: string[];
   screenDamageEffect?: number;
-  benchmarkActive?: boolean;
   towers?: SyncTowerState[];
   playerSlots?: Array<string | null>;
   playerGolds?: number[];
@@ -467,7 +457,7 @@ export interface SocketEventMap {
   toggle_pause: boolean;
   change_speed: number;
   toggle_mod: {
-    mod: "godMode" | "infiniteGold" | "waveModified" | "benchmarkActive";
+    mod: "godMode" | "infiniteGold" | "waveModified";
     value: boolean;
   };
   toggle_auto: boolean;

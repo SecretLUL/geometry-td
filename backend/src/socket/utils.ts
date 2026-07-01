@@ -1,11 +1,13 @@
-import { Server } from 'socket.io';
-import { db } from '../db';
-import { CustomSocket } from '../types';
-import { roomStates } from '../state';
+import { Server } from "socket.io";
+import { db } from "../db";
+import { CustomSocket } from "../types";
+import { roomStates } from "../state";
 
 export function recalculateStartingGold(state: any) {
   if (state.wave > 1 || state.isWaveActive) return;
-  const activeCount = state.playerSlots ? state.playerSlots.filter((id: any) => id !== null).length : 1;
+  const activeCount = state.playerSlots
+    ? state.playerSlots.filter((id: any) => id !== null).length
+    : 1;
   const splitGold = Math.floor(300 / Math.max(1, activeCount));
   if (!state.playerGolds) {
     state.playerGolds = [300, 300, 300, 300];
@@ -22,14 +24,14 @@ export function recalculateStartingGold(state: any) {
 export async function updateRoomHighscores(roomId: string, io: Server) {
   const state = roomStates[roomId];
   if (!state) return;
-  
-  if (state.godModeActive || state.infiniteGoldActive || state.waveModified || state.benchmarkActive) {
+
+  if (state.godModeActive || state.infiniteGoldActive || state.waveModified) {
     return;
   }
-  
+
   const currentWave = state.wave;
   if (currentWave <= 1) return;
-  
+
   for (const socketId of state.sockets) {
     const s = io.sockets.sockets.get(socketId) as CustomSocket;
     if (s && s.user) {

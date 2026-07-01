@@ -1,26 +1,26 @@
-import { Server } from 'socket.io';
-import { getMissionStats, getTotalOnlinePlayers } from './state';
-import { WebRTCSignalSchema } from './schemas';
-import { CustomSocket } from './types';
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from './auth';
+import { Server } from "socket.io";
+import { getMissionStats, getTotalOnlinePlayers } from "./state";
+import { WebRTCSignalSchema } from "./schemas";
+import { CustomSocket } from "./types";
+import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "./auth";
 
-import { registerRoomHandlers } from './socket/room';
-import { registerTowerHandlers } from './socket/tower';
-import { registerGameHandlers } from './socket/game';
+import { registerRoomHandlers } from "./socket/room";
+import { registerTowerHandlers } from "./socket/tower";
+import { registerGameHandlers } from "./socket/game";
 
 export function setupSockets(io: Server) {
   io.use((socket: any, next) => {
     const cookieHeader = socket.handshake.headers.cookie;
     if (cookieHeader) {
       const cookies = Object.fromEntries(
-        cookieHeader.split(';').map((c: string) => {
-          const parts = c.trim().split('=');
-          return [parts[0], parts.slice(1).join('=')];
+        cookieHeader.split(";").map((c: string) => {
+          const parts = c.trim().split("=");
+          return [parts[0], parts.slice(1).join("=")];
         })
       );
-      const isProd = process.env.NODE_ENV === 'production';
-      const cName = isProd ? '__Host-gtd-session' : 'gtd-session';
+      const isProd = process.env.NODE_ENV === "production";
+      const cName = isProd ? "__Host-gtd-session" : "gtd-session";
       const token = cookies[cName];
       if (token) {
         try {
@@ -36,7 +36,7 @@ export function setupSockets(io: Server) {
   });
 
   io.on("connection", (socket: CustomSocket) => {
-    socket.isHeadless = socket.handshake.query.headless === 'true';
+    socket.isHeadless = socket.handshake.query.headless === "true";
     console.log(`Player connected: ${socket.id}`);
     socket.emit("mission_stats_update", getMissionStats());
     io.emit("online_players_update", getTotalOnlinePlayers(io));
@@ -72,7 +72,7 @@ export function setupSockets(io: Server) {
       if (data.targetId) {
         io.to(data.targetId).emit("webrtc_signal", {
           senderId: socket.id,
-          signal: data.signal
+          signal: data.signal,
         });
       }
     });

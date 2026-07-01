@@ -5,6 +5,18 @@
   },
 
   {
+    "version": "v2.19.8",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Benchmark-System und zugehörige Testskripte vollständig entfernt."
+      }
+    ]
+  },
+
+  {
     "version": "v2.19.7",
     "date": "1. Juli 2026",
     "status": "active",

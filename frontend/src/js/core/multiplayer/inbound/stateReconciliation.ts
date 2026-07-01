@@ -25,7 +25,6 @@ export function initializeLastReceivedState(): void {
       gold: 0,
       enemyPool: [],
       screenDamageEffect: 0,
-      benchmarkActive: false,
       towers: [],
     };
   }
@@ -82,7 +81,6 @@ export function reconstructGameState(
       "gold",
       "enemyPool",
       "screenDamageEffect",
-      "benchmarkActive",
       "towers",
       "playerGolds",
       "playerSlots",

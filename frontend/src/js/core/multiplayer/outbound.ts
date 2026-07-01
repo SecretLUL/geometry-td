@@ -175,7 +175,6 @@ export function emitSyncGameState(data: SyncFullGameStatePayload): void {
     "gold",
     "enemyPool",
     "screenDamageEffect",
-    "benchmarkActive",
     "towers",
     "playerGolds",
     "playerSlots",
@@ -275,7 +274,6 @@ export function syncNow(): void {
       relocationActive: state.relocationActive,
       playerRelocationStates: state.playerRelocationStates ? [...state.playerRelocationStates] : [],
       screenDamageEffect: state.screenDamageEffect,
-      benchmarkActive: state.benchmarkActive,
       towers: state.towers.map((t) => ({
         col: t.col,
         row: t.row,
@@ -303,7 +301,7 @@ export function emitChangeSpeed(speed: number): void {
 }
 
 export function emitToggleMod(
-  mod: "godMode" | "infiniteGold" | "waveModified" | "benchmarkActive",
+  mod: "godMode" | "infiniteGold" | "waveModified",
   value: boolean
 ): void {
   socket?.emit("toggle_mod", { mod, value });

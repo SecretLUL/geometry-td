@@ -1,16 +1,16 @@
-import { Server } from 'socket.io';
+import { Server } from "socket.io";
 import {
   roomStates,
   roomJoinLocks,
   ICE_SERVERS,
   getMissionStats,
   getTotalOnlinePlayers,
-  initRoomState
-} from '../state';
-import { spawnHeadlessHost, stopHeadlessHost, activeBrowsers } from '../headless';
-import { JoinMissionSchema } from '../schemas';
-import { CustomSocket } from '../types';
-import { recalculateStartingGold } from './utils';
+  initRoomState,
+} from "../state";
+import { spawnHeadlessHost, stopHeadlessHost, activeBrowsers } from "../headless";
+import { JoinMissionSchema } from "../schemas";
+import { CustomSocket } from "../types";
+import { recalculateStartingGold } from "./utils";
 
 export function registerRoomHandlers(io: Server, socket: CustomSocket) {
   socket.on("join_mission", async (rawPayload: unknown) => {
@@ -21,22 +21,22 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
     }
 
     let mapName: string;
-    let mode: 'singleplayer' | 'public' | 'private' = 'public';
+    let mode: "singleplayer" | "public" | "private" = "public";
     let roomId: string | undefined;
     let action: string | undefined;
 
-    if (typeof parsed.data === 'string') {
+    if (typeof parsed.data === "string") {
       mapName = parsed.data;
     } else {
       mapName = parsed.data.mapName;
-      mode = (parsed.data.mode as any) || 'public';
+      mode = (parsed.data.mode as any) || "public";
       roomId = parsed.data.roomId;
       action = parsed.data.action;
     }
 
-    const isHeadless = socket.handshake.query.headless === 'true';
+    const isHeadless = socket.handshake.query.headless === "true";
     socket.isHeadless = isHeadless;
-    
+
     if (isHeadless) {
       const queryRoomId = socket.handshake.query.roomId as string;
       if (queryRoomId) {
@@ -46,25 +46,25 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
 
     let finalRoomId = roomId;
 
-    if (mode === 'singleplayer') {
+    if (mode === "singleplayer") {
       finalRoomId = `single-${socket.id}`;
-    } else if (mode === 'public') {
+    } else if (mode === "public") {
       if (!finalRoomId) {
-        finalRoomId = Object.keys(roomStates).find(rid => {
+        finalRoomId = Object.keys(roomStates).find((rid) => {
           const r = roomStates[rid];
-          return r.mapName === mapName && r.mode === 'public' && r.playerCount < 4;
+          return r.mapName === mapName && r.mode === "public" && r.playerCount < 4;
         });
 
         if (!finalRoomId) {
           finalRoomId = `pub-${Math.random().toString(36).substring(2, 10)}`;
         }
       }
-    } else if (mode === 'private') {
-      if (action === 'create' || !finalRoomId) {
-        let code = '';
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    } else if (mode === "private") {
+      if (action === "create" || !finalRoomId) {
+        let code = "";
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         do {
-          code = '';
+          code = "";
           for (let i = 0; i < 4; i++) {
             code += chars.charAt(Math.floor(Math.random() * chars.length));
           }
@@ -74,11 +74,11 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
         finalRoomId = finalRoomId.toUpperCase();
         const targetRoom = roomStates[finalRoomId];
         if (!targetRoom) {
-          socket.emit('room_error', 'The requested private room does not exist or has expired.');
+          socket.emit("room_error", "The requested private room does not exist or has expired.");
           return;
         }
         if (targetRoom.playerCount >= 4) {
-          socket.emit('room_error', 'The private room is already full (maximum 4 players).');
+          socket.emit("room_error", "The private room is already full (maximum 4 players).");
           return;
         }
         mapName = targetRoom.mapName;
@@ -86,12 +86,12 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
     }
 
     if (!finalRoomId) {
-      socket.emit('room_error', 'Failed to determine room ID.');
+      socket.emit("room_error", "Failed to determine room ID.");
       return;
     }
 
     while (roomJoinLocks.has(finalRoomId)) {
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise((resolve) => setTimeout(resolve, 5));
     }
     roomJoinLocks.add(finalRoomId);
 
@@ -117,29 +117,51 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
 
       state.sockets.add(socket.id);
 
-      const isDevEnv = process.env.NODE_ENV === 'development';
-      const wantHost = socket.handshake.query.wantHost === 'true';
-      const shouldBeHost = isHeadless || (mode === 'singleplayer') || (isDevEnv && wantHost && !state.hostId) || (!state.hostId);
+      const isDevEnv = process.env.NODE_ENV === "development";
+      const wantHost = socket.handshake.query.wantHost === "true";
+      const shouldBeHost =
+        isHeadless ||
+        mode === "singleplayer" ||
+        (isDevEnv && wantHost && !state.hostId) ||
+        !state.hostId;
 
       if (shouldBeHost) {
         if (isHeadless) {
-          console.log(`[HEADLESS] Headless host socket connected for room ${finalRoomId} (${mapName}): ${socket.id}`);
+          console.log(
+            `[HEADLESS] Headless host socket connected for room ${finalRoomId} (${mapName}): ${socket.id}`
+          );
           state.headlessSocketId = socket.id;
         } else {
-          console.log(`[DEV-HOST] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as HOST.`);
+          console.log(
+            `[DEV-HOST] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as HOST.`
+          );
         }
         state.hostId = socket.id;
-        socket.emit("role_assigned", { isHost: true, iceServers: ICE_SERVERS, playerIndex: assignedSlot });
+        socket.emit("role_assigned", {
+          isHost: true,
+          iceServers: ICE_SERVERS,
+          playerIndex: assignedSlot,
+        });
       } else {
-        console.log(`[NETWORK] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as CLIENT.`);
+        console.log(
+          `[NETWORK] Human player ${socket.id} joined room ${finalRoomId} (${mapName}) as CLIENT.`
+        );
 
-        if (mode !== 'singleplayer' && !state.hostId && (!activeBrowsers[finalRoomId] || activeBrowsers[finalRoomId].status === 'failed')) {
-          spawnHeadlessHost(finalRoomId, mapName).catch(err => {
+        if (
+          mode !== "singleplayer" &&
+          !state.hostId &&
+          (!activeBrowsers[finalRoomId] || activeBrowsers[finalRoomId].status === "failed")
+        ) {
+          spawnHeadlessHost(finalRoomId, mapName).catch((err) => {
             console.error("Async spawnHeadlessHost failed:", err);
           });
         }
 
-        socket.emit("role_assigned", { isHost: false, iceServers: ICE_SERVERS, playerIndex: assignedSlot });
+        socket.emit("role_assigned", {
+          isHost: false,
+          iceServers: ICE_SERVERS,
+          playerIndex: assignedSlot,
+        });
       }
 
       let humanCount = 0;
@@ -160,7 +182,7 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
       io.to(finalRoomId).emit("player_slots_update", {
         playerSlots: state.playerSlots,
         playerGolds: state.playerGolds,
-        hostId: state.hostId
+        hostId: state.hostId,
       });
 
       const stateToSend = { ...state, sockets: Array.from(state.sockets) };
@@ -192,7 +214,7 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
           if (remainingCount > 0 && leavingGold > 0 && state.playerGolds) {
             const share = Math.floor(leavingGold / remainingCount);
             const extra = leavingGold % remainingCount;
-            
+
             let distributedExtra = false;
             for (let i = 0; i < 4; i++) {
               if (state.playerSlots[i] !== null) {
@@ -241,7 +263,7 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
               nextHostSocket.emit("role_assigned", {
                 isHost: true,
                 iceServers: ICE_SERVERS,
-                playerIndex: assignedSlot
+                playerIndex: assignedSlot,
               });
             }
           }
@@ -260,7 +282,7 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
           }
         }
         state.playerCount = humanCount;
-        
+
         if (state.wave === 1 && !state.isWaveActive) {
           recalculateStartingGold(state);
         }
@@ -269,12 +291,14 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
         io.to(socket.mission).emit("player_slots_update", {
           playerSlots: state.playerSlots,
           playerGolds: state.playerGolds,
-          hostId: state.hostId
+          hostId: state.hostId,
         });
 
         if (state.playerCount === 0) {
-          console.log(`[NETWORK] No players remaining in ${socket.mission}. Stopping headless host.`);
-          stopHeadlessHost(socket.mission).catch(err => {
+          console.log(
+            `[NETWORK] No players remaining in ${socket.mission}. Stopping headless host.`
+          );
+          stopHeadlessHost(socket.mission).catch((err) => {
             console.error("Async stopHeadlessHost failed:", err);
           });
           delete roomStates[socket.mission];

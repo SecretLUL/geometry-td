@@ -44,7 +44,7 @@ export function setupCanvasEvents(canvas: HTMLCanvasElement): void {
 
   // ── Canvas: click ─────────────────────────────────────────────────────────
   canvas.addEventListener("click", (e) => {
-    if (state.gameOver || state.benchmarkActive) return;
+    if (state.gameOver) return;
 
     const rect = canvas.getBoundingClientRect();
     // Use clientWidth/clientHeight (CSS layout px) so coordinates map to CSS px space,
@@ -170,8 +170,7 @@ export function setupCanvasEvents(canvas: HTMLCanvasElement): void {
   // ── Canvas: right-click sell / cancel ─────────────────────────────────────
   canvas.addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    if (state.gameOver || (state.isPaused && !state.relocationActive) || state.benchmarkActive)
-      return;
+    if (state.gameOver || (state.isPaused && !state.relocationActive)) return;
 
     // Dismiss mobile context shop if open
     const contextShop = document.getElementById("context-shop");

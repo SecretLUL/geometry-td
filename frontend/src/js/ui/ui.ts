@@ -30,7 +30,6 @@ let lastRenderedGold = -1;
 let lastRenderedGeneratorCount = -1;
 let lastRenderedOriginalWave: number | null | undefined = undefined;
 
-let lastBtnBenchmark: boolean | null = null;
 let lastBtnHost: boolean | null = null;
 let lastBtnWaveActive: boolean | null = null;
 let lastBtnAutoStart: boolean | null = null;
@@ -101,8 +100,7 @@ export function updateUI(): void {
     }
   }
 
-  const cheatsActive =
-    state.godMode || state.infiniteGold || state.waveModified || state.benchmarkActive;
+  const cheatsActive = state.godMode || state.infiniteGold || state.waveModified;
   if (lastRenderedCheats !== cheatsActive) {
     lastRenderedCheats = cheatsActive;
     const cheatInd = getEl("cheatIndicator");
@@ -190,87 +188,58 @@ export function updateUI(): void {
     });
   }
 
-  const benchmarkActive = state.benchmarkActive === true;
-
   if (
-    lastBtnBenchmark !== benchmarkActive ||
     lastBtnHost !== state.isHost ||
     lastBtnWaveActive !== state.isWaveActive ||
     lastBtnAutoStart !== state.autoStartActive ||
     lastBtnWave !== state.wave
   ) {
-    lastBtnBenchmark = benchmarkActive;
     lastBtnHost = state.isHost;
     lastBtnWaveActive = state.isWaveActive;
     lastBtnAutoStart = state.autoStartActive;
     lastBtnWave = state.wave;
 
-    const benchmarkInd = getEl("benchmarkIndicator");
-    if (benchmarkInd) {
-      if (benchmarkActive && !state.isHost) {
-        benchmarkInd.classList.remove("hidden");
-      } else {
-        benchmarkInd.classList.add("hidden");
-      }
-    }
-
     const clientInteractiveBtnIds = ["startWaveBtn", "autoStartBtn", "speedBtn", "pauseBtn"];
     clientInteractiveBtnIds.forEach((id) => {
       const btn = getEl(id) as HTMLButtonElement | null;
       if (btn) {
-        if (benchmarkActive && !state.isHost) {
-          btn.disabled = true;
-          btn.classList.add("btn-disabled");
-          btn.style.opacity = "0.5";
-          btn.style.pointerEvents = "none";
-          if (id === "startWaveBtn") {
-            btn.innerText = "Benchmark läuft...";
-          }
-        } else {
-          btn.style.opacity = "";
-          btn.style.pointerEvents = "";
+        btn.style.opacity = "";
+        btn.style.pointerEvents = "";
 
-          if (id === "startWaveBtn") {
-            if (state.isWaveActive) {
-              btn.disabled = true;
-              btn.classList.add("btn-disabled");
-              btn.innerText = "Welle läuft...";
-            } else if (state.autoStartActive) {
-              btn.disabled = true;
-              btn.classList.add("btn-disabled");
-              btn.innerText = "Auto aktiv";
-            } else {
-              btn.disabled = false;
-              btn.classList.remove("btn-disabled");
-              btn.innerText = `Start Welle ${state.wave}`;
-            }
-          } else if (id === "autoStartBtn") {
-            btn.disabled = false;
-            btn.classList.remove("btn-disabled");
-            btn.innerText = state.autoStartActive ? "Auto: An" : "Auto: Aus";
-            btn.style.background = state.autoStartActive
-              ? "linear-gradient(to bottom, #00ff88, #00b35f)"
-              : "";
-            btn.style.color = state.autoStartActive ? "#fff" : "";
+        if (id === "startWaveBtn") {
+          if (state.isWaveActive) {
+            btn.disabled = true;
+            btn.classList.add("btn-disabled");
+            btn.innerText = "Welle läuft...";
+          } else if (state.autoStartActive) {
+            btn.disabled = true;
+            btn.classList.add("btn-disabled");
+            btn.innerText = "Auto aktiv";
           } else {
             btn.disabled = false;
             btn.classList.remove("btn-disabled");
+            btn.innerText = `Start Welle ${state.wave}`;
           }
+        } else if (id === "autoStartBtn") {
+          btn.disabled = false;
+          btn.classList.remove("btn-disabled");
+          btn.innerText = state.autoStartActive ? "Auto: An" : "Auto: Aus";
+          btn.style.background = state.autoStartActive
+            ? "linear-gradient(to bottom, #00ff88, #00b35f)"
+            : "";
+          btn.style.color = state.autoStartActive ? "#fff" : "";
+        } else {
+          btn.disabled = false;
+          btn.classList.remove("btn-disabled");
         }
       }
     });
 
     getTowerBtns().forEach((btn) => {
       const htmlBtn = btn as HTMLElement;
-      if (benchmarkActive && !state.isHost) {
-        htmlBtn.style.opacity = "0.4";
-        htmlBtn.style.pointerEvents = "none";
-        htmlBtn.style.cursor = "not-allowed";
-      } else {
-        htmlBtn.style.opacity = "";
-        htmlBtn.style.pointerEvents = "";
-        htmlBtn.style.cursor = "";
-      }
+      htmlBtn.style.opacity = "";
+      htmlBtn.style.pointerEvents = "";
+      htmlBtn.style.cursor = "";
     });
   }
 

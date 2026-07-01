@@ -5,6 +5,7 @@
     "check:frontend": "npm run --prefix frontend lint",
     "check-all:frontend": "npm run --prefix frontend check-all",
     "check:backend": "npm run --prefix backend type-check",
-    "check-all": "npm run check-all:frontend && npm run check:backend"
+    "check-all:backend": "npm run --prefix backend type-check && npm run --prefix backend build",
+    "check-all": "npm run --prefix frontend format && npm run --prefix backend format && npm run check-all:frontend && npm run check-all:backend"
   }
 }
