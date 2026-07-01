@@ -6,9 +6,38 @@
  */
 import { defineConfig } from 'vite';
 import path from 'path';
+import fs from 'fs';
+
+function htmlIncludePlugin() {
+  return {
+    name: 'html-include',
+    transformIndexHtml(html, ctx) {
+      const dir = ctx.filename ? path.dirname(ctx.filename) : __dirname;
+
+      const resolveIncludes = (content, currentDir) => {
+        const includeRegex = /<include\s+src="([^"]+)"\s*(?:\/>|><\/include>)/g;
+        return content.replace(includeRegex, (match, srcPath) => {
+          const fullPath = path.resolve(currentDir, srcPath);
+          if (fs.existsSync(fullPath)) {
+            if (ctx.server) {
+              ctx.server.watcher.add(fullPath);
+            }
+            const fileContent = fs.readFileSync(fullPath, 'utf-8');
+            return resolveIncludes(fileContent, path.dirname(fullPath));
+          } else {
+            console.warn(`[html-include] File not found: ${fullPath}`);
+            return match;
+          }
+        });
+      };
+
+      return resolveIncludes(html, dir);
+    }
+  };
+}
 
 export default defineConfig({
-  plugins: [],
+  plugins: [htmlIncludePlugin()],
   server: {
     port: 5173,
     host: true, // Listen on all network interfaces (important for Docker/remote NAS)

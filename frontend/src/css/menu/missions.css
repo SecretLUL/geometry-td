@@ -189,3 +189,25 @@
     transform: translate(0);
   }
 }
+
+/* Map Header Custom Gradients & Filters */
+.mission-header-spiral {
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e) !important;
+}
+.mission-header-spiral svg {
+  filter: drop-shadow(0 0 8px var(--tesla-cyan));
+}
+
+.mission-header-quantum {
+  background: linear-gradient(135deg, #0f0c29, #00f2fe, #24243e) !important;
+}
+.mission-header-quantum svg {
+  filter: drop-shadow(0 0 10px #00f2fe);
+}
+
+.mission-header-zigzag {
+  background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d) !important;
+}
+.mission-header-zigzag svg {
+  filter: drop-shadow(0 0 10px var(--bomb-red));
+}

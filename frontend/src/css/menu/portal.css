@@ -176,3 +176,21 @@ body.menu-page {
   height: 100%;
   overflow: hidden;
 }
+
+#fps-display {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  pointer-events: none;
+  font-family: "Outfit", sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: #00ff88;
+  text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
+}
+
+#tab-settings .settings-list {
+  max-width: 650px;
+  margin: 0 auto;
+}

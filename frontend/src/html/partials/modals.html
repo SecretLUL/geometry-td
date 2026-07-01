@@ -1,0 +1,109 @@
+<!-- ── Mode Selection Modal (Premium, Cyber-Glassmorphic) ── -->
+<div id="modeSelectionModal" class="custom-overlay hidden">
+  <div class="custom-modal-content">
+    <button class="custom-modal-close" id="closeModeModal">&times;</button>
+    <div class="custom-modal-header">
+      <div class="custom-modal-header-icon">🛡️</div>
+      <h2 id="modalMapName">SEKTOR-ZUGRIFFS-PROTOKOLL</h2>
+    </div>
+    <p class="custom-modal-subtitle">
+      Wähle deine Einsatzmethode für die Simulation in diesem Sektor
+    </p>
+
+    <div class="modes-grid">
+      <!-- Solo Modus -->
+      <div class="mode-card" id="modeCardSolo">
+        <div class="mode-icon">👤</div>
+        <h3>Solo-Einsatz</h3>
+        <p class="mode-desc">
+          Starte eine isolierte Simulation nur für dich. Keine Störungen, reiner Fokus auf deine
+          Taktik.
+        </p>
+        <button class="mode-action-btn solo-btn glitch-hover" id="startSoloBtn">
+          Solo Starten
+        </button>
+      </div>
+
+      <!-- Public Modus -->
+      <div class="mode-card" id="modeCardPublic">
+        <div class="mode-icon">🌐</div>
+        <h3>Öffentliches Match</h3>
+        <p class="mode-desc">
+          Tritt einem bestehenden Trupp bei oder öffne diesen Sektor für bis zu 4 Spieler.
+          Teamplay erforderlich!
+        </p>
+        <button class="mode-action-btn public-btn glitch-hover" id="startPublicBtn">
+          Match Suchen
+        </button>
+      </div>
+
+      <!-- Private Modus -->
+      <div class="mode-card" id="modeCardPrivate">
+        <div class="mode-icon">🔐</div>
+        <h3>Privates Match</h3>
+        <p class="mode-desc">
+          Generiere einen einzigartigen 4-stelligen Zugangscode oder gib einen Code ein, um mit
+          Freunden zu spielen.
+        </p>
+        <div class="private-controls">
+          <button class="mode-action-btn private-create-btn glitch-hover" id="createPrivateBtn">
+            Raum Erstellen
+          </button>
+          <div class="private-divider">oder</div>
+          <div class="private-join-box">
+            <input
+              type="text"
+              id="privateCodeInputModal"
+              maxlength="4"
+              placeholder="CODE"
+              autocomplete="off"
+              class="private-input"
+            />
+            <button class="private-join-btn" id="joinPrivateBtnModal">Beitreten</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Profile Picture Crop Modal (Premium, Cyber-Glassmorphic) ── -->
+<div id="avatarCropModal" class="custom-overlay hidden">
+  <div class="custom-modal-content avatar-crop-modal-content">
+    <button class="custom-modal-close" id="closeCropModal">&times;</button>
+    <div class="custom-modal-header">
+      <div class="custom-modal-header-icon">✂️</div>
+      <h2>BILD ZUSCHNEIDEN</h2>
+    </div>
+    <p class="custom-modal-subtitle">Bewege und zoome das Bild passend in den Kreis</p>
+
+    <div class="crop-workspace">
+      <div class="crop-container">
+        <canvas id="cropCanvas" width="300" height="300"></canvas>
+      </div>
+
+      <div class="crop-zoom-control">
+        <span class="zoom-icon minus">🔍-</span>
+        <input
+          type="range"
+          id="cropZoomSlider"
+          class="ig-range-slider"
+          min="1"
+          max="3"
+          step="0.01"
+          value="1"
+        />
+        <span class="zoom-icon plus">🔍+</span>
+      </div>
+    </div>
+
+    <div class="crop-actions">
+      <button id="cancelCropBtn" class="mode-action-btn solo-btn glitch-hover">
+        Abbrechen
+      </button>
+      <button id="confirmCropBtn" class="mode-action-btn public-btn glitch-hover">
+        Zuschneiden
+      </button>
+    </div>
+  </div>
+</div>

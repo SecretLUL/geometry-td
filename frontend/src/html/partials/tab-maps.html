@@ -1,0 +1,168 @@
+<!-- Maps Tab -->
+<div id="tab-maps" class="tab-content-wrapper">
+  <!-- Direct Code Joiner Component (Cyberpunk Style) -->
+  <div class="direct-join-bar">
+    <div class="direct-join-label">
+      <span class="direct-join-pulse"></span>
+      <span>DIREKTBEITRITT PER RAUM-CODE:</span>
+    </div>
+    <div class="direct-join-controls">
+      <input
+        type="text"
+        id="directCodeInput"
+        maxlength="4"
+        placeholder="CODE"
+        autocomplete="off"
+        class="direct-input"
+      />
+      <button id="directJoinBtn" class="direct-btn glitch-hover">
+        VERIFIZIEREN & BEITRETEN
+      </button>
+    </div>
+  </div>
+
+  <div class="mission-grid">
+    <!-- Spiral Map -->
+    <div class="mission-card" data-map="The Spiral">
+      <div class="mission-header mission-header-spiral">
+        <svg
+          viewBox="-2 -2 28 28"
+          width="48"
+          height="48"
+          stroke="#ffffff"
+          stroke-width="2"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12 12c-1.1 0-2 .9-2 2s.9 2 2 2 3-1.3 3-3-1.3-4-3-4-5 2.2-5 5 2.2 6 5 6 7-3.1 7-7-3.1-8-7-8-9 4-9 9 4 11 9 11 11-4.9 11-11"
+          />
+        </svg>
+      </div>
+      <div class="mission-content">
+        <div class="mission-name">
+          <span>THE SPIRAL</span>
+          <div class="difficulty-dots">
+            <div class="dot active easy"></div>
+            <div class="dot active med"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+        <div class="mission-stats">
+          <div class="mission-stat-item">
+            <span class="mission-stat-label">Pfad-Länge</span>
+            <span class="mission-stat-value">Extrem Lang</span>
+          </div>
+          <div class="mission-stat-item">
+            <span class="mission-stat-label">Schwierigkeit</span>
+            <span class="mission-stat-value" style="color: #ffcc00">Medium</span>
+          </div>
+        </div>
+        <button class="mission-btn glitch-hover">START SIMULATION</button>
+      </div>
+    </div>
+
+    <!-- Quantum Bypass Map -->
+    <div class="mission-card" data-map="Quantum Bypass">
+      <div class="mission-header mission-header-quantum">
+        <svg
+          viewBox="-2 -2 28 28"
+          width="48"
+          height="48"
+          stroke="#ffffff"
+          stroke-width="2"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3"></circle>
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="11"
+            ry="4"
+            transform="rotate(45 12 12)"
+          ></ellipse>
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="11"
+            ry="4"
+            transform="rotate(-45 12 12)"
+          ></ellipse>
+        </svg>
+      </div>
+      <div class="mission-content">
+        <div class="mission-name">
+          <span>QUANTUM BYPASS</span>
+          <div class="difficulty-dots">
+            <div class="dot active easy"></div>
+            <div class="dot active med"></div>
+            <div class="dot active med"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+        <div class="mission-stats">
+          <div class="mission-stat-item">
+            <span class="mission-stat-label">Pfad-Länge</span>
+            <span class="mission-stat-value">Mittellang</span>
+          </div>
+          <div class="mission-stat-item">
+            <span class="mission-stat-label">Schwierigkeit</span>
+            <span class="mission-stat-value" style="color: #ffcc00">Medium+</span>
+          </div>
+        </div>
+        <button class="mission-btn glitch-hover">START SIMULATION</button>
+      </div>
+    </div>
+
+    <!-- ZigZag Map -->
+    <div class="mission-card" data-map="The ZigZag">
+      <div class="mission-header mission-header-zigzag">
+        <svg
+          viewBox="-2 -2 28 28"
+          width="48"
+          height="48"
+          stroke="#ffffff"
+          stroke-width="2"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+            fill="#ffffff"
+            fill-opacity="0.2"
+          ></path>
+        </svg>
+      </div>
+      <div class="mission-content">
+        <div class="mission-name">
+          <span>THE ZIGZAG</span>
+          <div class="difficulty-dots">
+            <div class="dot active easy"></div>
+            <div class="dot active med"></div>
+            <div class="dot active hard"></div>
+            <div class="dot active hard"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+        <div class="mission-stats">
+          <div class="mission-stat-item">
+            <span class="mission-stat-label">Pfad-Länge</span>
+            <span class="mission-stat-value">Kompakt</span>
+          </div>
+          <div class="mission-stat-item">
+            <span class="mission-stat-label">Schwierigkeit</span>
+            <span class="mission-stat-value" style="color: #ff3366">Schwer</span>
+          </div>
+        </div>
+        <button class="mission-btn glitch-hover">START SIMULATION</button>
+      </div>
+    </div>
+  </div>
+</div>

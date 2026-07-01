@@ -1,0 +1,65 @@
+<!-- Lexicon Tab (Database) -->
+<div id="tab-lexicon" class="tab-content-wrapper hidden">
+  <div class="lexicon-split-layout">
+    <div class="lexicon-list-panel" id="lexiconList">
+      <!-- Injected by LexiconController -->
+    </div>
+    <div class="lexicon-details-panel" id="lexiconDetails">
+      <h2 id="lexTitle" class="lexicon-detail-title"></h2>
+      
+      <div class="lexicon-row-flex">
+        <div id="lexIcon" class="lexicon-icon-wrapper">
+          <canvas id="lexiconCanvas" width="180" height="180"></canvas>
+        </div>
+        <div class="lexicon-info-side">
+          <p id="lexDescription" class="lexicon-detail-desc"></p>
+          <div class="stat-grid">
+            <div class="stat-row">
+              <strong>HP</strong>
+              <div class="stat-bar-container">
+                <div class="stat-bar-fill" id="lexHpBar"></div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <strong>Speed</strong>
+              <div class="stat-bar-container">
+                <div class="stat-bar-fill" id="lexSpeedBar"></div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <strong>Reward</strong>
+              <div class="stat-bar-container">
+                <div class="stat-bar-fill" id="lexRewardBar"></div>
+              </div>
+            </div>
+            <div class="stat-row" style="margin-top: 10px">
+              <strong>Danger</strong>
+              <span id="lexDifficultyStars" class="lexicon-danger-stars"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lexicon-tactics-box">
+        <div class="lexicon-tactics-col">
+          <div class="lexicon-tactics-label abilities">Abilities</div>
+          <div id="lexAbility" class="lexicon-tactics-val"></div>
+        </div>
+        <div class="lexicon-tactics-col">
+          <div class="lexicon-tactics-label weakness">Tactical Weakness</div>
+          <div id="lexWeakness" class="lexicon-tactics-val"></div>
+        </div>
+        <div class="lexicon-tactics-col">
+          <div class="lexicon-tactics-label detection">First Detection</div>
+          <div id="lexMinWave" class="lexicon-tactics-val"></div>
+        </div>
+      </div>
+
+      <p id="lexFlavor" class="lexicon-flavor-text"></p>
+    </div>
+    
+    <div id="lexiconPlaceholder" class="lexicon-placeholder-panel">
+      Select Entity to Analyze
+    </div>
+  </div>
+</div>

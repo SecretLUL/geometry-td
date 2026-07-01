@@ -143,3 +143,130 @@
     width 0.5s ease-out,
     background-color 0.5s ease-out;
 }
+
+/* Refactored styles from inline index.html styling */
+.lexicon-split-layout {
+  display: flex;
+  gap: 30px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.lexicon-list-panel {
+  flex: 0 0 350px;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  padding-right: 20px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.lexicon-details-panel {
+  flex: 1;
+  padding-left: 10px;
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.lexicon-detail-title {
+  font-size: 2.2rem;
+  margin: 0 0 10px 0;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.lexicon-row-flex {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 15px;
+}
+
+.lexicon-icon-wrapper {
+  width: 180px;
+  height: 180px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(76, 201, 240, 0.3);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.lexicon-info-side {
+  flex: 1;
+}
+
+.lexicon-detail-desc {
+  font-size: 1rem;
+  color: #a8a8b3;
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+.lexicon-danger-stars {
+  color: var(--gold);
+  letter-spacing: 5px;
+  font-size: 1.2rem;
+}
+
+.lexicon-tactics-box {
+  display: flex;
+  gap: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lexicon-tactics-col {
+  flex: 1;
+}
+
+.lexicon-tactics-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+}
+
+.lexicon-tactics-label.abilities {
+  color: var(--tesla-cyan);
+}
+
+.lexicon-tactics-label.weakness {
+  color: var(--bomb-red);
+}
+
+.lexicon-tactics-label.detection {
+  color: var(--gold);
+}
+
+.lexicon-tactics-val {
+  color: #fff;
+  font-weight: 600;
+}
+
+.lexicon-flavor-text {
+  margin-top: 25px;
+  font-style: italic;
+  color: #aaa;
+  border-left: 3px solid rgba(76, 201, 240, 0.4);
+  padding-left: 15px;
+  padding-bottom: 25px;
+  line-height: 1.6;
+}
+
+.lexicon-placeholder-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}

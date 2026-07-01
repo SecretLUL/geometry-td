@@ -1,0 +1,26 @@
+<!-- Einklappbarer Changelog Container -->
+<div id="changelog-panel" class="changelog-container collapsed blur-hidden">
+  <!-- Angedockter Toggle Button für das Changelog -->
+  <button
+    id="changelog-toggle"
+    class="changelog-toggle-btn"
+    title="Changelog ein-/ausblenden"
+  >
+    <span id="changelog-pulse" class="pulse-dot hidden"></span>
+    <span class="toggle-text">CHANGELOG</span>
+    <span class="toggle-icon">◀</span>
+  </button>
+  <div class="changelog-header">
+    <div class="changelog-title-block">
+      <h3>SYSTEM LOG</h3>
+      <span class="changelog-status"><span class="pulse-green"></span> SEC-ONLINE</span>
+    </div>
+    <p class="changelog-desc" id="changelog-env-desc">
+      Chronologische Aufzeichnung aller Simulationstransfers aus der DEV-Umgebung.
+    </p>
+  </div>
+
+  <div id="changelog-list" class="changelog-list-content">
+    <div class="changelog-loading">Lade Simulationstransfers...</div>
+  </div>
+</div>

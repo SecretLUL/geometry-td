@@ -1,0 +1,34 @@
+<!-- Leaderboard Tab -->
+<div id="tab-leaderboard" class="tab-content-wrapper hidden">
+  <div class="leaderboard-container">
+    <div class="leaderboard-header">
+      <div class="leaderboard-title-block">
+        <h2 class="leaderboard-title">SIMULATIONS-BESTENLISTE</h2>
+        <p class="leaderboard-subtitle">
+          Die ruhmreichsten Taktiker im Kampf gegen die Unendlichkeit
+        </p>
+      </div>
+      <button id="refresh-leaderboard-btn" class="leaderboard-refresh-btn glitch-hover">
+        <span class="refresh-icon">🔄</span> AKTUALISIEREN
+      </button>
+    </div>
+    <div class="leaderboard-table-wrapper">
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th class="col-rank">Rang</th>
+            <th class="col-user">Kämpfer</th>
+            <th class="col-map">Karte</th>
+            <th class="col-wave">Höchste Welle</th>
+            <th class="col-date">Erreicht am</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-list">
+          <tr class="leaderboard-loading-row">
+            <td colspan="5">Lade Bestenliste...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
