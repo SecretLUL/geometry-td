@@ -12,6 +12,10 @@
       {
         "type": "feature",
         "desc": "inbound.ts refaktoriert und modularisiert."
+      },
+      {
+        "type": "feature",
+        "desc": "prisma-tower.ts refaktoriert und rendering-code ausgelagert."
       }
     ]
   },
