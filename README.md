@@ -44,11 +44,14 @@ geometry-td/
 ├── backend/                  # Server application (Express, WebSockets, Headless Puppeteer)
 │   ├── src/
 │   │   ├── routes/           # REST endpoints (Auth, Game Stats)
+│   │   ├── auth.ts           # Token verification & auth helper functions
 │   │   ├── db.ts             # Database connection & schema initialization
 │   │   ├── headless.ts       # Puppeteer control (headless Chromium host instances)
 │   │   ├── performance-test.ts # Automated multiplayer benchmark
+│   │   ├── schemas.ts        # Zod validation schemas for WebSocket payloads
 │   │   ├── socket.ts         # Socket handler with Zod schema validation
 │   │   ├── state.ts          # Global in-memory server state
+│   │   ├── types.ts          # Common TypeScript interfaces & types
 │   │   └── server.ts         # Main server entry point
 │   ├── Dockerfile.dev        # Development Dockerfile with Chromium pre-installed
 │   ├── Dockerfile.prod       # Production Dockerfile (Multi-stage build)
@@ -57,13 +60,19 @@ geometry-td/
 │   ├── public/               # Static assets (Audio tracks, Changelog, Web fonts)
 │   ├── src/
 │   │   ├── css/              # Modular stylesheets (Portal, Menu, Mobile, Game)
-│   │   └── js/               # Game engine, WebRTC P2P, entities (towers/enemies), UI
+│   │   └── js/               # Game engine, entities (towers/enemies), UI & WebRTC P2P
+│   │       ├── core/         # Core systems (Game loop, state, map, achievements, pool)
+│   │       ├── entities/     # Game entities (Towers, Enemies, Projectiles)
+│   │       ├── fx/           # Visual effects, particles, and graphics
+│   │       ├── ui/           # User interface components, HUD, modals, and tooltips
+│   │       └── types.ts      # Client-side TypeScript interfaces & types
 │   ├── default.conf          # Nginx configuration for production (Proxying & Gzip)
 │   ├── Dockerfile.dev        # Development Dockerfile
 │   ├── Dockerfile.prod       # Production Dockerfile with Nginx server
 │   ├── index.html            # Main entry page
 │   ├── game.html             # Game board page (also loaded by the headless host)
 │   └── vite.config.js
+├── tsconfig.json             # Root solution-style configuration for multi-package IDE support
 ├── docker-compose.yaml       # Local container configuration (development services only)
 ├── docker-compose.example.yaml # Template for Dev & Prod services (including volumes/networks)
 └── package.json              # Global npm scripts for code validation
@@ -156,6 +165,12 @@ The game uses a **SSOT balancing system** (Single Source of Truth) defined in [c
 5.  **Prisma:** Continuous laser beam with damage scaling over time. Specializations at level 10:
     *   *Meltdown Overdrive:* Triggers a massive explosion once maximum laser charge is reached.
     *   *Refraction Split:* Splits the laser beam across multiple nearby targets.
+6.  **Booster:** Support tower that does not attack directly, but amplifies the range, damage, or fire rate of all nearby towers (excluding other Boosters) inside its radius. Specializations at level 10:
+    *   *Frequency Modulation:* Boosts the attack speed of nearby towers by +40% (Mastery: +75%).
+    *   *Amplitude Amplifier:* Boosts the damage of nearby towers by +40% and range by +20% (Mastery: +80% damage, +35% range).
+7.  **Generator:** Passive economic tower that generates gold during active waves. Does not target or shoot at enemies. Purchase cost scales dynamically (+300g per built Generator). Specializations at level 10:
+    *   *Investment Bank:* Yields a flat payout of +80g (Mastery: +400g) at the end of each wave instead of generating gold passively during waves.
+    *   *Industrial Production:* Multiplies passive gold income by 1.5x (Mastery: 3.0x).
 
 ---
 
