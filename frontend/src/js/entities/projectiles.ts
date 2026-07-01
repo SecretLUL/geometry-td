@@ -317,13 +317,6 @@ export class Projectile {
             createExplosion(this.x, this.y, "#ff3333", 15);
             PoolManager.getShockwave(this.x, this.y, this.aoeRadius * 1.5);
 
-            if (this.tower && this.tower.type === "Bomb") {
-              state.screenShake = Math.max(
-                state.screenShake || 0,
-                this.tower.specialization === "nuke" ? 12 : 5
-              );
-            }
-
             // RADIATION: Nuke specialization leaves radioactive ground
             if (this.tower && this.tower.specialization === "nuke") {
               const dmgPerTick = Math.max(1, Math.floor(this.damage * 0.05));

@@ -374,45 +374,223 @@ body:not(.splash-active) .portal-title-outer-wrapper {
   transition: height 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.splash-status-panel {
-  background: rgba(13, 13, 31, 0.6);
-  border: 1px solid rgba(76, 201, 240, 0.15);
-  border-radius: 16px;
-  padding: 20px 30px;
-  width: 100%;
-  max-width: 480px;
+/* ── Geometric Portal Centerpiece ── */
+.geometric-portal-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: inset 0 0 20px rgba(76, 201, 240, 0.03);
-}
-
-.status-row-item {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-family: "Outfit", sans-serif;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
+  justify-content: center;
 }
 
-.status-label {
-  color: #888899;
+.portal-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.outer-ring {
+  width: 180px;
+  height: 180px;
+  border: 2px dashed rgba(76, 201, 240, 0.4);
+  box-shadow: 0 0 20px rgba(76, 201, 240, 0.1);
+  animation: rotate-clockwise 20s linear infinite;
+}
+
+.middle-ring {
+  width: 140px;
+  height: 140px;
+  border: 2px solid rgba(255, 51, 102, 0.2);
+  border-top-color: rgba(255, 51, 102, 0.8);
+  border-bottom-color: rgba(255, 51, 102, 0.8);
+  box-shadow: 0 0 15px rgba(255, 51, 102, 0.15);
+  animation: rotate-counter-clockwise 12s linear infinite;
+}
+
+.inner-ring {
+  width: 100px;
+  height: 100px;
+  border: 1px dotted rgba(76, 201, 240, 0.6);
+  animation: rotate-clockwise 8s linear infinite;
+}
+
+.portal-core {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-glow 2.5s infinite ease-in-out;
+}
+
+.core-shape.geometry-diamond {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 2px solid var(--tesla-cyan);
+  box-shadow: 0 0 12px var(--tesla-cyan);
+  transform: rotate(45deg);
+  animation: rotate-clockwise-core 6s linear infinite;
+}
+
+/* ── Interactive Tech Brackets for Enter Button ── */
+.splash-action-container {
+  position: relative;
+  padding: 10px;
+  display: inline-block;
+}
+
+.button-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--tesla-cyan);
+  opacity: 0.6;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.corner-tl {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-tr {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-bl {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-br {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+.splash-action-container:hover .button-corner {
+  opacity: 1;
+  border-color: var(--bomb-red);
+  filter: drop-shadow(0 0 5px var(--bomb-red));
+}
+
+.splash-action-container:hover .corner-tl {
+  transform: translate(-6px, -6px);
+}
+
+.splash-action-container:hover .corner-tr {
+  transform: translate(6px, -6px);
+}
+
+.splash-action-container:hover .corner-bl {
+  transform: translate(-6px, 6px);
+}
+
+.splash-action-container:hover .corner-br {
+  transform: translate(6px, 6px);
+}
+
+/* ── Subtle Launch Instructions ── */
+.splash-instructions {
+  font-family: "Outfit", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: -10px;
+  animation: pulse-opacity 3s infinite ease-in-out;
   text-transform: uppercase;
 }
 
-.status-val {
-  font-weight: 700;
+/* ── Animations ── */
+@keyframes rotate-clockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.status-val.ok {
-  color: #00ff88;
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+@keyframes rotate-clockwise-core {
+  from {
+    transform: rotate(45deg);
+  }
+  to {
+    transform: rotate(405deg);
+  }
 }
 
-.status-val.ready {
-  color: var(--tesla-cyan);
-  text-shadow: 0 0 8px rgba(76, 201, 240, 0.4);
+@keyframes rotate-counter-clockwise {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 4px rgba(76, 201, 240, 0.4));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px rgba(76, 201, 240, 0.8));
+  }
+}
+
+@keyframes pulse-opacity {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ── Responsiveness for small screens ── */
+@media screen and (max-height: 600px) {
+  .geometric-portal-wrapper {
+    width: 140px;
+    height: 140px;
+  }
+  .outer-ring {
+    width: 130px;
+    height: 130px;
+  }
+  .middle-ring {
+    width: 100px;
+    height: 100px;
+  }
+  .inner-ring {
+    width: 70px;
+    height: 70px;
+  }
+  .portal-core {
+    width: 40px;
+    height: 40px;
+  }
+  .core-shape.geometry-diamond {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .splash-enter-btn {

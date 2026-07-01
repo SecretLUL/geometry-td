@@ -5,6 +5,30 @@
   },
 
   {
+    "version": "v2.18.39",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "wackeleffekt beim bombenturm entfernt."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.18.38",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "anzeigefehler bei der golderzeugung des generator-turms im hud behoben."
+      }
+    ]
+  },
+
+  {
     "version": "v2.18.37",
     "date": "30. Juni 2026",
     "status": "active",

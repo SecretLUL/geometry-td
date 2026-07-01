@@ -340,6 +340,7 @@ export class GeneratorTower extends Tower {
             if (state.isHost) {
               Multiplayer.emitSyncGold(state.gold);
             }
+            Multiplayer.updateUI();
           }
 
           // Visual feedbacks on both host and client
