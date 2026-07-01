@@ -1,0 +1,61 @@
+/*
+ * @file: frontend/src/css/components/upgrades.css
+ * @purpose: Styles for tower upgrade options and hero power buttons.
+ * @last_update: 2026-07-01 / v2.0.0
+ */
+
+/* ── Upgrade options layout ────────────────────────────────────────────────── */
+.upgrade-option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px !important;
+  width: 100%;
+  gap: 30px;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer;
+}
+
+.upgrade-option-btn:hover {
+  background: rgba(0, 212, 255, 0.05) !important;
+  border-color: var(--tesla-cyan) !important;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.25) !important;
+  transform: translateY(-2px);
+}
+
+.upgrade-option-btn .spec-title {
+  font-size: 1.6em;
+  color: var(--gold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 8px rgba(255, 170, 0, 0.35);
+}
+
+.upgrade-option-btn .spec-desc {
+  font-size: 1rem;
+  color: #a8a8b3;
+  flex: 1;
+  text-align: left;
+}
+
+.hero-btn {
+  background: linear-gradient(135deg, var(--bomb-red) 0%, #ff4d6d 100%);
+  color: white;
+  padding: 14px 35px !important;
+  font-size: 1.2em !important;
+  border-radius: 14px !important;
+  font-weight: 800 !important;
+  border: none;
+  box-shadow: 0 0 20px rgba(255, 0, 85, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hero-btn:hover {
+  background: linear-gradient(135deg, #ff1a6a 0%, #ff7a91 100%);
+  box-shadow: 0 0 35px rgba(255, 0, 85, 0.7);
+  transform: translateY(-3px) scale(1.02);
+}

@@ -1,0 +1,208 @@
+/*
+ * @file: frontend/src/css/components/notifications.css
+ * @purpose: Styles for in-game alerts, notification panels, alert themes, and animations.
+ * @last_update: 2026-07-01 / v2.0.0
+ */
+
+/* ── High-Tech Notification Center ────────────────────────────────── */
+#game-notifications {
+  position: absolute;
+  bottom: 25px; /* Sits at bottom left, completely out of the main play area */
+  left: 25px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column-reverse; /* Stacks new alerts on top of old ones */
+  align-items: flex-start;
+  gap: 10px;
+  pointer-events: none; /* Let clicks pass through to the canvas when not clicking the alert */
+  width: 340px;
+  font-family: "Outfit", sans-serif;
+  line-height: 1.5 !important; /* Overrides inherited line-height: 0 from canvas-wrapper */
+}
+
+.game-alert {
+  background: rgba(13, 13, 31, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 10px; /* Sleeker, more compact radius */
+  padding: 10px 16px; /* Significantly reduced padding (down from 14px 20px) */
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Reduced gap (down from 6px) */
+  width: 100%; /* Fills the container exactly */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); /* More compact shadow */
+  animation:
+    alert-slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+    alert-fade-out 0.5s ease 4.5s forwards;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto; /* Allow clicking on the notification itself to dismiss */
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.game-alert:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.game-alert::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+/* Themes for Notifications */
+.game-alert.theme-wave {
+  border: 1px solid rgba(252, 163, 17, 0.3);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(252, 163, 17, 0.1);
+}
+.game-alert.theme-wave:hover {
+  border-color: rgba(252, 163, 17, 0.6);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(252, 163, 17, 0.25);
+}
+.game-alert.theme-wave::before {
+  background: #fca311;
+  box-shadow: 0 0 10px #fca311;
+}
+
+.game-alert.theme-warning {
+  border: 1px solid rgba(255, 51, 102, 0.3);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(255, 51, 102, 0.1);
+  animation:
+    alert-slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+    warning-pulse 1.6s infinite alternate,
+    alert-fade-out 0.5s ease 6.5s forwards; /* Warning alert stays slightly longer */
+}
+.game-alert.theme-warning:hover {
+  border-color: rgba(255, 51, 102, 0.6);
+}
+.game-alert.theme-warning::before {
+  background: #ff3366;
+  box-shadow: 0 0 10px #ff3366;
+}
+
+.game-alert.theme-info {
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(0, 212, 255, 0.1);
+}
+.game-alert.theme-info:hover {
+  border-color: rgba(0, 212, 255, 0.6);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(0, 212, 255, 0.25);
+}
+.game-alert.theme-info::before {
+  background: #00d4ff;
+  box-shadow: 0 0 10px #00d4ff;
+}
+
+/* Alert Header & Content styles */
+.alert-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.75rem;
+  opacity: 0.9;
+  line-height: 1.2 !important;
+}
+.game-alert.theme-wave .alert-header {
+  color: #fca311;
+}
+.game-alert.theme-warning .alert-header {
+  color: #ff3366;
+}
+.game-alert.theme-info .alert-header {
+  color: #00d4ff;
+}
+
+.alert-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.95rem; /* Down from 1.1rem */
+  margin-bottom: 1px; /* Down from 2px */
+  letter-spacing: 0.5px;
+  line-height: 1.3 !important;
+}
+
+.alert-desc {
+  color: #a8a8b3;
+  font-size: 0.8rem; /* Down from 0.85rem */
+  font-weight: 400;
+  line-height: 1.4 !important; /* Down from 1.5 */
+}
+
+.alert-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Down from 12px */
+  margin-top: 3px; /* Down from 4px */
+  padding-top: 4px; /* Down from 6px */
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem; /* Down from 0.85rem */
+  font-weight: 700;
+  line-height: 1.2 !important;
+}
+.alert-gold-bonus {
+  color: #ffd700;
+}
+.alert-gold-interest {
+  color: #00ff00;
+}
+
+/* Keyframe Animations */
+@keyframes alert-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes alert-fade-out {
+  to {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.95);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    overflow: hidden;
+  }
+}
+
+@keyframes warning-pulse {
+  0% {
+    box-shadow:
+      0 8px 30px rgba(0, 0, 0, 0.5),
+      0 0 15px rgba(255, 51, 102, 0.1);
+  }
+  100% {
+    box-shadow:
+      0 8px 30px rgba(0, 0, 0, 0.5),
+      0 0 28px rgba(255, 51, 102, 0.3);
+  }
+}

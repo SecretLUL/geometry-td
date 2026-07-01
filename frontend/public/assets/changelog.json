@@ -24,6 +24,10 @@
       {
         "type": "feature",
         "desc": "loop.ts refaktoriert und in spezialisierte Module aufgeteilt."
+      },
+      {
+        "type": "feature",
+        "desc": "components.css refaktoriert und modularisiert."
       }
     ]
   },

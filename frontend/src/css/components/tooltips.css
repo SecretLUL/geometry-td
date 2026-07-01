@@ -1,0 +1,27 @@
+/*
+ * @file: frontend/src/css/components/tooltips.css
+ * @purpose: Styles for dynamic game hover tooltips.
+ * @last_update: 2026-07-01 / v2.0.0
+ */
+
+/* ── Tooltips ─────────────────────────────────────────────────────────── */
+#tooltip {
+  position: fixed;
+  background: rgba(13, 13, 31, 0.96);
+  border: 1px solid #4cc9f0;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 150;
+  box-shadow: 0 0 14px rgba(76, 201, 240, 0.3);
+}
+
+#tooltip h3 {
+  margin: 0 0 6px;
+  color: #e94560;
+}
+#tooltip p {
+  margin: 3px 0;
+  color: #a8a8b3;
+}

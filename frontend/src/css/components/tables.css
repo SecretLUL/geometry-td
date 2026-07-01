@@ -1,0 +1,38 @@
+/*
+ * @file: frontend/src/css/components/tables.css
+ * @purpose: Styles for scrolling tables and modern grid/table lists.
+ * @last_update: 2026-07-01 / v2.0.0
+ */
+
+/* ── Tables ───────────────────────────────────────────────────────────── */
+.table-scroll {
+  max-height: 160px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modern-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(10, 10, 26, 0.98);
+  padding: 15px;
+  color: var(--tesla-cyan);
+  text-transform: uppercase;
+  font-size: 0.85em;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+}
+
+.modern-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ccc;
+  font-weight: 600;
+}

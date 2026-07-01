@@ -1,0 +1,95 @@
+/*
+ * @file: frontend/src/css/components/buttons.css
+ * @purpose: Styles for generic, primary, secondary, and close actions buttons.
+ * @last_update: 2026-07-01 / v2.0.0
+ */
+
+/* ── Buttons (Generic) ────────────────────────────────────────────────── */
+button {
+  background: linear-gradient(to bottom, #3a3a5a, #25253a);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95em;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+  background: linear-gradient(to bottom, #4a4a75, #2d2d47);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.4),
+    0 0 10px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--bomb-red) 0%, #ff5773 100%);
+  color: white;
+}
+
+.primary-btn:hover {
+  background: linear-gradient(135deg, #ff1a6a 0%, #ff7a91 100%);
+  box-shadow: 0 0 25px rgba(255, 0, 85, 0.4);
+  transform: translateY(-3px);
+}
+
+.secondary-btn {
+  background: linear-gradient(to bottom, #1c2b4d, #0d162b);
+  color: var(--tesla-cyan);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.secondary-btn:hover {
+  border-color: var(--tesla-cyan);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.btn-disabled {
+  opacity: 0.4 !important;
+  pointer-events: none !important;
+  filter: grayscale(0.8) !important;
+  cursor: not-allowed !important;
+}
+
+/* Close Action Button */
+.ig-close-btn {
+  background: linear-gradient(135deg, #4cc9f0 0%, #7209b7 100%);
+  color: #fff;
+  border: none;
+  font-size: 1.15em;
+  font-weight: 800;
+  padding: 16px 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  box-shadow: 0 5px 15px rgba(76, 201, 240, 0.35);
+  margin-top: 15px;
+  align-self: center;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ig-close-btn:hover {
+  box-shadow:
+    0 8px 25px rgba(76, 201, 240, 0.5),
+    0 0 15px rgba(114, 9, 183, 0.4);
+  transform: translateY(-2px);
+}
+
+.ig-close-btn:active {
+  transform: translateY(0);
+}
