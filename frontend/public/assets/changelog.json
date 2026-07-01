@@ -11,6 +11,10 @@
     "changes": [
       {
         "type": "feature",
+        "desc": "fx.ts refaktoriert, modularisiert und in spezialisierte sub-dateien aufgeteilt."
+      },
+      {
+        "type": "feature",
         "desc": "inbound.ts refaktoriert und modularisiert."
       },
       {
