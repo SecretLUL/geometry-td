@@ -32,6 +32,10 @@
       {
         "type": "feature",
         "desc": "menu.css refaktoriert und modularisiert."
+      },
+      {
+        "type": "feature",
+        "desc": "config.ts refaktoriert und in spezialisierte sub-dateien aufgeteilt."
       }
     ]
   },

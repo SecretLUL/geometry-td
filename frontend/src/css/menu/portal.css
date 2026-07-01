@@ -105,8 +105,7 @@ body.menu-page {
 
 .portal-title .word-2,
 .portal-title .word-3 {
-  font-family: "Outfit", sans-serif; /* fallback Outfit if BladeRunner is missing */
-  font-family: "BladeRunner", sans-serif;
+  font-family: "BladeRunner", "Outfit", sans-serif;
   font-size: clamp(3rem, 12vw, 5.2rem);
   font-weight: normal;
   line-height: 0.95;
