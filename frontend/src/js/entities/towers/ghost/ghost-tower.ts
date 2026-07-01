@@ -4,17 +4,17 @@
  * @dependencies: config, state, base-tower, sniper-tower, bomb-tower, tesla-tower, prisma-tower
  * @last_update: 2026-05-29 / v2.0.0 - Migrated rendering to PixiJS.
  */
-import { Config, TowerData } from "../../core/config";
-import { state } from "../../core/state";
-import { Tower, drawRangeCircle } from "./base-tower";
-import { SniperTower } from "./sniper-tower";
-import { BombTower } from "./bomb-tower";
-import { TeslaTower } from "./tesla-tower";
-import { PrismaTower } from "./prisma-tower";
-import { BoosterTower } from "./booster-tower";
-import { GeneratorTower } from "./generator-tower";
-import { Multiplayer } from "../../core/multiplayer/context";
-import { isCellAllowedForPlayer } from "../../core/utils";
+import { Config, TowerData } from "../../../core/config";
+import { state } from "../../../core/state";
+import { Tower, drawRangeCircle } from "../base-tower";
+import { SniperTower } from "../sniper/sniper-tower";
+import { BombTower } from "../bomb/bomb-tower";
+import { TeslaTower } from "../tesla/tesla-tower";
+import { PrismaTower } from "../prisma/prisma-tower";
+import { BoosterTower } from "../booster/booster-tower";
+import { GeneratorTower } from "../generator/generator-tower";
+import { Multiplayer } from "../../../core/multiplayer/context";
+import { isCellAllowedForPlayer } from "../../../core/utils";
 import * as PIXI from "pixi.js";
 
 // ─── Ghost Tower (placement preview) ─────────────────────────────────────────

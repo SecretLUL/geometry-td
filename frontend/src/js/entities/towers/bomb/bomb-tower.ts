@@ -4,13 +4,13 @@
  * @dependencies: config, state, fx, projectiles, base-tower, utils, types, pool
  * @last_update: 2026-05-29 / v2.5.0 - Adjusted to use the newly reduced aoeRadiusPerLevel value.
  */
-import { Config, TowerData, TowerBalancer } from "../../core/config";
-import { state } from "../../core/state";
-import { createExplosion } from "../../fx/fx";
-import { Tower, tierOf } from "./base-tower";
-import { getDistanceSq } from "../../core/utils";
-import { Enemy, TowerSpecialization } from "../../types";
-import { PoolManager } from "../../core/pool";
+import { Config, TowerData, TowerBalancer } from "../../../core/config";
+import { state } from "../../../core/state";
+import { createExplosion } from "../../../fx/fx";
+import { Tower, tierOf } from "../base-tower";
+import { getDistanceSq } from "../../../core/utils";
+import { Enemy, TowerSpecialization } from "../../../types";
+import { PoolManager } from "../../../core/pool";
 import * as PIXI from "pixi.js";
 
 // ─── Bomb Tower ───────────────────────────────────────────────────────────────

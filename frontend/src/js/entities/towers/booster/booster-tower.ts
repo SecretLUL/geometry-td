@@ -3,14 +3,14 @@
  * @purpose: Support tower that amplifies nearby towers (range, fire rate, damage) and draws connecting laser beams.
  * @dependencies: config, state, base-tower, utils, types, pixi.js
  */
-import { Config, TowerData, TowerBalancer } from "../../core/config";
-import { state } from "../../core/state";
-import { createExplosion } from "../../fx/fx";
-import { Tower } from "./base-tower";
-import { getDistanceSq } from "../../core/utils";
+import { Config, TowerData, TowerBalancer } from "../../../core/config";
+import { state } from "../../../core/state";
+import { createExplosion } from "../../../fx/fx";
+import { Tower } from "../base-tower";
+import { getDistanceSq } from "../../../core/utils";
 import * as PIXI from "pixi.js";
-import { PoolManager } from "../../core/pool";
-import { entitiesContainer } from "../../core/game/viewport";
+import { PoolManager } from "../../../core/pool";
+import { entitiesContainer } from "../../../core/game/viewport";
 
 export class BoosterTower extends Tower {
   public pixiBeamsGraphics?: PIXI.Graphics;

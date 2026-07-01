@@ -3,13 +3,13 @@
  * @purpose: High-tier focusing defense utilizing continuous locking beams, structural meltdowns, and ray refraction to melt targets.
  * @dependencies: config, state, fx, base-tower, utils, types, pool, prisma-renderer
  */
-import { Config, TowerData, TowerBalancer } from "../../core/config";
-import { state } from "../../core/state";
-import { createExplosion } from "../../fx/fx";
-import { Tower } from "./base-tower";
-import { getDistanceSq } from "../../core/utils";
-import { Enemy, TowerSpecialization } from "../../types";
-import { PoolManager } from "../../core/pool";
+import { Config, TowerData, TowerBalancer } from "../../../core/config";
+import { state } from "../../../core/state";
+import { createExplosion } from "../../../fx/fx";
+import { Tower } from "../base-tower";
+import { getDistanceSq } from "../../../core/utils";
+import { Enemy, TowerSpecialization } from "../../../types";
+import { PoolManager } from "../../../core/pool";
 import * as PIXI from "pixi.js";
 import { PrismaTowerRenderer } from "./prisma-renderer";
 

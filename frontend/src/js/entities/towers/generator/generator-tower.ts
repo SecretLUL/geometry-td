@@ -3,14 +3,14 @@
  * @purpose: Economy tower that generates gold over time during waves and offers Investment Bank and Industrial Production upgrade paths.
  * @dependencies: config, state, base-tower, utils, types, pool
  */
-import { Config, TowerData, TowerBalancer, getTowerPurchaseCost } from "../../core/config";
-import { state } from "../../core/state";
-import { createExplosion, createCoinBurst } from "../../fx/fx";
-import { Tower } from "./base-tower";
+import { Config, TowerData, TowerBalancer, getTowerPurchaseCost } from "../../../core/config";
+import { state } from "../../../core/state";
+import { createExplosion, createCoinBurst } from "../../../fx/fx";
+import { Tower } from "../base-tower";
 
-import { PoolManager } from "../../core/pool";
-import { socket } from "../../core/multiplayer/context";
-import { Multiplayer } from "../../core/multiplayer/index";
+import { PoolManager } from "../../../core/pool";
+import { socket } from "../../../core/multiplayer/context";
+import { Multiplayer } from "../../../core/multiplayer/index";
 import * as PIXI from "pixi.js";
 
 export class GeneratorTower extends Tower {
