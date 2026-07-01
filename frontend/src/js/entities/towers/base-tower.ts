@@ -8,7 +8,7 @@ import { Config, TowerData, TowerBalancer } from "../../core/config";
 import { state } from "../../core/state";
 import { createExplosion } from "../../fx/fx";
 import { getDistanceSq, getNearbyEnemies } from "../../core/utils";
-import { Enemy, TowerType, TowerSpecialization } from "../../types";
+import { Enemy, TowerType, TowerSpecialization, Tower as ITower } from "../../types";
 import { PoolManager } from "../../core/pool";
 import * as PIXI from "pixi.js";
 import { app, entitiesContainer } from "../../core/game/viewport";
@@ -54,6 +54,7 @@ export class Tower {
   public cachedFireRate: number;
   public cachedIsBoosted: boolean;
   public cachedBoosterDamageMult: number;
+  public visualBooster: ITower | null;
 
   public pixiSprite?: PIXI.Container;
   public pixiBoostGraphics?: PIXI.Graphics;
