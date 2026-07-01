@@ -48,6 +48,14 @@
       {
         "type": "feature",
         "desc": "config.ts refaktoriert und in spezialisierte sub-dateien aufgeteilt."
+      },
+      {
+        "type": "feature",
+        "desc": "socket.ts refaktoriert und in spezialisierte sub-dateien aufgeteilt."
+      },
+      {
+        "type": "feature",
+        "desc": "profile.ts refaktoriert und modularisiert."
       }
     ]
   },
