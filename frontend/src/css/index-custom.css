@@ -1,9 +1,13 @@
 @import "./portal/variables-layout.css";
+@import "./portal/animations.css";
+@import "./portal/portal-centerpiece.css";
+@import "./portal/portal-title.css";
 @import "./portal/splash.css";
 @import "./portal/lobby-modal.css";
 @import "./portal/widgets.css";
 @import "./portal/tabs.css";
 @import "./portal/leaderboard.css";
+@import "./portal/auth.css";
 @import "./portal/profile.css";
 @import "./portal/panels.css";
 @import "./portal/responsive.css";

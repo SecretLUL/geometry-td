@@ -1,0 +1,165 @@
+/* ── Reusable Portal Animations & Keyframes ── */
+
+@keyframes header-float {
+  0% {
+    transform: translate(-3px, -3px) rotate(-0.5deg);
+  }
+  25% {
+    transform: translate(3px, -2px) rotate(0.2deg);
+  }
+  50% {
+    transform: translate(2px, 3px) rotate(0.5deg);
+  }
+  75% {
+    transform: translate(-3px, 2px) rotate(-0.2deg);
+  }
+  100% {
+    transform: translate(-3px, -3px) rotate(-0.5deg);
+  }
+}
+
+@keyframes title-prefix-entrance {
+  from {
+    opacity: 0;
+    letter-spacing: 24px;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 12px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes title-entrance {
+  from {
+    opacity: 0;
+    transform: scale(1.03) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes neon-flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    text-shadow:
+      0 0 8px rgba(76, 201, 240, 0.9),
+      0 0 16px rgba(76, 201, 240, 0.6),
+      0 0 32px rgba(76, 201, 240, 0.3);
+    opacity: 1;
+  }
+  20%,
+  24%,
+  55% {
+    text-shadow:
+      0 0 2px rgba(76, 201, 240, 0.2),
+      0 0 4px rgba(76, 201, 240, 0.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes glitch-layer-1 {
+  0% {
+    clip-path: inset(40% 0 61% 0);
+    transform: skew(0.3deg);
+  }
+  20% {
+    clip-path: inset(92% 0 1% 0);
+    transform: skew(-0.5deg);
+  }
+  40% {
+    clip-path: inset(15% 0 80% 0);
+    transform: skew(0.5deg);
+  }
+  60% {
+    clip-path: inset(80% 0 5% 0);
+    transform: skew(-0.2deg);
+  }
+  80% {
+    clip-path: inset(3% 0 92% 0);
+    transform: skew(0.1deg);
+  }
+  100% {
+    clip-path: inset(25% 0 58% 0);
+    transform: skew(-0.4deg);
+  }
+}
+
+@keyframes glitch-layer-2 {
+  0% {
+    clip-path: inset(25% 0 58% 0);
+    transform: skew(-0.3deg);
+  }
+  20% {
+    clip-path: inset(15% 0 80% 0);
+    transform: skew(0.5deg);
+  }
+  40% {
+    clip-path: inset(92% 0 1% 0);
+    transform: skew(-0.1deg);
+  }
+  60% {
+    clip-path: inset(3% 0 92% 0);
+    transform: skew(0.4deg);
+  }
+  80% {
+    clip-path: inset(80% 0 5% 0);
+    transform: skew(-0.3deg);
+  }
+  100% {
+    clip-path: inset(40% 0 61% 0);
+    transform: skew(0.2deg);
+  }
+}
+
+@keyframes splash-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dynamic clockwise rotation keyframe, supporting configurable start rotation via custom property */
+@keyframes rotate-clockwise {
+  from {
+    transform: rotate(var(--rotation-start, 0deg));
+  }
+  to {
+    transform: rotate(calc(var(--rotation-start, 0deg) + 360deg));
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 4px rgba(76, 201, 240, 0.4));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px rgba(76, 201, 240, 0.8));
+  }
+}
+
+@keyframes pulse-opacity {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}

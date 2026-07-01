@@ -5,6 +5,22 @@
   },
 
   {
+    "version": "v2.19.7",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "profile.css refaktoriert und modularisiert."
+      },
+      {
+        "type": "feature",
+        "desc": "splash.css refaktoriert und modularisiert."
+      }
+    ]
+  },
+
+  {
     "version": "v2.19.6",
     "date": "1. Juli 2026",
     "status": "active",

@@ -1,0 +1,115 @@
+/* ── Cyberpunk Brand Title Styles ── */
+
+.title-block {
+  text-align: center;
+  position: relative;
+  animation: header-float 10s ease-in-out infinite;
+  will-change: transform;
+}
+
+.portal-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  margin-bottom: 16px;
+  line-height: 1;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.portal-title.beat {
+  transform: scale(1.02);
+  transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.portal-title .word-1 {
+  font-family: "Outfit", sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 14px;
+  padding-left: 14px;
+  /* mathematically offsets letter-spacing of the last character to guarantee exact centering */
+  color: var(--tesla-cyan);
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(76, 201, 240, 0.6);
+  margin-bottom: 8px;
+  animation: title-prefix-entrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.portal-title .main-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 16px;
+  animation: title-entrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.portal-title .word-2,
+.portal-title .word-3 {
+  font-family: "BladeRunner", sans-serif;
+  font-size: 6.8rem;
+  font-weight: normal;
+  line-height: 0.95;
+  letter-spacing: 4px;
+  position: relative;
+  display: inline-block;
+  animation: neon-flicker 6s infinite ease-in-out alternate;
+}
+
+.portal-title .word-2 {
+  color: #fff;
+  text-shadow:
+    0 0 8px rgba(255, 255, 255, 0.5),
+    0 0 16px rgba(255, 255, 255, 0.2);
+}
+
+.portal-title .word-3 {
+  color: var(--bomb-red);
+  text-shadow:
+    0 0 8px rgba(255, 51, 102, 0.8),
+    0 0 16px rgba(255, 51, 102, 0.4);
+}
+
+/* Consolidated chromatic aberrations for both logo words */
+.portal-title .word-2::before,
+.portal-title .word-3::before {
+  content: attr(data-text);
+  position: absolute;
+  left: -2px;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "BladeRunner", sans-serif;
+  font-weight: normal;
+  color: #00ffff;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  text-shadow: -2px 0 #00ffff;
+  animation: glitch-layer-1 4s infinite linear alternate-reverse;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.6;
+}
+
+.portal-title .word-2::after,
+.portal-title .word-3::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "BladeRunner", sans-serif;
+  font-weight: normal;
+  color: #ff0055;
+  background: transparent;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0);
+  text-shadow: 2px 0 #ff0055;
+  animation: glitch-layer-2 3.3s infinite linear alternate-reverse;
+  pointer-events: none;
+  z-index: -2;
+  opacity: 0.6;
+}

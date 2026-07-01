@@ -1,0 +1,94 @@
+/* ── Geometric Portal Centerpiece ── */
+
+.geometric-portal-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portal-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.outer-ring {
+  width: 180px;
+  height: 180px;
+  border: 2px dashed rgba(76, 201, 240, 0.4);
+  box-shadow: 0 0 20px rgba(76, 201, 240, 0.1);
+  animation: rotate-clockwise 20s linear infinite;
+}
+
+.middle-ring {
+  width: 140px;
+  height: 140px;
+  border: 2px solid rgba(255, 51, 102, 0.2);
+  border-top-color: rgba(255, 51, 102, 0.8);
+  border-bottom-color: rgba(255, 51, 102, 0.8);
+  box-shadow: 0 0 15px rgba(255, 51, 102, 0.15);
+  /* Reuses rotate-clockwise keyframe in reverse direction instead of duplicate keyframe */
+  animation: rotate-clockwise 12s linear infinite reverse;
+}
+
+.inner-ring {
+  width: 100px;
+  height: 100px;
+  border: 1px dotted rgba(76, 201, 240, 0.6);
+  animation: rotate-clockwise 8s linear infinite;
+}
+
+.portal-core {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse-glow 2.5s infinite ease-in-out;
+}
+
+.core-shape.geometry-diamond {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 2px solid var(--tesla-cyan);
+  box-shadow: 0 0 12px var(--tesla-cyan);
+  /* Reuses rotate-clockwise keyframe with custom start angle instead of duplicate keyframe */
+  --rotation-start: 45deg;
+  transform: rotate(var(--rotation-start));
+  animation: rotate-clockwise 6s linear infinite;
+}
+
+/* ── Centerpiece Responsiveness for Small Screens ── */
+@media screen and (max-height: 600px) {
+  .geometric-portal-wrapper {
+    width: 140px;
+    height: 140px;
+  }
+  .outer-ring {
+    width: 130px;
+    height: 130px;
+  }
+  .middle-ring {
+    width: 100px;
+    height: 100px;
+  }
+  .inner-ring {
+    width: 70px;
+    height: 70px;
+  }
+  .portal-core {
+    width: 40px;
+    height: 40px;
+  }
+  .core-shape.geometry-diamond {
+    width: 16px;
+    height: 16px;
+  }
+}
