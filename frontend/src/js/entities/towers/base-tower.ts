@@ -222,7 +222,9 @@ export class Tower {
     if (!this.pixiOwnerGlowGraphics) return;
     this.pixiOwnerGlowGraphics.clear();
 
-    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    const activeCount = state.playerSlots
+      ? state.playerSlots.filter((id) => id !== null).length
+      : 1;
     if (activeCount <= 1) {
       this.pixiOwnerGlowGraphics.visible = false;
       return;

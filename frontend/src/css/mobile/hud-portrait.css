@@ -256,21 +256,8 @@
     padding: 6px 16px !important;
     border-radius: 8px !important;
   }
-
   #cheatIndicatorText {
     font-size: 0.8rem !important;
     letter-spacing: 1px !important;
-  }
-}
-
-/* Keep buttons fixed at the bottom of the sidebar on desktop/tablet split-screen (width > 800px and height >= 550px) */
-@media screen and (min-width: 801px) and (min-height: 550px) {
-  .bottom-controls {
-    position: fixed !important;
-    bottom: 20px !important;
-    right: 20px !important;
-    width: calc(var(--ui-panel-width) - 40px) !important;
-    margin-top: 0 !important;
-    padding-bottom: 0 !important;
   }
 }

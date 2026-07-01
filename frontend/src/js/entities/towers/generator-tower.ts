@@ -333,7 +333,10 @@ export class GeneratorTower extends Tower {
           // Authoritative gold addition (host only or singleplayer)
           const isAlone = !socket || !socket.connected;
           if (state.isHost || isAlone) {
-            const ownIdx = (this as any).ownerIndex !== undefined ? (this as any).ownerIndex : (Multiplayer.myPlayerIndex || 0);
+            const ownIdx =
+              (this as any).ownerIndex !== undefined
+                ? (this as any).ownerIndex
+                : Multiplayer.myPlayerIndex || 0;
             if (!state.playerGolds) {
               state.playerGolds = [300, 300, 300, 300];
             }

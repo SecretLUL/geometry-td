@@ -63,6 +63,13 @@ export function buildTowerAt(type: string, col: number, row: number): boolean {
 
       if (!state.infiniteGold) {
         state.gold -= cost;
+        if (
+          state.playerGolds &&
+          Multiplayer.myPlayerIndex !== undefined &&
+          state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+        ) {
+          state.playerGolds[Multiplayer.myPlayerIndex] = state.gold;
+        }
       }
       updateUI();
     }
@@ -542,15 +549,16 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
 
     if (col < 0 || col >= getCOLS() || row < 0 || row >= getROWS()) return;
 
-    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    const activeCount = state.playerSlots
+      ? state.playerSlots.filter((id) => id !== null).length
+      : 1;
     const myIndex = Multiplayer.myPlayerIndex || 0;
 
     // Relocation click handler
     if (state.relocationActive) {
       const hasMisplaced = state.towers.some(
         (t) =>
-          t.ownerIndex === myIndex &&
-          !isCellAllowedForPlayer(t.col, t.row, myIndex, activeCount)
+          t.ownerIndex === myIndex && !isCellAllowedForPlayer(t.col, t.row, myIndex, activeCount)
       );
       if (!hasMisplaced) return; // Not our turn to relocate
 
@@ -611,6 +619,13 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
             const cost = existingTower.upgradeCost;
             if (!state.infiniteGold) {
               state.gold -= cost;
+              if (
+                state.playerGolds &&
+                Multiplayer.myPlayerIndex !== undefined &&
+                state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+              ) {
+                state.playerGolds[Multiplayer.myPlayerIndex] = state.gold;
+              }
             }
             existingTower.upgrade();
             updateUI();
@@ -642,7 +657,8 @@ export function setupEvents(startWaveCallback: () => void, canvas: HTMLCanvasEle
   // ── Canvas: right-click sell / cancel ─────────────────────────────────────
   canvas.addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    if (state.gameOver || (state.isPaused && !state.relocationActive) || state.benchmarkActive) return;
+    if (state.gameOver || (state.isPaused && !state.relocationActive) || state.benchmarkActive)
+      return;
 
     // Dismiss mobile context shop if open
     const contextShop = document.getElementById("context-shop");

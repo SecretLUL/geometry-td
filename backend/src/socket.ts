@@ -266,7 +266,8 @@ export function setupSockets(io: Server) {
         io.to(finalRoomId).emit("player_count_update", state.playerCount);
         io.to(finalRoomId).emit("player_slots_update", {
           playerSlots: state.playerSlots,
-          playerGolds: state.playerGolds
+          playerGolds: state.playerGolds,
+          hostId: state.hostId
         });
 
         const stateToSend = { ...state, sockets: Array.from(state.sockets) };
@@ -624,13 +625,71 @@ export function setupSockets(io: Server) {
         if (state.playerSlots) {
           const idx = state.playerSlots.indexOf(socket.id);
           if (idx !== -1) {
+            const leavingGold = state.playerGolds ? state.playerGolds[idx] : 0;
             state.playerSlots[idx] = null;
+            if (state.playerGolds) {
+              state.playerGolds[idx] = 0;
+            }
+
+            // Distribute gold among remaining players
+            const remainingCount = state.playerSlots.filter((id: any) => id !== null).length;
+            if (remainingCount > 0 && leavingGold > 0 && state.playerGolds) {
+              const share = Math.floor(leavingGold / remainingCount);
+              const extra = leavingGold % remainingCount;
+              
+              let distributedExtra = false;
+              for (let i = 0; i < 4; i++) {
+                if (state.playerSlots[i] !== null) {
+                  state.playerGolds[i] += share;
+                  if (!distributedExtra) {
+                    state.playerGolds[i] += extra;
+                    distributedExtra = true;
+                  }
+                }
+              }
+            }
+
+            // Reassign towers in server cache
+            let recipientIdx = -1;
+            for (let k = 1; k <= 3; k++) {
+              const targetIdx = (idx - k + 4) % 4;
+              if (state.playerSlots[targetIdx] !== null) {
+                recipientIdx = targetIdx;
+                break;
+              }
+            }
+
+            if (recipientIdx !== -1 && state.towers) {
+              for (const t of state.towers) {
+                if (t.ownerIndex === idx) {
+                  t.ownerIndex = recipientIdx;
+                }
+              }
+            }
           }
         }
 
         if (state.hostId === socket.id) {
           console.log(`[HOST] Host ${socket.id} disconnected.`);
           state.hostId = null;
+
+          // Assign a new host from the remaining active players
+          if (state.playerSlots) {
+            const nextHostSocketId = state.playerSlots.find((id: any) => id !== null);
+            if (nextHostSocketId) {
+              state.hostId = nextHostSocketId;
+              const nextHostSocket = io.sockets.sockets.get(nextHostSocketId) as CustomSocket;
+              if (nextHostSocket) {
+                console.log(`[HOST-MIGRATION] Assigned new host: ${nextHostSocketId}`);
+                const assignedSlot = state.playerSlots.indexOf(nextHostSocketId);
+                nextHostSocket.emit("role_assigned", {
+                  isHost: true,
+                  iceServers: ICE_SERVERS,
+                  playerIndex: assignedSlot
+                });
+              }
+            }
+          }
         }
 
         if (socket.isHeadless) {
@@ -653,7 +712,8 @@ export function setupSockets(io: Server) {
           io.to(socket.mission).emit("player_count_update", state.playerCount);
           io.to(socket.mission).emit("player_slots_update", {
             playerSlots: state.playerSlots,
-            playerGolds: state.playerGolds
+            playerGolds: state.playerGolds,
+            hostId: state.hostId
           });
 
           if (state.playerCount === 0) {

@@ -32,6 +32,7 @@ import {
   Vector2D,
 } from "../../types";
 import { PoolManager } from "../pool";
+import { getPlayerColorString } from "../../entities/towers/base-tower";
 import { Multiplayer, socket, setSocket } from "./context";
 import {
   handleWebRTCSignal,
@@ -403,11 +404,13 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
   }
   if (reconstructedState.playerGolds !== undefined) {
     state.playerGolds = reconstructedState.playerGolds;
-    if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
-      state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
-    } else {
-      state.gold = reconstructedState.gold || 0;
-    }
+  }
+  if (
+    Multiplayer.myPlayerIndex !== undefined &&
+    state.playerGolds &&
+    state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+  ) {
+    state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
   } else if (reconstructedState.gold !== undefined) {
     state.gold = reconstructedState.gold;
   }
@@ -567,7 +570,10 @@ export function bindInboundEvents(
       }
       if (data.playerGolds !== undefined) {
         state.playerGolds = data.playerGolds;
-        if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
+        if (
+          Multiplayer.myPlayerIndex !== undefined &&
+          state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+        ) {
           state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
         }
       }
@@ -580,7 +586,17 @@ export function bindInboundEvents(
       if (!state.isHost) {
         if (data.wave) state.wave = data.wave;
         if (data.lives !== undefined) state.lives = data.lives;
-        if (data.gold !== undefined && (state.gold === undefined || state.gold === 300)) state.gold = data.gold;
+        if (data.gold !== undefined) {
+          if (
+            Multiplayer.myPlayerIndex !== undefined &&
+            state.playerGolds &&
+            state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+          ) {
+            state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
+          } else if (state.gold === undefined || state.gold === 300) {
+            state.gold = data.gold;
+          }
+        }
       }
 
       // Initialize WebRTC connection using hostId provided by server
@@ -732,7 +748,17 @@ export function bindInboundEvents(
 
       if (!state.isHost) {
         if (lives !== undefined) state.lives = lives;
-        if (gold !== undefined) state.gold = gold;
+        if (gold !== undefined) {
+          if (
+            Multiplayer.myPlayerIndex !== undefined &&
+            state.playerGolds &&
+            state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+          ) {
+            state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
+          } else {
+            state.gold = gold;
+          }
+        }
       }
 
       if (playerCount !== undefined) {
@@ -932,7 +958,13 @@ export function bindInboundEvents(
 
     s.on("request_relocate_tower", (data: any) => {
       if (!state.isHost) return;
-      (Multiplayer as any).processRelocateTower(data.fromCol, data.fromRow, data.toCol, data.toRow, data.playerId);
+      (Multiplayer as any).processRelocateTower(
+        data.fromCol,
+        data.fromRow,
+        data.toCol,
+        data.toRow,
+        data.playerId
+      );
     });
 
     // Client Confirms
@@ -1060,42 +1092,112 @@ export function bindInboundEvents(
     // Gold synchronization
     s.on("sync_gold", (playerGolds: number[]) => {
       state.playerGolds = playerGolds;
-      if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
+      if (Multiplayer.lastReceivedState) {
+        Multiplayer.lastReceivedState.playerGolds = [...playerGolds];
+      }
+      if (
+        Multiplayer.myPlayerIndex !== undefined &&
+        state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+      ) {
         state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
       }
       Multiplayer.updateUI();
     });
 
     // Player slots update
-    s.on("player_slots_update", (data: { playerSlots: Array<string | null>; playerGolds: number[] }) => {
-      state.playerSlots = data.playerSlots;
-      state.playerGolds = data.playerGolds;
+    s.on(
+      "player_slots_update",
+      (data: { playerSlots: Array<string | null>; playerGolds: number[]; hostId?: string }) => {
+        const oldSlots = [...state.playerSlots];
 
-      const idx = state.playerSlots.indexOf(s.id || "");
-      if (idx !== -1) {
-        Multiplayer.myPlayerIndex = idx;
-      }
-
-      if (Multiplayer.myPlayerIndex !== undefined && state.playerGolds[Multiplayer.myPlayerIndex] !== undefined) {
-        state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
-      }
-
-      Multiplayer.lastPlayerCount = state.playerSlots.filter((id) => id !== null).length;
-
-      // Force redraw of towers to update neon colors immediately
-      for (const t of state.towers) {
-        if (t.drawOwnerGlow) {
-          t.drawOwnerGlow();
+        state.playerSlots = data.playerSlots;
+        state.playerGolds = data.playerGolds;
+        if (Multiplayer.lastReceivedState) {
+          Multiplayer.lastReceivedState.playerSlots = [...data.playerSlots];
+          Multiplayer.lastReceivedState.playerGolds = [...data.playerGolds];
         }
-      }
 
-      if (state.isHost) {
-        (Multiplayer as any).recalculateRelocationState();
-        Multiplayer.syncNow();
-      }
+        // Find if anyone left
+        for (let i = 0; i < 4; i++) {
+          if (oldSlots[i] !== null && state.playerSlots[i] === null) {
+            // Player i has left!
+            // Find the recipient for Player i's towers (closest preceding active slot)
+            let recipientIdx = -1;
+            for (let k = 1; k <= 3; k++) {
+              const targetIdx = (i - k + 4) % 4;
+              if (state.playerSlots[targetIdx] !== null) {
+                recipientIdx = targetIdx;
+                break;
+              }
+            }
 
-      Multiplayer.updateUI();
-    });
+            if (recipientIdx !== -1) {
+              const newOwnerColor = getPlayerColorString(recipientIdx);
+
+              // Reassign towers owned by player i to recipientIdx
+              let reassignedCount = 0;
+              for (const t of state.towers) {
+                if (t.ownerIndex === i) {
+                  t.ownerIndex = recipientIdx;
+                  reassignedCount++;
+
+                  // Visual effect: neon burst at tower position
+                  createExplosion(t.x, t.y, newOwnerColor, 6);
+
+                  // Floating text over the tower
+                  const msg = `Spieler ${recipientIdx + 1} übernimmt!`;
+                  PoolManager.getFloatingText(t.x, t.y, msg, newOwnerColor);
+                }
+              }
+              if (reassignedCount > 0) {
+                console.log(
+                  `[NETWORK] Player ${i + 1} disconnected. Reassigned ${reassignedCount} towers to Player ${recipientIdx + 1}.`
+                );
+                showGameNotification(
+                  "info",
+                  "⚠️ SPIELER VERLASSEN",
+                  `Spieler ${i + 1} hat das Spiel verlassen! Seine ${reassignedCount} Türme wurden an Spieler ${recipientIdx + 1} übertragen.`
+                );
+              }
+            }
+          }
+        }
+
+        if (data.hostId !== undefined) {
+          if (!state.isHost) {
+            setWebRTCRole(state.isHost, data.hostId || null);
+          }
+        }
+
+        const idx = state.playerSlots.indexOf(s.id || "");
+        if (idx !== -1) {
+          Multiplayer.myPlayerIndex = idx;
+        }
+
+        if (
+          Multiplayer.myPlayerIndex !== undefined &&
+          state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+        ) {
+          state.gold = state.playerGolds[Multiplayer.myPlayerIndex];
+        }
+
+        Multiplayer.lastPlayerCount = state.playerSlots.filter((id) => id !== null).length;
+
+        // Force redraw of towers to update neon colors immediately
+        for (const t of state.towers) {
+          if (t.drawOwnerGlow) {
+            t.drawOwnerGlow();
+          }
+        }
+
+        if (state.isHost) {
+          (Multiplayer as any).recalculateRelocationState();
+          Multiplayer.syncNow();
+        }
+
+        Multiplayer.updateUI();
+      }
+    );
 
     // Host ended wave notification
     s.on("host_ended_wave", () => {

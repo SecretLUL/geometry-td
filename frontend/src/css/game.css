@@ -360,6 +360,12 @@
   transition: all 0.3s ease;
 }
 
+.controls {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
 .section-label {
   color: var(--tesla-cyan);
   font-size: 0.85rem;
@@ -528,14 +534,14 @@
 }
 
 .bottom-controls {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: calc(var(--ui-panel-width) - 40px);
+  position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  z-index: 1000;
+  margin-top: auto;
+  padding-top: 20px;
+  z-index: 10;
 }
 
 @media (max-width: 800px) {

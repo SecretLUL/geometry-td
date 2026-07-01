@@ -412,14 +412,15 @@ export function updateRelocationUI(): void {
     relocModal.style.zIndex = "9998";
     relocModal.style.color = "#fff";
     relocModal.style.fontFamily = "'Outfit', sans-serif";
-    
+
     const content = document.createElement("div");
     content.className = "reloc-modal-content";
     content.style.textAlign = "center";
     content.style.padding = "40px";
     content.style.borderRadius = "16px";
     content.style.border = "1px solid rgba(255, 0, 85, 0.3)";
-    content.style.background = "linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(10, 10, 15, 0.95))";
+    content.style.background =
+      "linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(10, 10, 15, 0.95))";
     content.style.boxShadow = "0 0 30px rgba(0, 0, 0, 0.5)";
 
     const title = document.createElement("h2");
@@ -441,17 +442,22 @@ export function updateRelocationUI(): void {
     document.getElementById("game-container")?.appendChild(relocModal);
   }
 
-  const myIndex = Multiplayer.myPlayerIndex || 0;
+  const myIndex = Multiplayer.myPlayerIndex !== undefined ? Multiplayer.myPlayerIndex : 0;
   const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
-  
-  // Check if local player has misplaced towers
-  const hasMisplaced = state.towers.some(
-    (t) => t.ownerIndex === myIndex && !isCellAllowedForPlayer(t.col, t.row, myIndex, activeCount)
-  );
+
+  // Use host-authoritative relocation state if available, otherwise fallback to local calculation
+  const hasMisplaced =
+    state.playerRelocationStates && state.playerRelocationStates[myIndex] !== undefined
+      ? state.playerRelocationStates[myIndex]
+      : state.towers.some(
+          (t) =>
+            t.ownerIndex === myIndex && !isCellAllowedForPlayer(t.col, t.row, myIndex, activeCount)
+        );
 
   if (hasMisplaced) {
     relocBanner.classList.remove("hidden");
-    relocBanner.innerText = "⚠️ ZONE GEÄNDERT! Versetze deine misplaced (blinkenden) Türme oder verkaufe sie für 100% Rückerstattung.";
+    relocBanner.innerText =
+      "⚠️ ZONE GEÄNDERT! Versetze deine misplaced (blinkenden) Türme oder verkaufe sie für 100% Rückerstattung.";
     relocModal.classList.add("hidden");
   } else {
     relocBanner.classList.add("hidden");

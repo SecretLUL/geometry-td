@@ -213,7 +213,10 @@ export function emitSyncGameState(data: SyncFullGameStatePayload): void {
       }
     } else if (field === "playerRelocationStates") {
       if (
-        !booleanArraysEqual(data.playerRelocationStates, Multiplayer.lastSyncState.playerRelocationStates) &&
+        !booleanArraysEqual(
+          data.playerRelocationStates,
+          Multiplayer.lastSyncState.playerRelocationStates
+        ) &&
         data.playerRelocationStates !== undefined
       ) {
         delta.playerRelocationStates = data.playerRelocationStates;
@@ -261,16 +264,16 @@ export function syncNow(): void {
       })),
       enemiesToSpawn: state.enemiesToSpawn,
       spawnCooldown: state.spawnCooldown,
-      enemyPool: state.enemyPool || [],
+      enemyPool: [...(state.enemyPool || [])],
       isWaveActive: state.isWaveActive,
       autoStartActive: state.autoStartActive,
       wave: state.wave,
       lives: state.lives,
       gold: state.gold,
-      playerSlots: state.playerSlots,
-      playerGolds: state.playerGolds,
+      playerSlots: [...state.playerSlots],
+      playerGolds: [...state.playerGolds],
       relocationActive: state.relocationActive,
-      playerRelocationStates: state.playerRelocationStates,
+      playerRelocationStates: state.playerRelocationStates ? [...state.playerRelocationStates] : [],
       screenDamageEffect: state.screenDamageEffect,
       benchmarkActive: state.benchmarkActive,
       towers: state.towers.map((t) => ({
@@ -368,6 +371,11 @@ export function emitHostEndedWave(): void {
   socket?.emit("host_ended_wave");
 }
 
-export function emitRequestRelocateTower(fromCol: number, fromRow: number, toCol: number, toRow: number): void {
+export function emitRequestRelocateTower(
+  fromCol: number,
+  fromRow: number,
+  toCol: number,
+  toRow: number
+): void {
   socket?.emit("request_relocate_tower", { fromCol, fromRow, toCol, toRow });
 }

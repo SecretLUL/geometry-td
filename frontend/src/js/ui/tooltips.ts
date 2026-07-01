@@ -149,7 +149,9 @@ export function updateTooltip(): void {
         ? ""
         : `<p>Reichweite: <span>${formatStat(rangeVal, isRangeBoosted)}</span></p>`;
 
-    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    const activeCount = state.playerSlots
+      ? state.playerSlots.filter((id) => id !== null).length
+      : 1;
     let ownerHtml = "";
     if (activeCount > 1 && hoveredTower.ownerIndex !== undefined) {
       const ownerColor = getPlayerColorString(hoveredTower.ownerIndex);

@@ -27,7 +27,13 @@ export function drawGhostTower(g: PIXI.Graphics): void {
   }
   const ghostCache = (state as any).ghostCache;
 
-  const type = state.selectedTowerType || (state.relocatingTower ? state.towers.find(t => t.col === state.relocatingTower!.col && t.row === state.relocatingTower!.row)?.type : null);
+  const type =
+    state.selectedTowerType ||
+    (state.relocatingTower
+      ? state.towers.find(
+          (t) => t.col === state.relocatingTower!.col && t.row === state.relocatingTower!.row
+        )?.type
+      : null);
 
   if (!type || !state.ghostMouse) {
     for (const key in ghostCache) {
@@ -51,7 +57,9 @@ export function drawGhostTower(g: PIXI.Graphics): void {
   const data = TowerData[type] || TowerData["Base"];
 
   const reloc = state.relocatingTower;
-  const towerToMove = reloc ? state.towers.find((t) => t.col === reloc.col && t.row === reloc.row) : null;
+  const towerToMove = reloc
+    ? state.towers.find((t) => t.col === reloc.col && t.row === reloc.row)
+    : null;
   const range = towerToMove ? towerToMove.range : data.baseRange;
 
   if (type === "Sniper") {
@@ -103,8 +111,14 @@ export function drawGhostTower(g: PIXI.Graphics): void {
   }
 
   const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
-  const isOccupied = state.towers.some((t) => t.col === col && t.row === row && !(t.col === state.relocatingTower?.col && t.row === state.relocatingTower?.row));
-  const isAllowed = isCellAllowedForPlayer(col, row, Multiplayer.myPlayerIndex, activeCount) && !isOccupied;
+  const isOccupied = state.towers.some(
+    (t) =>
+      t.col === col &&
+      t.row === row &&
+      !(t.col === state.relocatingTower?.col && t.row === state.relocatingTower?.row)
+  );
+  const isAllowed =
+    isCellAllowedForPlayer(col, row, Multiplayer.myPlayerIndex, activeCount) && !isOccupied;
 
   if (!isAllowed) {
     g.rect(cx - TS / 2, cy - TS / 2, TS, TS).fill({ color: 0xff3366, alpha: 0.15 });

@@ -94,6 +94,13 @@ export function showUpgradeModal(tower: any): void {
           if (state.infiniteGold || state.gold >= cost) {
             if (!state.infiniteGold) {
               state.gold -= cost;
+              if (
+                state.playerGolds &&
+                Multiplayer.myPlayerIndex !== undefined &&
+                state.playerGolds[Multiplayer.myPlayerIndex] !== undefined
+              ) {
+                state.playerGolds[Multiplayer.myPlayerIndex] = state.gold;
+              }
             }
             tower.applySpecialization(spec.id);
           }

@@ -8,7 +8,13 @@
 import { state } from "../state";
 import { Config } from "../config";
 import { Multiplayer, socket, setSocket } from "./context";
-import { processPlaceTower, processUpgradeTower, processSellTower, recalculateRelocationState, processRelocateTower } from "./host";
+import {
+  processPlaceTower,
+  processUpgradeTower,
+  processSellTower,
+  recalculateRelocationState,
+  processRelocateTower,
+} from "./host";
 import { bindInboundEvents } from "./inbound";
 import {
   emitSyncGameState,

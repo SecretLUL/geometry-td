@@ -27,7 +27,12 @@ function getPlayerIndex(playerId?: string): number {
   return idx === -1 ? 0 : idx;
 }
 
-export function processPlaceTower(type: TowerType, col: number, row: number, playerId?: string): boolean {
+export function processPlaceTower(
+  type: TowerType,
+  col: number,
+  row: number,
+  playerId?: string
+): boolean {
   const pIdx = getPlayerIndex(playerId);
 
   // Check if tower already exists at this position
@@ -138,9 +143,16 @@ export function processSellTower(col: number, row: number, playerId?: string): b
     if ((tower as any).ownerIndex !== undefined && (tower as any).ownerIndex !== pIdx) {
       return false;
     }
-    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
-    const isMisplaced = !isCellAllowedForPlayer(tower.col, tower.row, tower.ownerIndex !== undefined ? tower.ownerIndex : 0, activeCount);
-    const refundMult = (state.relocationActive && isMisplaced) ? 1.0 : 0.5;
+    const activeCount = state.playerSlots
+      ? state.playerSlots.filter((id) => id !== null).length
+      : 1;
+    const isMisplaced = !isCellAllowedForPlayer(
+      tower.col,
+      tower.row,
+      tower.ownerIndex !== undefined ? tower.ownerIndex : 0,
+      activeCount
+    );
+    const refundMult = state.relocationActive && isMisplaced ? 1.0 : 0.5;
     const refund = Math.floor(tower.totalSpent * refundMult);
 
     if (!state.playerGolds) {

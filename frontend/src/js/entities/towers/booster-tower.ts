@@ -165,7 +165,11 @@ export class BoosterTower extends Tower {
         const flicker = Math.random() < 0.1 ? 0.05 : 0.12 + 0.08 * Math.sin(time * 0.005);
         let hasLines = false;
         for (const t of state.towers) {
-          if (t !== this && t.type !== "Booster" && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+          if (
+            t !== this &&
+            t.type !== "Booster" &&
+            (t.constructionTimer === undefined || t.constructionTimer <= 0)
+          ) {
             const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
             if (distSq <= rangeSq) {
               this.pixiBeamsGraphics.moveTo(this.x, this.y).lineTo(t.x, t.y);
@@ -185,7 +189,11 @@ export class BoosterTower extends Tower {
         }
         for (const t of state.towers) {
           // Buff other fully-constructed towers in range
-          if (t !== this && t.type !== "Booster" && (t.constructionTimer === undefined || t.constructionTimer <= 0)) {
+          if (
+            t !== this &&
+            t.type !== "Booster" &&
+            (t.constructionTimer === undefined || t.constructionTimer <= 0)
+          ) {
             const distSq = getDistanceSq(this.x, this.y, t.x, t.y);
             if (distSq <= rangeSq) {
               if (t.visualBooster === this) {
@@ -197,7 +205,9 @@ export class BoosterTower extends Tower {
                   .lineTo(t.x, t.y)
                   .stroke({ color: beamColor, width: width, alpha: alpha });
 
-                this.pixiBeamsGraphics.circle(t.x, t.y, 3.5).fill({ color: "#ffffff", alpha: alpha });
+                this.pixiBeamsGraphics
+                  .circle(t.x, t.y, 3.5)
+                  .fill({ color: "#ffffff", alpha: alpha });
               }
             }
           }

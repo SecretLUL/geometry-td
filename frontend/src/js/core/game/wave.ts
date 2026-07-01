@@ -241,7 +241,9 @@ export function handleWaveLogic(): void {
     state.wave++;
 
     const waveBonus = Config.WAVE_BONUS_BASE + (state.wave - 1) * Config.WAVE_BONUS_PER_WAVE;
-    const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
+    const activeCount = state.playerSlots
+      ? state.playerSlots.filter((id) => id !== null).length
+      : 1;
     const splitBonus = Math.floor(waveBonus / Math.max(1, activeCount));
 
     if (!state.playerGolds) {
@@ -263,7 +265,10 @@ export function handleWaveLogic(): void {
         (t.constructionTimer === undefined || t.constructionTimer <= 0)
       ) {
         const amount = t.getEffectiveGoldIncome();
-        const tOwner = (t as any).ownerIndex !== undefined ? (t as any).ownerIndex : (Multiplayer.myPlayerIndex || 0);
+        const tOwner =
+          (t as any).ownerIndex !== undefined
+            ? (t as any).ownerIndex
+            : Multiplayer.myPlayerIndex || 0;
         state.playerGolds[tOwner] += amount;
         bankGold += amount; // for UI notification summary
 

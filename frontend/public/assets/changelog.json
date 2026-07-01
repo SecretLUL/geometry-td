@@ -5,6 +5,26 @@
   },
 
   {
+    "version": "v2.19.3",
+    "date": "1. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "fehler bei der golderstattung beim verkauf von client-türmen behoben."
+      },
+      {
+        "type": "fix",
+        "desc": "gold-synchronisation und client-seitige vorhersage für käufe und upgrades stabilisiert."
+      },
+      {
+        "type": "fix",
+        "desc": "webrtc-delta-synchronisation für spieler-arrays durch deep-cloning repariert."
+      }
+    ]
+  },
+
+  {
     "version": "v2.19.2",
     "date": "1. Juli 2026",
     "status": "active",
