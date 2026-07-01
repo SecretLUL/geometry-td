@@ -45,6 +45,7 @@ export class BackgroundController {
   private lastGridWidth: number = 0;
   private lastGridHeight: number = 0;
   private lastFrameTime: number = performance.now();
+  private nextFrameTime: number = performance.now();
 
   constructor(canvasId: string) {
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
@@ -141,14 +142,12 @@ export class BackgroundController {
 
     const refreshRateSelect = (document.getElementById("igRefreshRateSelect") ||
       document.getElementById("refreshRateSelect")) as HTMLSelectElement | null;
-    const configuredFPS =
-      parseInt(
-        refreshRateSelect
-          ? refreshRateSelect.value
-          : localStorage.getItem("td_refresh_rate") || "60"
-      ) || 60;
+    const refreshRateVal = refreshRateSelect
+      ? refreshRateSelect.value
+      : localStorage.getItem("td_refresh_rate") || "60";
+    const isUncapped = refreshRateVal === "uncapped";
+    let targetFPS = isUncapped ? 9999 : parseInt(refreshRateVal) || 60;
 
-    let targetFPS = configuredFPS;
     if (isPerfMode) {
       if (!hasFocus) {
         targetFPS = 10;
@@ -166,16 +165,29 @@ export class BackgroundController {
     }
 
     const timestamp = performance.now();
-    let elapsed = timestamp - this.lastFrameTime;
-    const frameInterval = 1000 / targetFPS;
+    const isActuallyUncapped = isUncapped && !isPerfMode;
+    const frameInterval = isActuallyUncapped ? 0 : 1000 / targetFPS;
 
-    if (elapsed < frameInterval - 4.0) {
-      requestAnimationFrame(() => this.animate());
-      return;
+    // Frame pacing check using nextFrameTime to prevent VSync beating and high refresh rate capping issues
+    if (!isActuallyUncapped) {
+      if (timestamp - this.nextFrameTime > 100) {
+        this.nextFrameTime = timestamp;
+      }
+      // Tolerance of 1.0 ms to absorb VSync jitter
+      if (timestamp < this.nextFrameTime - 1.0) {
+        requestAnimationFrame(() => this.animate());
+        return;
+      }
     }
 
+    // Update nextFrameTime for target FPS pacing
+    if (!isActuallyUncapped) {
+      this.nextFrameTime = Math.max(this.nextFrameTime + frameInterval, timestamp);
+    }
+
+    let elapsed = timestamp - this.lastFrameTime;
     if (elapsed > 100) {
-      elapsed = frameInterval;
+      elapsed = isActuallyUncapped ? 16.666 : frameInterval;
     }
 
     this.lastFrameTime = timestamp;

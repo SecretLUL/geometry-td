@@ -5,6 +5,42 @@
   },
 
   {
+    "version": "v2.18.37",
+    "date": "30. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "fps-begrenzung bei 144 hz korrigiert, 165 hz und unbegrenzt optionen hinzugefügt und fps-anzeige auf reale loop-updates umgestellt."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.18.36",
+    "date": "30. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "beispiel-dateien für nas-deployment hinzugefügt, originale skripte in .gitignore eingetragen und alle skripte auf englisch übersetzt."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.18.35",
+    "date": "30. Juni 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "docker-compose-beispiel und .env.example hinzugefügt sowie .gitignore aktualisiert."
+      }
+    ]
+  },
+
+  {
     "version": "v2.18.34",
     "date": "17. Juni 2026",
     "status": "active",
