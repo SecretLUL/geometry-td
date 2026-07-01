@@ -16,6 +16,10 @@
       {
         "type": "feature",
         "desc": "prisma-tower.ts refaktoriert und rendering-code ausgelagert."
+      },
+      {
+        "type": "feature",
+        "desc": "loop.ts refaktoriert und in spezialisierte Module aufgeteilt."
       }
     ]
   },
