@@ -5,6 +5,70 @@
   },
 
   {
+    "version": "v2.20.2",
+    "date": "3. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Basis-Turmdaten für Level 10-20 aus tower-database.ts entfernt und Balancer/Visualisierung angepasst."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.20.1",
+    "date": "3. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Skalierung der x- und y-Achsen im Upgrade-Effizienz-Diagramm anpassbar gemacht."
+      },
+      {
+        "type": "feature",
+        "desc": "Aufladungszeit-Regler für Prisma-Türme hinzugefügt, um den Schadens-Ramp-up zu simulieren."
+      },
+      {
+        "type": "feature",
+        "desc": "Formel-Simulation, manuelle Parameterregler und offensive Turm-Accordion komplett entfernt; Dashboard nutzt nun ausschließlich die echte Spieldatenbank."
+      },
+      {
+        "type": "feature",
+        "desc": "Upgrade-Effizienz-Graph invertiert, sodass nun DPS pro investiertem Gold angezeigt wird (höhere Werte sind effizienter)."
+      },
+      {
+        "type": "feature",
+        "desc": "Turm-Farblegende unter den globalen Parametern in der balancing.html hinzugefügt."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.20.0",
+    "date": "3. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Balancing auf eine zentrale, rein datenbasierte towerDatabase umgestellt."
+      }
+    ]
+  },
+
+  {
+    "version": "v2.19.9",
+    "date": "3. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "feature",
+        "desc": "Interaktives Balancing-Dashboard zur Visualisierung von Spieler-DPS und Upgrade-Effizienz hinzugefügt."
+      }
+    ]
+  },
+
+  {
     "version": "v2.19.8",
     "date": "1. Juli 2026",
     "status": "active",

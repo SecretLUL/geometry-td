@@ -4,7 +4,7 @@
  * @dependencies: config, state, fx, utils, types, pool
  * @last_update: 2026-05-29 / v1.1.0 - Integrated new premium visual rendering for Cluster parent bombs and fragmentation sub-munitions.
  */
-import { Config, TowerData } from "../core/config";
+import { Config, TowerData, TowerBalancer } from "../core/config";
 import { state } from "../core/state";
 import { createExplosion } from "../fx/fx";
 import { getDistanceSq, getNearbyEnemies } from "../core/utils";
@@ -368,11 +368,15 @@ export class Projectile {
               }
 
               if (this.isCluster) {
-                const spec = TowerData["Bomb"].specializations["cluster"];
-                const clusterCount =
-                  this.tower && this.tower.masteryUnlocked
-                    ? spec.values!.masteryClusters
-                    : spec.values!.normalClusters;
+                let clusterCount = 5;
+                if (this.tower) {
+                  const stats = TowerBalancer.getStats(
+                    this.tower.type,
+                    this.tower.level,
+                    this.tower.specialization
+                  );
+                  clusterCount = stats.clusterCount || 5;
+                }
                 for (let i = 0; i < clusterCount; i++) {
                   const miniEnemy =
                     nearby[Math.floor(Math.random() * nearby.length)] || this.target;

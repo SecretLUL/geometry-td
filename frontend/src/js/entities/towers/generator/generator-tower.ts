@@ -20,15 +20,16 @@ export class GeneratorTower extends Tower {
     super(col, row);
     this.type = "Generator";
     const data = TowerData["Generator"];
-    this.range = data.baseRange;
-    this.damage = data.baseDamage;
-    this.fireRate = data.baseFireRate;
+    const levelStats = TowerBalancer.getStats(this.type, 1);
+    this.range = levelStats.range;
+    this.damage = levelStats.damage;
+    this.fireRate = levelStats.fireRate;
     const existingCount = state.towers
       ? state.towers.filter((t) => t.type === "Generator" && !t.isPredicted).length
       : 0;
     const purchaseCost = getTowerPurchaseCost(this.type, existingCount);
     this.totalSpent = purchaseCost;
-    this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
+    this.upgradeCost = levelStats.upgradeCost;
     this.colors = data.colors;
     this.currentColor = this.colors[0];
 
@@ -56,13 +57,13 @@ export class GeneratorTower extends Tower {
       this.totalSpent += this.upgradeCost;
       this.level++;
 
-      const data = TowerData[this.type];
-      this.damage += data.damagePerLevel;
-      this.range += data.rangePerLevel;
-      this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
+      const levelStats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      this.damage = levelStats.damage;
+      this.range = levelStats.range;
+      this.fireRate = levelStats.fireRate;
+      this.upgradeCost = levelStats.upgradeCost;
 
       this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
-      this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
       if (!silent) {
         const floatingText = `Level ${this.level}!`;
@@ -273,16 +274,12 @@ export class GeneratorTower extends Tower {
   }
 
   public override getEffectiveGoldIncome(): number {
-    let goldAmount = 5 + this.level * 10;
-    if (this.specialization === "industrial") {
-      const spec = TowerData["Generator"].specializations["industrial"];
-      const multiplier = this.masteryUnlocked
-        ? spec.multipliers!.masteryIncome
-        : spec.multipliers!.normalIncome;
-      goldAmount = Math.floor(goldAmount * multiplier);
-    } else if (this.specialization === "bank") {
-      const spec = TowerData["Generator"].specializations["bank"];
-      goldAmount = this.masteryUnlocked ? spec.values!.masteryGold : spec.values!.normalGold;
+    const stats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+    let goldAmount = 0;
+    if (this.specialization === "bank") {
+      goldAmount = stats.bankGold || 80;
+    } else {
+      goldAmount = stats.goldIncome || 0;
     }
     const boosterDmgMultiplier = this.getBoosterDamageMultiplier();
     return Math.floor(goldAmount * boosterDmgMultiplier);

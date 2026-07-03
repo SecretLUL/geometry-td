@@ -24,11 +24,12 @@ export class PrismaTower extends Tower {
     super(col, row);
     this.type = "Prisma";
     const data = TowerData["Prisma"];
-    this.range = data.baseRange;
-    this.damage = data.baseDamage;
-    this.fireRate = data.baseFireRate;
+    const levelStats = TowerBalancer.getStats(this.type, 1);
+    this.range = levelStats.range;
+    this.damage = levelStats.damage;
+    this.fireRate = levelStats.fireRate;
     this.totalSpent = data.baseCost;
-    this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
+    this.upgradeCost = levelStats.upgradeCost;
 
     this.colors = data.colors;
     this.currentColor = this.colors[0];
@@ -66,13 +67,13 @@ export class PrismaTower extends Tower {
       this.totalSpent += this.upgradeCost;
       this.level++;
 
-      const data = TowerData["Prisma"];
-      this.damage += data.damagePerLevel;
-      this.range += data.rangePerLevel;
+      const levelStats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      this.damage = levelStats.damage;
+      this.range = levelStats.range;
+      this.fireRate = levelStats.fireRate;
+      this.upgradeCost = levelStats.upgradeCost;
 
       this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
-
-      this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
       PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, "#ffea00");
       createExplosion(this.x, this.y, this.currentColor, 10);
@@ -187,12 +188,6 @@ export class PrismaTower extends Tower {
     return bestEnemy;
   }
 
-  public override getSpecializationInfo(specId: TowerSpecialization, isMastery = false): string {
-    const spec = TowerData[this.type].specializations[specId];
-    if (!spec) return "Keine";
-    return isMastery ? spec.masteryDesc : spec.desc;
-  }
-
   public override getSpecializations(): { id: TowerSpecialization; name: string; desc: string }[] {
     const specs = TowerData[this.type].specializations;
     return Object.keys(specs).map((key) => ({
@@ -229,9 +224,9 @@ export class PrismaTower extends Tower {
     if ((target as any).meltdownExploded) return;
     (target as any).meltdownExploded = true;
 
-    const spec = TowerData[this.type].specializations["meltdown"];
-    const aoeRadius = this.masteryUnlocked ? spec.values!.masteryRadius : spec.values!.normalRadius;
-    const aoeDmg = this.masteryUnlocked ? spec.values!.masteryDmg : spec.values!.normalDmg;
+    const stats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+    const aoeRadius = stats.meltdownRadius || 100;
+    const aoeDmg = stats.meltdownDmg || 10000;
 
     const radiusSq = aoeRadius * aoeRadius;
     const nearby = this.getNearbyEnemies(target.x, target.y, aoeRadius);
@@ -277,10 +272,9 @@ export class PrismaTower extends Tower {
       const rangeSq = effRange * effRange;
       const nearby = this.getNearbyEnemies(this.x, this.y, effRange);
       let splits = 0;
-      const spec = TowerData[this.type].specializations["refraction"];
-      const maxSplits = this.masteryUnlocked
-        ? spec.values!.masterySplits
-        : spec.values!.normalSplits;
+      const stats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      const maxSplits = stats.splits || 4;
+      const damageMultiplier = stats.damageMultiplier || 0.75;
 
       checkedEnemies.clear();
 
@@ -293,7 +287,7 @@ export class PrismaTower extends Tower {
         if (this.target && enemy === this.target) continue;
 
         if (getDistanceSq(enemy.x, enemy.y, this.x, this.y) <= rangeSq) {
-          const actualDmg = enemy.takeDamage(finalDmg * spec.values!.damageMultiplier, this);
+          const actualDmg = enemy.takeDamage(finalDmg * damageMultiplier, this);
           this.damageDealt += actualDmg;
 
           if (enemy.hp <= 0 && !enemy.deadMarked) {

@@ -22,11 +22,12 @@ export class BoosterTower extends Tower {
     super(col, row);
     this.type = "Booster";
     const data = TowerData["Booster"];
-    this.range = data.baseRange;
-    this.damage = data.baseDamage;
-    this.fireRate = data.baseFireRate;
+    const levelStats = TowerBalancer.getStats(this.type, 1);
+    this.range = levelStats.range;
+    this.damage = levelStats.damage;
+    this.fireRate = levelStats.fireRate;
     this.totalSpent = data.baseCost;
-    this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
+    this.upgradeCost = levelStats.upgradeCost;
     this.colors = data.colors;
     this.currentColor = this.colors[0];
 
@@ -78,14 +79,13 @@ export class BoosterTower extends Tower {
       this.totalSpent += this.upgradeCost;
       this.level++;
 
-      const data = TowerData[this.type];
-      this.damage += data.damagePerLevel;
-      this.range += data.rangePerLevel;
-      this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
+      const levelStats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      this.damage = levelStats.damage;
+      this.range = levelStats.range;
+      this.fireRate = levelStats.fireRate;
+      this.upgradeCost = levelStats.upgradeCost;
 
       this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
-
-      this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
       if (!silent) {
         const floatingText = `Level ${this.level}!`;

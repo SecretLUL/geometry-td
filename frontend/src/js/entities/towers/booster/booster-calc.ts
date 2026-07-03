@@ -4,7 +4,7 @@
  * @dependencies: config, state, utils, types
  * @last_update: 2026-07-01 / Refactored booster calculations to booster/booster-calc.ts
  */
-import { Config, TowerData } from "../../../core/config";
+import { Config, TowerBalancer } from "../../../core/config";
 import { state } from "../../../core/state";
 import { getDistanceSq } from "../../../core/utils";
 import type { Tower as ITower } from "../../../types";
@@ -46,35 +46,25 @@ export function recalculateBoosts(tower: ITower): void {
             tower.visualBooster = t;
           }
 
+          const boosterStats = TowerBalancer.getStats(t.type, t.level, t.specialization);
+
           // Range multiplier
           if (t.specialization === "amplitude") {
-            const spec = TowerData["Booster"].specializations["amplitude"];
-            const rangeBoost = t.masteryUnlocked
-              ? spec.values!.masteryRangeBoost
-              : spec.values!.normalRangeBoost;
-            rangeMultiplier += rangeBoost;
+            rangeMultiplier += boosterStats.rangeBoost || 0.2;
           } else {
             rangeMultiplier += 0.1; // +10% base range buff
           }
 
           // Damage multiplier
           if (t.specialization === "amplitude") {
-            const spec = TowerData["Booster"].specializations["amplitude"];
-            const dmgBoost = t.masteryUnlocked
-              ? spec.values!.masteryDmgBoost
-              : spec.values!.normalDmgBoost;
-            damageMultiplier += dmgBoost;
+            damageMultiplier += boosterStats.dmgBoost || 0.4;
           } else {
             damageMultiplier += 0.15; // +15% base damage buff
           }
 
           // Fire rate multiplier
           if (t.specialization === "frequency") {
-            const spec = TowerData["Booster"].specializations["frequency"];
-            const speedBoost = t.masteryUnlocked
-              ? spec.values!.masteryBoost
-              : spec.values!.normalBoost;
-            fireRateMultiplier += speedBoost;
+            fireRateMultiplier += boosterStats.speedBoost || 0.4;
           }
         }
       }

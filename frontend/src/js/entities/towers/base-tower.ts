@@ -101,9 +101,13 @@ export class Tower {
 
     this.ownerIndex = Multiplayer.myPlayerIndex !== undefined ? Multiplayer.myPlayerIndex : 0;
     this.level = 1;
-    this.range = data.baseRange;
-    this.damage = data.baseDamage;
-    this.fireRate = data.baseFireRate;
+
+    const levelStats = TowerBalancer.getStats(this.type, 1);
+    this.range = levelStats.range;
+    this.damage = levelStats.damage;
+    this.fireRate = levelStats.fireRate;
+    this.upgradeCost = levelStats.upgradeCost;
+
     this.fireCooldown = 0;
     this.missileCooldown = 0;
     this.projectileSpeed = data.projectileSpeed || Config.PROJECTILE_SPEED;
@@ -113,7 +117,6 @@ export class Tower {
     this.angle = 0;
     this.recoil = 0;
     this.totalSpent = data.baseCost;
-    this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
     this.specialization = null;
     this.masteryUnlocked = false;
 
@@ -283,15 +286,7 @@ export class Tower {
   }
 
   public getDamageWithSpecialization(): number {
-    let dmg = this.damage;
-    if (this.specialization === "heavy") {
-      const spec = TowerData[this.type].specializations["heavy"];
-      const mult = this.masteryUnlocked
-        ? spec.multipliers!.masteryDmg
-        : spec.multipliers!.normalDmg;
-      dmg = Math.floor(dmg * mult);
-    }
-    return dmg;
+    return this.damage;
   }
 
   public getBoosterDamageMultiplier(): number {
@@ -336,15 +331,13 @@ export class Tower {
       this.totalSpent += this.upgradeCost;
       this.level++;
 
-      const data = TowerData[this.type];
-      this.damage += data.baseDamage + this.level * data.damagePerLevel;
-      this.range += data.rangePerLevel;
-
-      this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
+      const levelStats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      this.damage = levelStats.damage;
+      this.range = levelStats.range;
+      this.fireRate = levelStats.fireRate;
+      this.upgradeCost = levelStats.upgradeCost;
 
       this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
-
-      this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
       if (!silent) {
         PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, "#4cc9f0");
@@ -370,6 +363,73 @@ export class Tower {
   }
 
   public getSpecializationInfo(specId: TowerSpecialization, isMastery = false): string {
+    const level = isMastery ? Config.TOWER_MASTERY_LEVEL : Config.TOWER_SPECIALIZATION_LEVEL;
+    try {
+      const stats = TowerBalancer.getStats(this.type, level, specId);
+      const baseStats = TowerBalancer.getStats(this.type, level, null);
+
+      if (specId === "missiles") {
+        const cd = ((stats.missileCooldown || 240) / 60).toFixed(1).replace(/\.0$/, "");
+        return `${stats.missileCount}x ${stats.missileDmg} DMG, ${cd}s CD`;
+      }
+      if (specId === "heavy") {
+        const mult = (stats.damage / baseStats.damage).toFixed(1).replace(/\.0$/, "");
+        return `${mult}x Schaden`;
+      }
+      if (specId === "ricochet") {
+        const spd = (60 / stats.fireRate).toFixed(1).replace(/\.0$/, "");
+        return `${stats.ricochetHits} Hits, ${spd}/s Speed`;
+      }
+      if (specId === "bounty") {
+        const mult = (stats.damage / baseStats.damage).toFixed(1).replace(/\.0$/, "");
+        const spd = (60 / stats.fireRate).toFixed(1).replace(/\.0$/, "");
+        return `+${stats.bounty}g/Kill, ${mult}x DMG, ${spd}/s Speed`;
+      }
+      if (specId === "nuke") {
+        const mult = (stats.damage / baseStats.damage).toFixed(1).replace(/\.0$/, "");
+        const aoeMult = ((stats.aoeRadius || 1) / (baseStats.aoeRadius || 1))
+          .toFixed(1)
+          .replace(/\.0$/, "");
+        return `Radioaktive Strahlung, ${aoeMult}x Radius, ${mult}x DMG`;
+      }
+      if (specId === "cluster") {
+        return isMastery
+          ? `${stats.clusterCount} Mini-Bomben`
+          : `Fragment-AOE, ${stats.clusterCount} Mini-Bomben`;
+      }
+      if (specId === "highvolt") {
+        const mult = (stats.damage / baseStats.damage).toFixed(1).replace(/\.0$/, "");
+        return `${mult}x Schaden`;
+      }
+      if (specId === "stun") {
+        const dur = ((stats.stunDuration || 0) / 60).toFixed(1).replace(/\.0$/, "");
+        return `${dur}s Betäubung`;
+      }
+      if (specId === "meltdown") {
+        return `Meltdown: ${stats.meltdownDmg} DMG (Radius ${stats.meltdownRadius})`;
+      }
+      if (specId === "refraction") {
+        return `Kettenstrahl: ${stats.splits} Extraziele (${Math.round((stats.damageMultiplier || 0.75) * 100)}% DMG)`;
+      }
+      if (specId === "frequency") {
+        return `+${Math.round((stats.speedBoost || 0) * 100)}% Angriffsgeschwindigkeit`;
+      }
+      if (specId === "amplitude") {
+        return `+${Math.round((stats.dmgBoost || 0) * 100)}% DMG, +${Math.round((stats.rangeBoost || 0) * 100)}% Reichweite`;
+      }
+      if (specId === "bank") {
+        return `+${stats.bankGold}g am Wellenende`;
+      }
+      if (specId === "industrial") {
+        const mult = ((stats.goldIncome || 0) / (baseStats.goldIncome || 1))
+          .toFixed(1)
+          .replace(/\.0$/, "");
+        return `${mult}x Gold-Einkommen`;
+      }
+    } catch (e) {
+      console.error("Error formatting specialization info:", e);
+    }
+
     const spec = TowerData[this.type].specializations[specId];
     if (!spec) return "Keine";
     return isMastery ? spec.masteryDesc : spec.desc;
@@ -551,9 +611,11 @@ export class Tower {
       }
 
       if (missileTarget) {
-        const spec = TowerData[this.type].specializations["missiles"];
-        const count = this.masteryUnlocked ? spec.values!.masteryCount : spec.values!.normalCount;
-        const missileDmg = this.masteryUnlocked ? spec.values!.masteryDmg : spec.values!.normalDmg;
+        const stats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+        const count = stats.missileCount || 3;
+        const missileDmg = stats.missileDmg || 8000;
+        const missileAoe = stats.missileAoe || 30;
+        const missileSpeed = stats.missileSpeed || 6.0;
 
         for (let i = 0; i < count; i++) {
           let offsetX: number, offsetY: number;
@@ -573,8 +635,8 @@ export class Tower {
             missileTarget,
             missileDmg,
             this,
-            spec.values!.aoeRadius,
-            spec.values!.speed,
+            missileAoe,
+            missileSpeed,
             0,
             false
           );
@@ -587,16 +649,14 @@ export class Tower {
             row: this.row,
             targetId: missileTarget.id,
             damage: missileDmg,
-            aoeRadius: spec.values!.aoeRadius,
-            projectileSpeed: spec.values!.speed,
+            aoeRadius: missileAoe,
+            projectileSpeed: missileSpeed,
             isHoming: true,
             offsetX: offsetX,
             offsetY: offsetY,
           });
         }
-        this.missileCooldown = this.masteryUnlocked
-          ? spec.values!.masteryCooldown
-          : spec.values!.normalCooldown;
+        this.missileCooldown = stats.missileCooldown || 240;
       }
     }
   }

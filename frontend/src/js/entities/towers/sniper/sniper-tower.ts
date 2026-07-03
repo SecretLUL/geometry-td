@@ -19,12 +19,13 @@ export class SniperTower extends Tower {
     super(col, row);
     this.type = "Sniper";
     const data = TowerData["Sniper"];
-    this.range = data.baseRange;
-    this.damage = data.baseDamage;
-    this.fireRate = data.baseFireRate;
+    const levelStats = TowerBalancer.getStats(this.type, 1);
+    this.range = levelStats.range;
+    this.damage = levelStats.damage;
+    this.fireRate = levelStats.fireRate;
     this.projectileSpeed = data.projectileSpeed || 40;
     this.totalSpent = data.baseCost;
-    this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
+    this.upgradeCost = levelStats.upgradeCost;
     this.colors = data.colors;
     this.currentColor = this.colors[0];
 
@@ -42,31 +43,13 @@ export class SniperTower extends Tower {
       this.totalSpent += this.upgradeCost;
       this.level++;
 
-      const data = TowerData["Sniper"];
-      this.damage += data.damagePerLevel + this.level * (data.damageLevelBonus || 0);
-      this.range += data.rangePerLevel;
-      this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
-
-      // Specialization Speed Buffs
-      if (this.specialization === "ricochet") {
-        const spec = data.specializations["ricochet"];
-        if (this.level >= Config.TOWER_MASTERY_LEVEL || this.masteryUnlocked) {
-          this.fireRate = spec.values!.masteryFireRate;
-        } else if (this.level >= Config.TOWER_SPECIALIZATION_LEVEL) {
-          this.fireRate = spec.values!.normalFireRate;
-        }
-      } else if (this.specialization === "bounty") {
-        const spec = data.specializations["bounty"];
-        if (this.level >= Config.TOWER_MASTERY_LEVEL || this.masteryUnlocked) {
-          this.fireRate = spec.values!.masteryFireRate || 90;
-        } else if (this.level >= Config.TOWER_SPECIALIZATION_LEVEL) {
-          this.fireRate = spec.values!.normalFireRate || 150;
-        }
-      }
+      const levelStats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      this.damage = levelStats.damage;
+      this.range = levelStats.range;
+      this.fireRate = levelStats.fireRate;
+      this.upgradeCost = levelStats.upgradeCost;
 
       this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
-
-      this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
       PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, "#4cc9f0");
       createExplosion(this.x, this.y, this.currentColor, 10);
@@ -85,6 +68,10 @@ export class SniperTower extends Tower {
       return true;
     }
     return false;
+  }
+
+  public override getDamageWithSpecialization(): number {
+    return this.damage;
   }
 
   public override updatePixi(): void {
@@ -383,12 +370,6 @@ export class SniperTower extends Tower {
     }
   }
 
-  public override getSpecializationInfo(specId: TowerSpecialization, isMastery = false): string {
-    const spec = TowerData[this.type].specializations[specId];
-    if (!spec) return "Keine";
-    return isMastery ? spec.masteryDesc : spec.desc;
-  }
-
   public override getSpecializations(): { id: TowerSpecialization; name: string; desc: string }[] {
     const specs = TowerData[this.type].specializations;
     return Object.keys(specs).map((key) => ({
@@ -396,18 +377,6 @@ export class SniperTower extends Tower {
       name: specs[key].name,
       desc: specs[key].desc,
     }));
-  }
-
-  public override getDamageWithSpecialization(): number {
-    let dmg = this.damage;
-    if (this.specialization === "bounty") {
-      const spec = TowerData[this.type].specializations["bounty"];
-      const mult = this.masteryUnlocked
-        ? spec.multipliers!.masteryDmg
-        : spec.multipliers!.normalDmg;
-      dmg = Math.floor(dmg * mult);
-    }
-    return Math.floor(dmg);
   }
 
   public override getDisplayDamage(): number {
@@ -449,9 +418,9 @@ export class SniperTower extends Tower {
 
         let hits = 0;
         let maxHits = 1;
+        const stats = TowerBalancer.getStats(this.type, this.level, this.specialization);
         if (this.specialization === "ricochet") {
-          const spec = TowerData[this.type].specializations["ricochet"];
-          maxHits = this.masteryUnlocked ? spec.values!.masteryHits : spec.values!.normalHits;
+          maxHits = stats.ricochetHits || 1;
         }
 
         const alreadyHit: Enemy[] = [];
@@ -475,10 +444,7 @@ export class SniperTower extends Tower {
             this.kills++;
 
             if (this.specialization === "bounty") {
-              const spec = TowerData[this.type].specializations["bounty"];
-              const bonus = this.masteryUnlocked
-                ? spec.values!.masteryBounty
-                : spec.values!.normalBounty;
+              const bonus = stats.bounty || 0;
               state.gold += bonus;
               state.totalGoldEarned += bonus;
               PoolManager.getFloatingText(
@@ -494,13 +460,9 @@ export class SniperTower extends Tower {
           alreadyHit.push(currentTarget);
 
           if (hits < maxHits) {
-            const spec = TowerData[this.type].specializations["ricochet"];
-            const nearby = this.getNearbyEnemies(
-              currentTarget.x,
-              currentTarget.y,
-              spec.values!.ricochetRange
-            );
-            let bestDistSq = spec.values!.ricochetRange * spec.values!.ricochetRange;
+            const ricochetRange = stats.ricochetRange || 150;
+            const nearby = this.getNearbyEnemies(currentTarget.x, currentTarget.y, ricochetRange);
+            let bestDistSq = ricochetRange * ricochetRange;
             let next: Enemy | null = null;
 
             for (let i = 0; i < nearby.length; i++) {

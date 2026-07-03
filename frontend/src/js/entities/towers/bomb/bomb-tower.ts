@@ -23,12 +23,13 @@ export class BombTower extends Tower {
     super(col, row);
     this.type = "Bomb";
     const data = TowerData["Bomb"];
-    this.range = data.baseRange;
-    this.damage = data.baseDamage;
-    this.fireRate = data.baseFireRate;
+    const levelStats = TowerBalancer.getStats(this.type, 1);
+    this.range = levelStats.range;
+    this.damage = levelStats.damage;
+    this.fireRate = levelStats.fireRate;
     this.totalSpent = data.baseCost;
-    this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
-    this.aoeRadius = data.aoeRadius;
+    this.upgradeCost = levelStats.upgradeCost;
+    this.aoeRadius = levelStats.aoeRadius;
     this.projectileSpeed = data.projectileSpeed || 3;
     this.colors = data.colors;
     this.currentColor = this.colors[0];
@@ -48,21 +49,16 @@ export class BombTower extends Tower {
       this.totalSpent += this.upgradeCost;
       this.level++;
 
-      const data = TowerData["Bomb"];
-      if (this.level === 19) {
-        this.damage = 4500;
-      } else if (this.level === 20) {
-        this.damage = 13500;
-      } else {
-        this.damage += data.damagePerLevel;
+      const levelStats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      this.damage = levelStats.damage;
+      this.range = levelStats.range;
+      if (levelStats.aoeRadius !== undefined) {
+        this.aoeRadius = levelStats.aoeRadius;
       }
-      this.range += data.rangePerLevel;
-      this.aoeRadius = (this.aoeRadius || 0) + (data.aoeRadiusPerLevel || 0);
-      this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
+      this.fireRate = levelStats.fireRate;
+      this.upgradeCost = levelStats.upgradeCost;
 
       this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
-
-      this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
       PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, "#4cc9f0");
       createExplosion(this.x, this.y, this.currentColor, 10);
@@ -389,12 +385,6 @@ export class BombTower extends Tower {
     }
   }
 
-  public override getSpecializationInfo(specId: TowerSpecialization, isMastery = false): string {
-    const spec = TowerData[this.type].specializations[specId];
-    if (!spec) return "Keine";
-    return isMastery ? spec.masteryDesc : spec.desc;
-  }
-
   public override getSpecializations(): { id: TowerSpecialization; name: string; desc: string }[] {
     const specs = TowerData[this.type].specializations;
     return Object.keys(specs).map((key) => ({
@@ -405,15 +395,7 @@ export class BombTower extends Tower {
   }
 
   public override getDamageWithSpecialization(): number {
-    let dmg = this.damage;
-    if (this.specialization === "nuke") {
-      const spec = TowerData[this.type].specializations["nuke"];
-      const mult = this.masteryUnlocked
-        ? spec.multipliers!.masteryDmg
-        : spec.multipliers!.normalDmg;
-      dmg = Math.floor(dmg * mult);
-    }
-    return dmg;
+    return this.damage;
   }
 
   public override getDisplayDamage(): number | string {
@@ -421,15 +403,7 @@ export class BombTower extends Tower {
   }
 
   public getDisplayAoe(): number {
-    let aoe = this.aoeRadius || 0;
-    if (this.specialization === "nuke") {
-      const spec = TowerData[this.type].specializations["nuke"];
-      const mult = this.masteryUnlocked
-        ? spec.multipliers!.masteryAoe
-        : spec.multipliers!.normalAoe;
-      aoe = Math.floor(aoe * mult);
-    }
-    return aoe;
+    return this.aoeRadius || 0;
   }
 
   public override update(): void {

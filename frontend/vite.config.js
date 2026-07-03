@@ -65,7 +65,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
-        game: path.resolve(__dirname, 'game.html')
+        game: path.resolve(__dirname, 'game.html'),
+        balancing: path.resolve(__dirname, 'balancing.html')
       }
     }
   }

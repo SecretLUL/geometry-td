@@ -5,7 +5,7 @@
  * @last_update: 2026-06-01 / v1.3.0 - Added Accelerator ability tooltip support.
  */
 import { state } from "../core/state";
-import { Config, TowerData, getTowerPurchaseCost } from "../core/config";
+import { Config, TowerData, getTowerPurchaseCost, TowerBalancer } from "../core/config";
 import { getEl } from "../core/utils";
 import { Multiplayer } from "../core/multiplayer/context";
 import { getPlayerColorString } from "../entities/towers/base-tower";
@@ -80,14 +80,15 @@ export function updateTooltip(): void {
 
     let buffDesc = "";
     if (hoveredTower.type === "Booster") {
+      const stats = TowerBalancer.getStats(
+        hoveredTower.type,
+        hoveredTower.level,
+        hoveredTower.specialization
+      );
       if (hoveredTower.specialization === "frequency") {
-        buffDesc = hoveredTower.masteryUnlocked
-          ? "+75% Angriffsgeschwindigkeit"
-          : "+40% Angriffsgeschwindigkeit";
+        buffDesc = `+${Math.round((stats.speedBoost || 0) * 100)}% Angriffsgeschwindigkeit`;
       } else if (hoveredTower.specialization === "amplitude") {
-        buffDesc = hoveredTower.masteryUnlocked
-          ? "+80% DMG, +35% Reichweite"
-          : "+40% DMG, +20% Reichweite";
+        buffDesc = `+${Math.round((stats.dmgBoost || 0) * 100)}% DMG, +${Math.round((stats.rangeBoost || 0) * 100)}% Reichweite`;
       } else {
         buffDesc = "+15% DMG, +10% Reichweite";
       }

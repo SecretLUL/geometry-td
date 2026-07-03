@@ -30,11 +30,12 @@ export class TeslaTower extends Tower {
     super(col, row);
     this.type = "Tesla";
     const data = TowerData["Tesla"];
-    this.range = data.baseRange;
-    this.damage = data.baseDamage;
-    this.fireRate = data.baseFireRate;
+    const levelStats = TowerBalancer.getStats(this.type, 1);
+    this.range = levelStats.range;
+    this.damage = levelStats.damage;
+    this.fireRate = levelStats.fireRate;
     this.totalSpent = data.baseCost;
-    this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, 1, data.baseCost);
+    this.upgradeCost = levelStats.upgradeCost;
     this.colors = data.colors;
     this.currentColor = this.colors[0];
     this.auraTime = 0;
@@ -83,14 +84,13 @@ export class TeslaTower extends Tower {
       this.totalSpent += this.upgradeCost;
       this.level++;
 
-      const data = TowerData["Tesla"];
-      this.damage += data.damagePerLevel;
-      this.range += data.rangePerLevel;
-      this.fireRate = TowerBalancer.getFireRateForLevel(this.type, this.level, this.fireRate);
+      const levelStats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+      this.damage = levelStats.damage;
+      this.range = levelStats.range;
+      this.fireRate = levelStats.fireRate;
+      this.upgradeCost = levelStats.upgradeCost;
 
       this.currentColor = this.colors[Math.min(this.level - 1, this.colors.length - 1)];
-
-      this.upgradeCost = TowerBalancer.getUpgradeCost(this.type, this.level, this.upgradeCost);
 
       PoolManager.getFloatingText(this.x, this.y - 20, `Level ${this.level}!`, "#4cc9f0");
       createExplosion(this.x, this.y, this.currentColor, 10);
@@ -379,12 +379,6 @@ export class TeslaTower extends Tower {
     }
   }
 
-  public override getSpecializationInfo(specId: TowerSpecialization, isMastery = false): string {
-    const spec = TowerData[this.type].specializations[specId];
-    if (!spec) return "Keine";
-    return isMastery ? spec.masteryDesc : spec.desc;
-  }
-
   public override getSpecializations(): { id: TowerSpecialization; name: string; desc: string }[] {
     const specs = TowerData[this.type].specializations;
     return Object.keys(specs).map((key) => ({
@@ -395,15 +389,7 @@ export class TeslaTower extends Tower {
   }
 
   public override getDamageWithSpecialization(): number {
-    let dmg = this.damage;
-    if (this.specialization === "highvolt") {
-      const spec = TowerData[this.type].specializations["highvolt"];
-      const mult = this.masteryUnlocked
-        ? spec.multipliers!.masteryDmg
-        : spec.multipliers!.normalDmg;
-      dmg *= mult;
-    }
-    return dmg;
+    return this.damage;
   }
 
   public override getDisplayDamage(): number {
@@ -456,10 +442,8 @@ export class TeslaTower extends Tower {
         let stunDuration = 0;
 
         if (this.specialization === "stun") {
-          const spec = TowerData[this.type].specializations["stun"];
-          stunDuration = this.masteryUnlocked
-            ? spec.values!.masteryDuration
-            : spec.values!.normalDuration;
+          const stats = TowerBalancer.getStats(this.type, this.level, this.specialization);
+          stunDuration = stats.stunDuration || 0;
         }
 
         if (!this._targetIdsBuffer) this._targetIdsBuffer = [];

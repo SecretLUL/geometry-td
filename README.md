@@ -25,6 +25,7 @@ The visual design is built around a neon-cybernetic cyber-glassmorphism theme, a
 *   **Persistent Progress System:** Secure registration and login via JWT-based authentication (stored in secure HttpOnly cookies). Progress, unlocked skins, achievements (with confetti animations), and high scores are saved in a PostgreSQL database.
 *   **Reactive Music Visualization:** Background music frequencies are analyzed in real time via the Web Audio API (`AnalyserNode`) to render an animated equalizer in the main menu.
 *   **In-Game Encyclopedia (Lexicon):** Integrated overview of all tower classes and enemy types, including detailed attribute progress bars and lore descriptions.
+*   **Interactive Balancing Dashboard:** Dedicated local visualization tool built with Chart.js. Allows designers to dynamically tweak tower damage/cost scaling models, inspect upgrade efficiency curves (splitting at Level 10) with adjustable x and y axes scaling, and simulate build DPS configurations against exponential enemy EHP waves.
 
 ---
 
@@ -70,6 +71,7 @@ geometry-td/
 │   ├── Dockerfile.prod       # Production Dockerfile with Nginx server
 │   ├── index.html            # Main entry page
 │   ├── game.html             # Game board page (also loaded by the headless host)
+│   ├── balancing.html        # Interactive tower & wave balancing dashboard
 │   └── vite.config.js
 ├── tsconfig.json             # Root solution-style configuration for multi-package IDE support
 ├── docker-compose.yaml       # Local container configuration (development services only)
@@ -211,6 +213,15 @@ The backend manages Puppeteer browser instances to serve as authoritative game h
     *   **Stuck Preventer:** Any instance stuck in the `launching` state for longer than 45 seconds is forcefully terminated and deleted.
     *   **Orphan Clean-up:** If a room has no human players remaining (`playerCount === 0`), the headless host is stopped.
     *   **Crash Recovery:** If a running browser becomes unresponsive (i.e. `browser.version()` times out), the instance is closed, marked as `failed`, and a new host is spawned for the room.
+
+## 📊 Tower Balancing & towerDatabase
+
+All tower attributes (damage, range, fire rate, upgrade costs, and specialization features) are configured inside a single data-driven lookup table:
+*   **Path:** `frontend/src/js/core/config/tower-database.ts`
+
+This allows for surgery-like fine-tuning of each level (from 1 to 20) and specialization path without altering code logic or math formulas.
+
+---
 
 ## 📄 License
 

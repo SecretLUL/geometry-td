@@ -12,3 +12,5 @@ export type { EnemyConfig } from "./config/enemies";
 export { TowerData } from "./config/towers";
 export type { TowerSpecConfig, TowerStatsConfig } from "./config/towers";
 export { TowerBalancer, getTowerPurchaseCost } from "./config/balancer";
+export { towerDatabase } from "./config/tower-database";
+export type { TowerLevelStats } from "./config/tower-database";
