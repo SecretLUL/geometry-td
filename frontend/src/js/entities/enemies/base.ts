@@ -210,15 +210,39 @@ export class BaseEnemy implements Enemy {
       // Draw HP background once
       this.hpGraphics.clear();
       if (!this.hideHealthBar) {
-        this.hpGraphics.rect(-15, -this.radius - 8, 30, 4).fill({ color: 0xff0000 });
+        const barWidth = 30;
+        const barHeight = 4;
+        const borderRadius = 2;
+        const yOffset = -this.radius - 8;
+
+        // 1. Draw glassmorphic shadow/glow backing
+        this.hpGraphics.roundRect(-barWidth / 2 - 0.5, yOffset - 0.5, barWidth + 1, barHeight + 1, borderRadius)
+          .fill({ color: 0x000000, alpha: 0.35 });
+
+        // 2. Draw background bar (dark slate with subtle emerald glowing border)
+        this.hpGraphics.roundRect(-barWidth / 2, yOffset, barWidth, barHeight, borderRadius)
+          .fill({ color: 0x1f2937, alpha: 0.85 })
+          .stroke({ color: 0x10b981, width: 0.7, alpha: 0.3 });
       }
 
       // Draw HP fill once (drawn at 0,0, positioned relative)
       if (this.hpFillGraphics) {
         this.hpFillGraphics.clear();
         if (!this.hideHealthBar) {
-          this.hpFillGraphics.rect(0, 0, 30, 4).fill({ color: 0x00ff00 });
-          this.hpFillGraphics.position.set(-15, -this.radius - 8);
+          const barWidth = 30;
+          const barHeight = 4;
+          const borderRadius = 2;
+          const yOffset = -this.radius - 8;
+
+          // 1. Draw progress fill with neon emerald green
+          this.hpFillGraphics.roundRect(0, 0, barWidth, barHeight, borderRadius)
+            .fill({ color: 0x10b981 });
+
+          // 2. Draw white translucent inner sheen core for premium 3D look
+          this.hpFillGraphics.roundRect(0, 0.5, barWidth, barHeight - 1, borderRadius - 0.5)
+            .fill({ color: 0xffffff, alpha: 0.25 });
+
+          this.hpFillGraphics.position.set(-barWidth / 2, yOffset);
         }
       }
 

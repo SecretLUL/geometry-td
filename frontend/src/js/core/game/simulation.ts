@@ -450,6 +450,10 @@ export function runSimulationTick(): void {
     state.groundEffects[i].update();
   }
 
+  if (state.screenDamageEffect > 0) {
+    state.screenDamageEffect--;
+  }
+
   if (state.isHost) {
     handleWaveLogic();
   }

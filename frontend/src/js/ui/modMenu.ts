@@ -112,6 +112,28 @@ export function setupModMenu() {
     updateUI();
     Multiplayer.syncNow();
   });
+  document.getElementById("modTakeDamageBtn")?.addEventListener("click", () => {
+    if (!state.isHost) return;
+    if (state.lives > 0) {
+      if (!state.godMode) {
+        state.lives = Math.max(0, state.lives - 1);
+      }
+      state.screenDamageEffect = 30; // Start pulse
+      Multiplayer.updateUI();
+      Multiplayer.syncNow();
+
+      if (state.lives <= 0 && !state.gameOver) {
+        state.gameOver = true;
+        Multiplayer.syncNow();
+      }
+    }
+  });
+  document.getElementById("modAddLifeBtn")?.addEventListener("click", () => {
+    if (!state.isHost) return;
+    state.lives++;
+    Multiplayer.updateUI();
+    Multiplayer.syncNow();
+  });
   document.getElementById("modSetWaveBtn")?.addEventListener("click", () => {
     if (!state.isHost) return;
     const input = document.getElementById("modWaveInput") as HTMLInputElement | null;

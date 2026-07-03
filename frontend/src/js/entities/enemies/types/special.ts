@@ -75,11 +75,12 @@ export class SwarmEnemy extends BaseEnemy {
       sumY: number;
     }
   > = new Map();
+  private static maxGroupSizes: Map<number, number> = new Map();
 
   constructor(waveNumber: number) {
     super(waveNumber);
     this.typeName = "Swarm";
-    this.radius = 4; // Very small
+    this.radius = 4; // Very small circular dot
     this.color = "#ff00ff"; // Neon pink
     this.speed = 2.0; // 60 map speed approx
 
@@ -136,8 +137,16 @@ export class SwarmEnemy extends BaseEnemy {
     this.updatePixi();
     return "moving";
   }
+
   public override updatePixi(): void {
     super.updatePixi();
+
+    // Dynamic coordinate-desynchronized breathing/pulsing animation to hover organically
+    if (this.bodyGraphics && !state.isPaused) {
+      const pulse = 1.0 + Math.sin(state.animTime * 0.15 + (this.x + this.y) * 0.05) * 0.2;
+      this.bodyGraphics.scale.set(pulse);
+      if (this.flashGraphics) this.flashGraphics.scale.set(pulse);
+    }
 
     if (this.swarmGroupId) {
       if (
@@ -166,20 +175,58 @@ export class SwarmEnemy extends BaseEnemy {
             cache!.sumY += e.y;
           }
         }
+
+        // Track maximum size seen so far for each active group
+        for (const [id, cache] of SwarmEnemy.groupCache.entries()) {
+          const currentMax = SwarmEnemy.maxGroupSizes.get(id) || 0;
+          if (cache.aliveCount > currentMax) {
+            SwarmEnemy.maxGroupSizes.set(id, cache.aliveCount);
+          }
+        }
+
+        // Clean up memory for groups that are no longer active
+        for (const id of SwarmEnemy.maxGroupSizes.keys()) {
+          if (!SwarmEnemy.groupCache.has(id)) {
+            SwarmEnemy.maxGroupSizes.delete(id);
+          }
+        }
       }
 
       const cached = SwarmEnemy.groupCache.get(this.swarmGroupId);
       if (cached && cached.firstMember === this && this.hpGraphics) {
         const { aliveCount, sumX, sumY } = cached;
         if (aliveCount > 0) {
-          const ratio = Math.max(0, aliveCount / 12);
+          const maxCount = SwarmEnemy.maxGroupSizes.get(this.swarmGroupId) || Config.SWARM_CLUSTER_SIZE || 6;
+          const ratio = Math.max(0, aliveCount / maxCount);
           const centerX = sumX / aliveCount;
           const centerY = sumY / aliveCount;
 
           this.hpGraphics.position.set(centerX - this.x, centerY - this.y);
           this.hpGraphics.clear();
-          this.hpGraphics.rect(-15, -this.radius - 22, 30, 4).fill({ color: 0xff0000 });
-          this.hpGraphics.rect(-15, -this.radius - 22, 30 * ratio, 4).fill({ color: 0x00ff00 });
+
+          const barWidth = 40;
+          const barHeight = 6;
+          const borderRadius = 3;
+          const yOffset = -this.radius - 22;
+
+          // 1. Draw glassmorphic shadow/glow backing
+          this.hpGraphics.roundRect(-barWidth / 2 - 1, yOffset - 1, barWidth + 2, barHeight + 2, borderRadius)
+            .fill({ color: 0x000000, alpha: 0.4 });
+
+          // 2. Draw background bar (dark slate with neon magenta outline)
+          this.hpGraphics.roundRect(-barWidth / 2, yOffset, barWidth, barHeight, borderRadius)
+            .fill({ color: 0x1f2937, alpha: 0.9 })
+            .stroke({ color: 0xff00ff, width: 1.0, alpha: 0.4 });
+
+          // 3. Draw active progress fill with white sheen core
+          if (ratio > 0) {
+            const fillWidth = barWidth * ratio;
+            this.hpGraphics.roundRect(-barWidth / 2, yOffset, fillWidth, barHeight, borderRadius)
+              .fill({ color: 0xff00ff });
+
+            this.hpGraphics.roundRect(-barWidth / 2, yOffset + 1, fillWidth, barHeight - 2, borderRadius - 1)
+              .fill({ color: 0xffffff, alpha: 0.3 });
+          }
         }
       } else if (this.hpGraphics) {
         this.hpGraphics.clear();
