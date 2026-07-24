@@ -1,29 +1,31 @@
-# Node Dependencies
+# Dependencies & Package Managers
 **/node_modules/
 .npm/
 
-# Build Outputs
+# Production & Development Build Outputs
 **/dist/
 **/build/
 
-# Docker & Environment Variables
+# Environment Variables & Secrets
 .env
 .env.local
 .env.*
 !.env.example
 !.env.local.example
 
+# Docker Configuration (Active configs ignored, example templates committed)
 docker-compose.yaml
 docker-compose.yml
 !docker-compose.example.yaml
 !docker-compose.example.yml
 
-
-
-# Operating System Trash
+# Operating System & IDE Files
 .DS_Store
 Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
 
-# Databases
+# Database Local Storage & Volumes
 **/postgres_data_dev/
 **/postgres_data_prod/
