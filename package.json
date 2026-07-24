@@ -1,6 +1,10 @@
 {
   "name": "geometry-td",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "check:frontend": "npm run --prefix frontend lint",
     "check-all:frontend": "npm run --prefix frontend check-all",
