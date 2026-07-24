@@ -41,5 +41,6 @@ jobs:
           port: 22
           script: |
             cd /volume1/docker/geometry-td
+            git pull origin main
             chmod +x deploy.sh
             ./deploy.sh
