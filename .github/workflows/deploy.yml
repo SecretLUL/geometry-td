@@ -21,7 +21,8 @@ jobs:
 
       - name: 📦 Abhängigkeiten installieren & Qualität prüfen
         run: |
-          npm ci
+          npm --prefix frontend ci
+          npm --prefix backend ci
           npm run check-all
 
       - name: 🔒 In Tailscale VPN einwählen
