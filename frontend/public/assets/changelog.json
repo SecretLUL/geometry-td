@@ -12,6 +12,14 @@
       {
         "type": "fix",
         "desc": "turmumplatzierungs-overlay für beigetretene spieler im multiplayer korrigiert."
+      },
+      {
+        "type": "fix",
+        "desc": "rot-pulsieren des bildschirms bei lebensverlust korrigiert."
+      },
+      {
+        "type": "fix",
+        "desc": "host-rollenzuweisung im backend korrigiert, sodass headless-hosts in public-matches korrekt starten."
       }
     ]
   },

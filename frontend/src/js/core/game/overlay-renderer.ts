@@ -75,6 +75,7 @@ export function drawOverlay(fpsDisplayVal: number, isPaused: boolean = false): v
     screenDamageGraphics
       .rect(0, 0, viewW, viewH)
       .stroke({ color: 0xff0000, alpha: alpha * 2, width: 15 });
+    state.screenDamageEffect--;
   }
 
   // 2. FPS Display

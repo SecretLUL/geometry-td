@@ -122,8 +122,7 @@ export function registerRoomHandlers(io: Server, socket: CustomSocket) {
       const shouldBeHost =
         isHeadless ||
         mode === "singleplayer" ||
-        (isDevEnv && wantHost && !state.hostId) ||
-        !state.hostId;
+        (isDevEnv && wantHost && !state.hostId);
 
       if (shouldBeHost) {
         if (isHeadless) {

@@ -1,0 +1,44 @@
+name: Continuous Deployment (NAS via Tailscale)
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  validate-and-deploy:
+    name: Build, Validate & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Code auschecken
+        uses: actions/checkout@v4
+
+      - name: 🟢 Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Abhängigkeiten installieren & Qualität prüfen
+        run: |
+          npm ci
+          npm run check-all
+
+      - name: 🔒 In Tailscale VPN einwählen
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: 🚀 Deployment auf dem NAS via SSH ausführen
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NAS_TAILSCALE_IP }}
+          username: ${{ secrets.NAS_USER }}
+          password: ${{ secrets.NAS_PASSWORD }}
+          port: 22
+          script: |
+            cd /volume1/docker/geometry-td
+            chmod +x deploy.sh
+            ./deploy.sh
