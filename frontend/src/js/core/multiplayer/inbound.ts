@@ -184,6 +184,7 @@ export function processIncomingGameState(payload: GameStateSocketPayload): void 
 
   if (reconstructedState.towers) {
     syncTowersFromList(reconstructedState.towers);
+    (Multiplayer as any).recalculateRelocationState();
   }
 
   Multiplayer.updateUI();
@@ -404,6 +405,7 @@ export function bindInboundEvents(
         playerRelocationStates: data.playerRelocationStates || [false, false, false, false],
       };
 
+      (Multiplayer as any).recalculateRelocationState();
       Multiplayer.updateUI();
       s.emit("ready_to_play");
     });
@@ -476,6 +478,7 @@ export function bindInboundEvents(
     s.on("sync_towers", (towersList: SyncTowerState[]) => {
       if (state.isHost) return; // Only clients process this
       recreateTowersFromList(towersList);
+      (Multiplayer as any).recalculateRelocationState();
       Multiplayer.updateUI();
     });
 
@@ -604,8 +607,8 @@ export function bindInboundEvents(
           }
         }
 
+        (Multiplayer as any).recalculateRelocationState();
         if (state.isHost) {
-          (Multiplayer as any).recalculateRelocationState();
           Multiplayer.syncNow();
         }
 

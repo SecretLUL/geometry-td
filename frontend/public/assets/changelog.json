@@ -5,6 +5,18 @@
   },
 
   {
+    "version": "v2.20.3",
+    "date": "24. Juli 2026",
+    "status": "active",
+    "changes": [
+      {
+        "type": "fix",
+        "desc": "turmumplatzierungs-overlay für beigetretene spieler im multiplayer korrigiert."
+      }
+    ]
+  },
+
+  {
     "version": "v2.20.2",
     "date": "3. Juli 2026",
     "status": "active",

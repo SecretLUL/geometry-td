@@ -181,8 +181,6 @@ export function processSellTower(col: number, row: number, playerId?: string): b
 }
 
 export function recalculateRelocationState(): void {
-  if (!state.isHost) return;
-
   const activeCount = state.playerSlots ? state.playerSlots.filter((id) => id !== null).length : 1;
   const relocStates = [false, false, false, false];
   let anyReloc = false;
@@ -201,13 +199,18 @@ export function recalculateRelocationState(): void {
   state.playerRelocationStates = relocStates;
 
   if (anyReloc) {
-    if (!state.isPaused) {
-      state.isPaused = true;
-      Multiplayer.emitTogglePause?.(true);
+    state.isPaused = true;
+  }
+
+  if (state.isHost) {
+    if (anyReloc) {
+      if (!wasRelocationActive) {
+        Multiplayer.emitTogglePause?.(true);
+      }
+    } else if (wasRelocationActive) {
+      state.isPaused = false;
+      Multiplayer.emitTogglePause?.(false);
     }
-  } else if (wasRelocationActive) {
-    state.isPaused = false;
-    Multiplayer.emitTogglePause?.(false);
   }
 }
 
