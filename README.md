@@ -134,7 +134,7 @@ docker compose up -d --build frontend-prod backend-prod db-prod
 
 > [!TIP]
 > **Automated Production Deployment (GitHub Actions & Tailscale):**
-> *   **Continuous Deployment Pipeline:** Every push to the `master` branch triggers the GitHub Actions workflow defined in `.github/workflows/deploy.yml`.
+> *   **Continuous Deployment Pipeline:** Every push to the `main` branch triggers the GitHub Actions workflow defined in `.github/workflows/deploy.yml`.
 > *   **Automated Quality Check:** The pipeline automatically runs `npm run check-all` to validate backend TypeScript types, frontend lints, Prettier checks, and production builds before deploying.
 > *   **Secure Tailscale SSH Deploy:** Upon successful validation, GitHub Actions securely connects to the NAS over Tailscale VPN (without public router port exposure) and executes `deploy.sh` to pull code, rebuild production containers, and prune unused Docker images.
 

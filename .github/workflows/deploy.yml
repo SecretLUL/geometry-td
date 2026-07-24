@@ -3,7 +3,7 @@ name: Continuous Deployment (NAS via Tailscale)
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   validate-and-deploy:
