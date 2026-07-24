@@ -12,6 +12,15 @@ services:
     restart: unless-stopped
     ports:
       - "8181:80" # Maps host port 8181 to container port 80 (HTTP)
+    depends_on:
+      backend-prod:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     networks:
       - gtd-prod-network
 
@@ -26,7 +35,8 @@ services:
     ports:
       - "7171:3000" # Maps host port 7171 to backend port 3000
     depends_on:
-      - db-prod # Ensures backend starts only after the db-prod container is ready
+      db-prod:
+        condition: service_healthy # Ensures backend starts only after the database is fully healthy
     environment:
       - FRONTEND_URL=http://gtd-frontend-prod # Frontend URL for CORS configuration
       - NODE_ENV=production                  # Sets Node environment to production mode
@@ -36,8 +46,19 @@ services:
       - DB_USER=gtd_user                     # Database user
       - DB_PASSWORD=${DB_PASSWORD}           # Database password loaded from .env
       - JWT_SECRET=${JWT_SECRET}             # JWT secret key loaded from .env
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/stats', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     cap_add:
       - SYS_ADMIN # Adds system administration capabilities if needed by specific system tools
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'    # Prevents Puppeteer Chromium from consuming all CPU cores
+          memory: 2048M   # Limits memory usage to 2GB to guard NAS RAM
     networks:
       - gtd-prod-network
 
@@ -52,6 +73,12 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}      # Database password from .env
     volumes:
       - db_data_prod:/var/lib/postgresql/data # Persists database files on the host
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gtd_user -d geometry_td"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     deploy:
       resources:
         limits:
@@ -95,7 +122,8 @@ services:
     ports:
       - "7676:3000" # Maps host port 7676 to container port 3000
     depends_on:
-      - db-dev      # Ensures dev backend starts only after the db-dev container is ready
+      db-dev:
+        condition: service_healthy      # Ensures dev backend starts only after the db-dev container is ready
     environment:
       - NODE_ENV=development
       - DB_HOST=db-dev
@@ -131,6 +159,12 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - db_data_dev:/var/lib/postgresql/data # Separate volume for development data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gtd_user -d geometry_td"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     deploy:
       resources:
         limits:
