@@ -18,11 +18,7 @@ docker-compose.yml
 !docker-compose.example.yaml
 !docker-compose.example.yml
 
-# Deployment Scripts
-deplay-to-nas.bat
-deploy.sh
-!deplay-to-nas.example.bat
-!deploy.example.sh
+
 
 # Operating System Trash
 .DS_Store
