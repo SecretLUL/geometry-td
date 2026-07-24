@@ -133,11 +133,10 @@ docker compose up -d --build frontend-prod backend-prod db-prod
 ```
 
 > [!TIP]
-> **Deployment Helper Scripts:**
-> *   `deplay-to-nas.example.bat`: Windows batch script template to auto-commit, push, connect to NAS via SSH, and trigger the remote deploy script.
-> *   `deploy.example.sh`: Bash script template run on the server (NAS) to pull the latest code, rebuild the production containers, and prune obsolete Docker images.
-> 
-> Copy these templates to `deplay-to-nas.bat` and `deploy.sh` respectively, adjust your connection details and paths, and run them to automate your deployment. The custom files containing your secrets are ignored by Git.
+> **Automated Production Deployment (GitHub Actions & Tailscale):**
+> *   **Continuous Deployment Pipeline:** Every push to the `master` branch triggers the GitHub Actions workflow defined in `.github/workflows/deploy.yml`.
+> *   **Automated Quality Check:** The pipeline automatically runs `npm run check-all` to validate backend TypeScript types, frontend lints, Prettier checks, and production builds before deploying.
+> *   **Secure Tailscale SSH Deploy:** Upon successful validation, GitHub Actions securely connects to the NAS over Tailscale VPN (without public router port exposure) and executes `deploy.sh` to pull code, rebuild production containers, and prune unused Docker images.
 
 #### Production Architecture:
 *   **Frontend Nginx (`frontend-prod`):** Accessible externally on port `8181`. Nginx serves the compiled static web assets, applies Gzip compression, and acts as a reverse proxy forwarding API requests (`/api/`) and WebSocket traffic (`/socket.io/`) to the backend container.
